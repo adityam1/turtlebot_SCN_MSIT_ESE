@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/ese_team_project/rocon/install
+
+Name: rocon_python_redis
+Description: Description of rocon_python_redis
+Version: 0.1.23
+Cflags: 
+Libs: -L/home/turtlebot/ese_team_project/rocon/install/lib 
+Requires: 

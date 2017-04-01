@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/ese_team_project/kobuki/devel
+
+Name: yocs_msgs
+Description: Description of yocs_msgs
+Version: 0.6.3
+Cflags: -I/home/turtlebot/ese_team_project/kobuki/devel/include
+Libs: -L/home/turtlebot/ese_team_project/kobuki/devel/lib 
+Requires: actionlib_msgs std_msgs geometry_msgs std_srvs message_runtime

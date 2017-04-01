@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/ese_team_project/kobuki/install
+
+Name: kobuki_dock_drive
+Description: Description of kobuki_dock_drive
+Version: 0.6.5
+Cflags: -I/home/turtlebot/ese_team_project/kobuki/install/include
+Libs: -L/home/turtlebot/ese_team_project/kobuki/install/lib -lkobuki_dock_drive
+Requires: ecl_threads ecl_geometry ecl_linear_algebra

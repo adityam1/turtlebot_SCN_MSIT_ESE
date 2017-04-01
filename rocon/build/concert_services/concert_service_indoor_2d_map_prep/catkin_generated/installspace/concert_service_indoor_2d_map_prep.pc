@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/ese_team_project/rocon/install
+
+Name: concert_service_indoor_2d_map_prep
+Description: Description of concert_service_indoor_2d_map_prep
+Version: 0.1.12
+Cflags: 
+Libs: -L/home/turtlebot/ese_team_project/rocon/install/lib 
+Requires: 

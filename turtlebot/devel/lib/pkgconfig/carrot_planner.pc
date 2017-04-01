@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/ese_team_project/turtlebot/devel
+
+Name: carrot_planner
+Description: Description of carrot_planner
+Version: 1.14.0
+Cflags: -I/home/turtlebot/ese_team_project/turtlebot/src/navigation/carrot_planner/include
+Libs: -L/home/turtlebot/ese_team_project/turtlebot/devel/lib -lcarrot_planner
+Requires: roscpp pluginlib costmap_2d base_local_planner nav_core

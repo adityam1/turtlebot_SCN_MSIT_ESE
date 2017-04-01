@@ -1,0 +1,6 @@
+set(rocon_gateway_utils_SETUP_PY_VERSION "0.7.10")
+set(rocon_gateway_utils_SETUP_PY_SCRIPTS "")
+set(rocon_gateway_utils_SETUP_PY_PACKAGES "rocon_gateway_utils")
+set(rocon_gateway_utils_SETUP_PY_PACKAGE_DIRS "src/rocon_gateway_utils")
+set(rocon_gateway_utils_SETUP_PY_MODULES "")
+set(rocon_gateway_utils_SETUP_PY_MODULE_DIRS "")

@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/ese_team_project/kobuki/devel
+
+Name: yocs_ar_pair_approach
+Description: Description of yocs_ar_pair_approach
+Version: 0.6.4
+Cflags: 
+Libs: -L/home/turtlebot/ese_team_project/kobuki/devel/lib 
+Requires: 

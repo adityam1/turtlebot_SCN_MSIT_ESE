@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/ese_team_project/rocon/install
+
+Name: concert_software_farmer
+Description: Description of concert_software_farmer
+Version: 0.6.11
+Cflags: 
+Libs: -L/home/turtlebot/ese_team_project/rocon/install/lib 
+Requires: 

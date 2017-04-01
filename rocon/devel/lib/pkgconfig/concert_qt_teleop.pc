@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/ese_team_project/rocon/devel
+
+Name: concert_qt_teleop
+Description: Description of concert_qt_teleop
+Version: 0.7.12
+Cflags: 
+Libs: -L/home/turtlebot/ese_team_project/rocon/devel/lib 
+Requires: 

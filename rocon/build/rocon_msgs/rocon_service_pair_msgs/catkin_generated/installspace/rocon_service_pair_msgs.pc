@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/ese_team_project/rocon/install
+
+Name: rocon_service_pair_msgs
+Description: Description of rocon_service_pair_msgs
+Version: 0.7.12
+Cflags: -I/home/turtlebot/ese_team_project/rocon/install/include
+Libs: -L/home/turtlebot/ese_team_project/rocon/install/lib 
+Requires: message_runtime uuid_msgs

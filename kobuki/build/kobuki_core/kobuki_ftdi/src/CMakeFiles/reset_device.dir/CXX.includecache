@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/turtlebot/ese_team_project/kobuki/src/kobuki_core/kobuki_ftdi/include/kobuki_ftdi/scanner.hpp
+vector
+-
+map
+-
+usb.h
+-
+stdint.h
+-
+
+/home/turtlebot/ese_team_project/kobuki/src/kobuki_core/kobuki_ftdi/src/reset_device.cpp
+iostream
+-
+kobuki_ftdi/scanner.hpp
+/home/turtlebot/ese_team_project/kobuki/src/kobuki_core/kobuki_ftdi/src/kobuki_ftdi/scanner.hpp
+

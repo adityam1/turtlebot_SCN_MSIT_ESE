@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/ese_team_project/rocon/devel
+
+Name: rocon_python_comms
+Description: Description of rocon_python_comms
+Version: 0.1.23
+Cflags: 
+Libs: -L/home/turtlebot/ese_team_project/rocon/devel/lib 
+Requires: 

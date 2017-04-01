@@ -1,0 +1,6 @@
+set(concert_software_farmer_SETUP_PY_VERSION "0.6.11")
+set(concert_software_farmer_SETUP_PY_SCRIPTS "")
+set(concert_software_farmer_SETUP_PY_PACKAGES "concert_software_farmer")
+set(concert_software_farmer_SETUP_PY_PACKAGE_DIRS "src/concert_software_farmer")
+set(concert_software_farmer_SETUP_PY_MODULES "")
+set(concert_software_farmer_SETUP_PY_MODULE_DIRS "")

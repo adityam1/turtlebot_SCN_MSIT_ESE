@@ -1,0 +1,2 @@
+set(concert_msgs_MESSAGE_FILES "msg/ConcertClient.msg;msg/ConcertClients.msg;msg/ConcertClientState.msg;msg/ConductorGraph.msg;msg/ErrorCodes.msg;msg/LinkConnection.msg;msg/LinkEdge.msg;msg/LinkGraph.msg;msg/LinkNode.msg;msg/ServiceProfile.msg;msg/Services.msg;msg/SoftwareProfile.msg;msg/SoftwareProfiles.msg;msg/SoftwareInstance.msg;msg/SoftwareInstances.msg;msg/Strings.msg")
+set(concert_msgs_SERVICE_FILES "srv/EnableService.srv;srv/UpdateServiceConfig.srv;srv/AllocateSoftware.srv")

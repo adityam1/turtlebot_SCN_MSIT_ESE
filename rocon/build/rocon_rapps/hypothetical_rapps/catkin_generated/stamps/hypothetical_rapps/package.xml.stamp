@@ -1,0 +1,22 @@
+<package>
+  <name>hypothetical_rapps</name>
+  <version>0.1.0</version>
+  <description>
+    Hypothetical rapps for testing. Do whatever you want here.
+  </description>
+  <maintainer email="d.stonier@gmail.com">Daniel Stonier</maintainer>
+  <license>BSD</license>
+  <url type="website">http://wiki.ros.org/hypothetical_rapps</url>
+  <url type="repository">https://github.com/robotics-in-concert/rocon_rapps</url>
+  <url type="bugtracker">https://github.com/robotics-in-concert/rocon_rapps/issues</url>
+  <author>Daniel Stonier</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- <run_depend>tango_cash</run_depend> -->
+  <export>
+    <!-- <rocon_app>foo/foo.rapp</rocon_app> -->
+    <!-- <rocon_app>bar/bar.rapp</rocon_app> -->
+    <!-- <rocon_app>foobar/foobar.rapp</rocon_app> -->
+  </export>
+</package>

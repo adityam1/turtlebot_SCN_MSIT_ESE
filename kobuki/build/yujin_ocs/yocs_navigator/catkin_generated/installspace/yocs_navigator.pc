@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/ese_team_project/kobuki/install
+
+Name: yocs_navigator
+Description: Description of yocs_navigator
+Version: 0.6.4
+Cflags: -I/home/turtlebot/ese_team_project/kobuki/install/include -I/usr/include
+Libs: -L/home/turtlebot/ese_team_project/kobuki/install/lib -lyocs_basic_move_controller -lyocs_semantic_navigator -l:/usr/lib/x86_64-linux-gnu/libboost_system.so
+Requires: roscpp actionlib tf yocs_math_toolkit move_base_msgs nav_msgs yocs_msgs

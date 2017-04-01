@@ -1,0 +1,24 @@
+<package>
+  <name>turtle_rapps</name>
+  <version>0.1.0</version>
+  <description>
+    Rapps for turtlesim powered robots.
+  </description>
+  <maintainer email="d.stonier@gmail.com">Daniel Stonier</maintainer>
+  <maintainer email="marcus.liebhardt@yujinrobot.com">Marcus Liebhardt</maintainer>
+  <license>BSD</license>
+  <url type="website">http://wiki.ros.org/turtle_rapps</url>
+  <url type="repository">https://github.com/robotics-in-concert/rocon_rapps</url>
+  <url type="bugtracker">https://github.com/robotics-in-concert/rocon_rapps/issues</url>
+  <author>Daniel Stonier</author>
+  <author>Jihoon Lee</author>
+  <author>Marcus Liebhardt</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>turtle_concert</run_depend>
+  <export>
+    <rocon_app>turtle_stroll/turtle_stroll.rapp</rocon_app>
+    <rocon_app>teleop/teleop.rapp</rocon_app>
+  </export>
+</package>

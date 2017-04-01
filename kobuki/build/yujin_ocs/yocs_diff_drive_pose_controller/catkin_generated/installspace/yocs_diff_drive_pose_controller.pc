@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/ese_team_project/kobuki/install
+
+Name: yocs_diff_drive_pose_controller
+Description: Description of yocs_diff_drive_pose_controller
+Version: 0.6.4
+Cflags: -I/home/turtlebot/ese_team_project/kobuki/install/include
+Libs: -L/home/turtlebot/ese_team_project/kobuki/install/lib -lyocs_diff_drive_pose_controller_nodelet
+Requires: ecl_threads geometry_msgs nodelet pluginlib roscpp sensor_msgs std_msgs tf yocs_controllers yocs_math_toolkit

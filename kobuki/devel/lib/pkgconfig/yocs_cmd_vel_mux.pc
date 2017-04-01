@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/ese_team_project/kobuki/devel
+
+Name: yocs_cmd_vel_mux
+Description: Description of yocs_cmd_vel_mux
+Version: 0.6.4
+Cflags: -I/home/turtlebot/ese_team_project/kobuki/devel/include -I/home/turtlebot/ese_team_project/kobuki/src/yujin_ocs/yocs_cmd_vel_mux/include
+Libs: -L/home/turtlebot/ese_team_project/kobuki/devel/lib -lyocs_cmd_vel_mux_nodelet -lyaml-cpp
+Requires: roscpp pluginlib nodelet dynamic_reconfigure geometry_msgs

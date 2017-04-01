@@ -1,0 +1,10 @@
+\subsubsection usage Usage
+\verbatim
+<node name="concert_conductor_params" pkg="concert_conductor" type="concert_conductor_params">
+  <param name="auto_invite" type="bool" value="False" />
+  <param name="local_clients_only" type="bool" value="False" />
+  <param name="oblivion_timeout" type="int" value="3600" />
+  <param name="service_timeout" type="double" value="5.0" />
+</node>
+\endverbatim
+

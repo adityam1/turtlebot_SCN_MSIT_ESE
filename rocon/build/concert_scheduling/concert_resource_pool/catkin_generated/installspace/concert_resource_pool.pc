@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/ese_team_project/rocon/install
+
+Name: concert_resource_pool
+Description: Description of concert_resource_pool
+Version: 0.7.0
+Cflags: 
+Libs: -L/home/turtlebot/ese_team_project/rocon/install/lib 
+Requires: 

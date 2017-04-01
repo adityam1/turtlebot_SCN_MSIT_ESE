@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/turtlebot/ese_team_project/kobuki/src/kobuki_core/kobuki_ftdi/src/ftdi_scan.cpp
+iostream
+-
+ftdi.h
+-
+

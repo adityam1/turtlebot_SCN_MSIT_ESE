@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/ese_team_project/turtlebot/devel
+
+Name: turtlebot_calibration
+Description: Description of turtlebot_calibration
+Version: 2.3.7
+Cflags: -I/home/turtlebot/ese_team_project/turtlebot/devel/include
+Libs: -L/home/turtlebot/ese_team_project/turtlebot/devel/lib 
+Requires: std_msgs message_runtime

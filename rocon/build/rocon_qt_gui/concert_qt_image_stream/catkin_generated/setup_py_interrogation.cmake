@@ -1,0 +1,6 @@
+set(concert_qt_image_stream_SETUP_PY_VERSION "0.7.12")
+set(concert_qt_image_stream_SETUP_PY_SCRIPTS "scripts/concert_image_stream")
+set(concert_qt_image_stream_SETUP_PY_PACKAGES "concert_qt_image_stream")
+set(concert_qt_image_stream_SETUP_PY_PACKAGE_DIRS "src/concert_qt_image_stream")
+set(concert_qt_image_stream_SETUP_PY_MODULES "")
+set(concert_qt_image_stream_SETUP_PY_MODULE_DIRS "")

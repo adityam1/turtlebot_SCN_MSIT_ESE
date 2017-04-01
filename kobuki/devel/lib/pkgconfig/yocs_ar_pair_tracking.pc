@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/ese_team_project/kobuki/devel
+
+Name: yocs_ar_pair_tracking
+Description: Description of yocs_ar_pair_tracking
+Version: 0.6.4
+Cflags: -I/home/turtlebot/ese_team_project/kobuki/src/yujin_ocs/yocs_ar_pair_tracking/include -I/usr/include
+Libs: -L/home/turtlebot/ese_team_project/kobuki/devel/lib -lyocs_ar_pair_tracking -l:/usr/lib/x86_64-linux-gnu/libboost_system.so
+Requires: roscpp ar_track_alvar_msgs std_msgs geometry_msgs yocs_math_toolkit yocs_ar_marker_tracking yocs_msgs

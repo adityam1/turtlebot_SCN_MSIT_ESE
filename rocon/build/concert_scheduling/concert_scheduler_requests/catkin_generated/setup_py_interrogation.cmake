@@ -1,0 +1,6 @@
+set(concert_scheduler_requests_SETUP_PY_VERSION "0.7.0")
+set(concert_scheduler_requests_SETUP_PY_SCRIPTS "")
+set(concert_scheduler_requests_SETUP_PY_PACKAGES "concert_scheduler_requests")
+set(concert_scheduler_requests_SETUP_PY_PACKAGE_DIRS "src/concert_scheduler_requests")
+set(concert_scheduler_requests_SETUP_PY_MODULES "")
+set(concert_scheduler_requests_SETUP_PY_MODULE_DIRS "")

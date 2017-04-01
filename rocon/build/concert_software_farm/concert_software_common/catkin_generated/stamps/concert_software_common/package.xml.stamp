@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package>
+  <name>concert_software_common</name>
+  <version>0.0.3</version>
+  <description>
+    Collection of concert software
+  </description>
+
+  <maintainer email="jihoonlee.in@gmail.com">Jihoon Lee</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://wiki.ros.org/concert_software_common</url>
+  <url type="bugtracker">https://github.com/robotics-in-concert/concert_software_farm/issues</url>
+  <url type="repository">https://github.com/robotics-in-concert/concert_software_farm</url>
+
+  <author>Jihoon Lee</author>
+  <buildtool_depend>catkin</buildtool_depend>
+  <run_depend>world_canvas_server</run_depend>
+  <run_depend>web_video_server</run_depend>
+  <export>
+    <software_farm>software/world_canvas_server.software</software_farm>
+    <software_farm>software/web_video_server.software</software_farm>
+  </export>
+</package>

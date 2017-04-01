@@ -1,0 +1,17 @@
+(cl:defpackage create_node-msg
+  (:use )
+  (:export
+   "<TURTLEBOTSENSORSTATE>"
+   "TURTLEBOTSENSORSTATE"
+   "<TURTLE>"
+   "TURTLE"
+   "<RAWTURTLEBOTSENSORSTATE>"
+   "RAWTURTLEBOTSENSORSTATE"
+   "<ROOMBASENSORSTATE>"
+   "ROOMBASENSORSTATE"
+   "<DRIVE>"
+   "DRIVE"
+   "<BATTERYSTATE>"
+   "BATTERYSTATE"
+  ))
+

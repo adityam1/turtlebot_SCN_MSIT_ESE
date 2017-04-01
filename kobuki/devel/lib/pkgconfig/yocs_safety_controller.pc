@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/ese_team_project/kobuki/devel
+
+Name: yocs_safety_controller
+Description: Description of yocs_safety_controller
+Version: 0.6.4
+Cflags: -I/home/turtlebot/ese_team_project/kobuki/src/yujin_ocs/yocs_safety_controller/include
+Libs: -L/home/turtlebot/ese_team_project/kobuki/devel/lib -lyocs_safety_controller_nodelet
+Requires: ecl_threads geometry_msgs nodelet pluginlib sensor_msgs std_msgs roscpp yocs_controllers

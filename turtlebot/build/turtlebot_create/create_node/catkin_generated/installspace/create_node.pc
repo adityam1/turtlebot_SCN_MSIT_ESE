@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/ese_team_project/turtlebot/install
+
+Name: create_node
+Description: Description of create_node
+Version: 2.3.1
+Cflags: -I/home/turtlebot/ese_team_project/turtlebot/install/include
+Libs: -L/home/turtlebot/ese_team_project/turtlebot/install/lib 
+Requires: diagnostic_msgs geometry_msgs message_runtime nav_msgs

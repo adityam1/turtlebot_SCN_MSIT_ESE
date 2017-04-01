@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/ese_team_project/rocon/devel
+
+Name: rocon_gateway_utils
+Description: Description of rocon_gateway_utils
+Version: 0.7.10
+Cflags: 
+Libs: -L/home/turtlebot/ese_team_project/rocon/devel/lib 
+Requires: 

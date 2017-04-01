@@ -1,0 +1,8 @@
+prefix=/home/turtlebot/ese_team_project/rocon/devel
+
+Name: rocon_app_utilities
+Description: Description of rocon_app_utilities
+Version: 0.7.13
+Cflags: 
+Libs: -L/home/turtlebot/ese_team_project/rocon/devel/lib 
+Requires: 
