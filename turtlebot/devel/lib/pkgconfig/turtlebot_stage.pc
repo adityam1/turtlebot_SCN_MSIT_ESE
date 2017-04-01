@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/turtlebot/devel
-
-Name: turtlebot_stage
-Description: Description of turtlebot_stage
-Version: 2.2.2
-Cflags: 
-Libs: -L/home/turtlebot/ese_team_project/turtlebot/devel/lib 
-Requires: 

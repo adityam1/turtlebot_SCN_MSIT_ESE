@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/turtlebot/devel
-
-Name: nav_core
-Description: Description of nav_core
-Version: 1.14.0
-Cflags: -I/home/turtlebot/ese_team_project/turtlebot/src/navigation/nav_core/include
-Libs: -L/home/turtlebot/ese_team_project/turtlebot/devel/lib 
-Requires: std_msgs geometry_msgs tf costmap_2d

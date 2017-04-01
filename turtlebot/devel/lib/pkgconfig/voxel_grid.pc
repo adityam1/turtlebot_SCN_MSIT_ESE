@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/turtlebot/devel
-
-Name: voxel_grid
-Description: Description of voxel_grid
-Version: 1.14.0
-Cflags: -I/home/turtlebot/ese_team_project/turtlebot/src/navigation/voxel_grid/include
-Libs: -L/home/turtlebot/ese_team_project/turtlebot/devel/lib -lvoxel_grid
-Requires: roscpp

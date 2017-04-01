@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/turtlebot/install
-
-Name: create_gazebo_plugins
-Description: Description of create_gazebo_plugins
-Version: 2.3.1
-Cflags: -I/home/turtlebot/ese_team_project/turtlebot/install/include
-Libs: -L/home/turtlebot/ese_team_project/turtlebot/install/lib -lgazebo_ros_create
-Requires: create_node gazebo_ros geometry_msgs nav_msgs roscpp sensor_msgs

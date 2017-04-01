@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/turtlebot/devel
-
-Name: move_slow_and_clear
-Description: Description of move_slow_and_clear
-Version: 1.14.0
-Cflags: -I/home/turtlebot/ese_team_project/turtlebot/src/navigation/move_slow_and_clear/include
-Libs: -L/home/turtlebot/ese_team_project/turtlebot/devel/lib -lmove_slow_and_clear
-Requires: roscpp pluginlib nav_core

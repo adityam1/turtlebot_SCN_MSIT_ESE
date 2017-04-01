@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/turtlebot/devel
-
-Name: turtlebot_teleop
-Description: Description of turtlebot_teleop
-Version: 2.3.14
-Cflags: 
-Libs: -L/home/turtlebot/ese_team_project/turtlebot/devel/lib 
-Requires: roscpp geometry_msgs joy

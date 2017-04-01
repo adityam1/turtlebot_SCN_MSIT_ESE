@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/turtlebot/install
-
-Name: turtlebot_stdr
-Description: Description of turtlebot_stdr
-Version: 2.2.2
-Cflags: 
-Libs: -L/home/turtlebot/ese_team_project/turtlebot/install/lib 
-Requires: 

@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/turtlebot/install
-
-Name: turtlebot_msgs
-Description: Description of turtlebot_msgs
-Version: 2.2.1
-Cflags: -I/home/turtlebot/ese_team_project/turtlebot/install/include
-Libs: -L/home/turtlebot/ese_team_project/turtlebot/install/lib 
-Requires: std_msgs sensor_msgs std_srvs message_runtime
