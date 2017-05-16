@@ -1,0 +1,5 @@
+cscope*
+.catkin_workspace
+build
+devel
+install
