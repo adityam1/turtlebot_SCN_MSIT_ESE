@@ -14,6 +14,9 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
 )
 
+find_package(PythonLibs REQUIRED)
+include_directories(${PYTHON_INCLUDE_DIRS})
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -56,7 +59,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
-  demoAlgoService.srv
+  demoNodeService.srv
   systemControlRegisterService.srv
   userInterfaceService.srv
 )
@@ -104,7 +107,7 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#    INCLUDE_DIRS include
+    INCLUDE_DIRS include
     LIBRARIES reconfigure
     CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
     DEPENDS system_lib
@@ -140,8 +143,9 @@ add_dependencies(${catkin_EXPORTED_TARGETS})
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/reconfigure_node.cpp)
 add_executable(${PROJECT_NAME}_node src/reconfigure_node.cpp src/Dependency.cpp)
-add_executable(demo_algo1 src/demo_algo1.cpp)
-add_executable(demo_algo2 src/demo_algo2.cpp)
+add_executable(demo_node1 src/demo_node1.cpp)
+add_executable(demo_node2 src/demo_node2.cpp)
+add_executable(demo_node3 src/demo_node3.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -156,11 +160,15 @@ add_executable(demo_algo2 src/demo_algo2.cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
+  ${PYTHON_LIBRARIES}
 )
-target_link_libraries(demo_algo1
+target_link_libraries(demo_node1
   ${catkin_LIBRARIES}
 )
-target_link_libraries(demo_algo2
+target_link_libraries(demo_node2
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(demo_node3
   ${catkin_LIBRARIES}
 )
 
