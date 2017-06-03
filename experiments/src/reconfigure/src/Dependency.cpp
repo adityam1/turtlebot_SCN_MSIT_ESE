@@ -1,80 +1,62 @@
 #include "Dependency.h"
+#include <cstring>
 
 /**
- * APIs for DependencyNode
+ * APIs for NodeInfo
  */
-DependencyNode::DependencyNode(const char *_name) {
+
+NodeInfo::NodeInfo(char const *_name){
+	this->name = std::string(_name);
+}
+NodeInfo::NodeInfo(char const *_name, std::vector<std::string> &_servicesProvided, std::vector<std::string> &_topicsPublished){
     this->name = std::string(_name);
+    this->servicesProvided = _servicesProvided;
+    this->topicsPublished = _topicsPublished;
 }
+NodeInfo::~NodeInfo(){
 
-DependencyNode::DependencyNode(const char *_name, std::vector<std::string> &_dependencies) {
-    this->name = std::string(_name);
-    this->dependencies = _dependencies;
 }
-
-std::string
-DependencyNode::getName() {
-    return this->name;
+std::string NodeInfo::getName(void){
+	return this->name;
 }
-
-void
-DependencyNode::addDependencies(std::string& _dependency) {
-    this->dependencies.push_back(_dependency);
+std::vector<std::string> & NodeInfo::getServicesProvided(void){
+	return this->servicesProvided;
 }
-
-void
-DependencyNode::addDependencies(std::vector<std::string> &_dependencies) {
-    int size = _dependencies.size();
+std::vector<std::string> & NodeInfo::getSTopicsPublished(void){
+	return this->topicsPublished;
+}
+void NodeInfo::addServicesProvided(std::string &_servicesProvided){
+	this->servicesProvided.push_back(_servicesProvided);
+}
+void NodeInfo::addTopicsPublished(std::string &_topicsPublished){
+	this->topicsPublished.push_back(_topicsPublished);
+}
+void NodeInfo::addServicesProvided(std::vector<std::string> &_servicesProvided){
+    int size = _servicesProvided.size();
     for (int i = 0; i < size; i++) {
-        this->dependencies.push_back(_dependencies[i]);
+        this->servicesProvided.push_back(_servicesProvided[i]);
+    }
+}
+void NodeInfo::addTopicsPublished(std::vector<std::string> &_topicsPublished){
+    int size = _topicsPublished.size();
+    for (int i = 0; i < size; i++) {
+        this->topicsPublished.push_back(_topicsPublished[i]);
     }
 }
 
-std::vector<std::string> &
-DependencyNode::getDependencies(void) {
-    return this->dependencies;
-}
-
-DependencyNode::~DependencyNode() {
+NodeList::NodeList(){
 
 }
-
-/**
- * APIs for DependencyTree
- */
-DependencyTree::DependencyTree() {
-    
-}
-
-DependencyTree::~DependencyTree() {
+NodeList::~NodeList(){
 
 }
-
-void 
-DependencyTree::addDependencyNode(DependencyNode *_node) {
-    this->tree.push_back(_node);
+void NodeList::addNode(NodeInfo *_node){
+	this->list.push_back(_node);
 }
-
-void
-DependencyTree::addDependencyNode(std::vector<DependencyNode*> &_nodes) {
+void NodeList::addNode(std::vector<NodeInfo*> &_nodes){
     int size = _nodes.size();
 
     for (int i = 0; i < size; i++) {
-        this->tree.push_back(_nodes[i]);
+        this->list.push_back(_nodes[i]);
     }
-}
-
-bool 
-DependencyTree::isValidDependencyNode(std::string _node) {
-    if (_node.empty()) {
-        return false;
-    }
-
-    for (int i = 0; i < tree.size(); i++) {
-        if (_node.compare(tree[i]->getName()) == 0) {
-            return true;
-        }
-    }
-
-    return false;
 }

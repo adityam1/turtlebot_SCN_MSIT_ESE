@@ -1,6 +1,9 @@
 string node_name
 string callback_service
-string[] list_dependencies
+string[] services_provided
+string[] topics_published
+string[] services_used
+string[] topics_subscribed
 
 ---
 
