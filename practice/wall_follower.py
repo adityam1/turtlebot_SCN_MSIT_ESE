@@ -108,7 +108,7 @@ def main():
 
 			twist_msg.angular.z = K_dist_from_line * e_dist_from_line
 
-			#vel_pub.publish(twist_msg)
+			vel_pub.publish(twist_msg)
 
 			with odom_lock:
 				latest_odom_data = odom_data
@@ -131,12 +131,12 @@ def main():
 
 		if bumped:
 			#Stop
-#			twist_msg.linear.x = twist_msg.angular.z = 0
-#			vel_pub.publish(twist_msg)
+			twist_msg.linear.x = twist_msg.angular.z = 0
+			vel_pub.publish(twist_msg)
 #			rospy.sleep(0.1)
 #			vel_pub.publish(twist_msg)
-#			rospy.sleep(0.1)
-			rospy.sleep(1)
+			rospy.sleep(0.1)
+#			rospy.sleep(1)
 
 			with odom_lock:
 				latest_odom_data = odom_data
@@ -156,7 +156,7 @@ def main():
 
 				twist_msg.angular.z = K_dist_from_line * e_dist_from_line
 
-				#vel_pub.publish(twist_msg)
+				vel_pub.publish(twist_msg)
 
 				with odom_lock:
 					latest_odom_data = odom_data
@@ -222,7 +222,7 @@ def main():
 #					twist_msg.linear.x = twist_msg.linear.x * K_d * error_d
 #					twist_msg.angular.z = 0
 #
-				#vel_pub.publish(twist_msg)
+				vel_pub.publish(twist_msg)
 
 				with odom_lock:
 					latest_odom_data = odom_data
@@ -290,7 +290,7 @@ def main():
 #					twist_msg.linear.x = twist_msg.linear.x * K_d * error_d
 #					twist_msg.angular.z = 0
 
-				#vel_pub.publish(twist_msg)
+				vel_pub.publish(twist_msg)
 
 				with odom_lock:
 					latest_odom_data = odom_data
