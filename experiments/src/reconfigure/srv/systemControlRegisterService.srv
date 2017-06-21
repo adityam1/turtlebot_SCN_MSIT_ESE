@@ -1,0 +1,12 @@
+string node_name
+string callback_service
+string[] services_provided
+string[] topics_published
+string[] services_used
+string[] topics_subscribed
+
+---
+
+uint8 OK = 0
+uint8 ERROR = 1
+uint8 result

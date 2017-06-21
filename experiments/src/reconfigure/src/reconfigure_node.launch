@@ -1,0 +1,3 @@
+<launch>
+<node name="systemControlNode" pkg="reconfigure" type="reconfigure_node" />
+</launch>
