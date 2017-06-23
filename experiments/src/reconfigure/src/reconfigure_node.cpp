@@ -22,16 +22,20 @@
  * global definitions
  */
 NodeList nodeList;
-typedef std::map<std::string, std::vector<std::string> > my_map;
+typedef std::map<std::string, std::vector<std::string>> my_map;
 
 // key - node name, values - services it provides
 std::map<std::string, std::vector<std::string> > NodeServices;
+
 // key - node name, values - topics it publishes
 std::map<std::string, std::vector<std::string> > NodeTopics;
+
 // key - service name, values - nodes used the service
 std::map<std::string, std::vector<std::string> > ServicesInfo;
+
 // key - topic name, values - nodes subscribed to the topic
 std::map<std::string, std::vector<std::string> > TopicsInfo;
+
 extern char **environ;
 
 /**
@@ -77,8 +81,24 @@ bool systemControlRegisterCallback(reconfigure::systemControlRegisterService::Re
 
 	//For each node store the list of services it provides
 	ROS_INFO("registered node name: %s", req.node_name.c_str());
-    NodeServices.insert(std::pair<std::string, std::vector<std::string> >(req.node_name, std::vector<std::string>()));
+    
+    /* if (new service is being registered)
+     * {
+     *     if (node exists in the map)
+     *     {
+     *         update node->second(vector)
+     *     }
+     *     else
+     *     {
+     *         add node to map
+     *         add service to node->second(vector)
+     *     }
+     * }
+     */
+    NodeServices.insert(std::pair<std::string, std::vector<std::string>>(req.node_name, std::vector<std::string>()));
+
     ROS_INFO("registered callback_service: %s", req.callback_service.c_str());
+
     for (int i = 0; i < req.services_provided.size(); i++) {
         ROS_INFO("registered node services provided %d: %s", i, req.services_provided[i].c_str());
         NodeServices[req.node_name].push_back(req.services_provided[i]);
