@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
     //ros::init(argc, argv, "systemControlNode");
     ros::NodeHandle n;
 
-    ros::ServiceServer registerService = n.advertiseService("systemControlRegisterService", systemControlRegisterCallback);
+    ros::ServiceServer registerService = n.advertiseService("systemControlRegisterService", scnRegister);
 
     ros::ServiceServer userInterfaceService = n.advertiseService("userInterfaceService", userInterfaceServiceCallback);
 
@@ -68,6 +68,7 @@ int main(int argc, char **argv) {
     return 0;
 }
 
+#if 0
 /**
  * Request format
  * string node_name - the name of the node registered
@@ -76,8 +77,9 @@ int main(int argc, char **argv) {
  * Response format
  * uint8 result - the result of the service call
  */
-bool systemControlRegisterCallback(reconfigure::systemControlRegisterService::Request &req,
-                                   reconfigure::systemControlRegisterService::Response &res) {
+bool systemControlRegisterCallback(
+        reconfigure::systemControlRegisterService::Request &req,
+        reconfigure::systemControlRegisterService::Response &res) {
 
 	//For each node store the list of services it provides
 	ROS_INFO("registered node name: %s", req.node_name.c_str());
@@ -138,6 +140,148 @@ bool systemControlRegisterCallback(reconfigure::systemControlRegisterService::Re
     res.result = 0;
     return true;
 }
+#endif
+
+
+/*------------------------------------------------------------------
+ * #FIXME
+ * Write for actions
+ *-----------------------------------------------------------------*/
+
+
+/*------------------------------------------------------------------
+ * register_service
+ * Registers the service with the SCN i.e. records the dependency 
+ * for a service for the respective node.
+ *
+ * #FIXME: Need a check?
+ * It is expected that a service client can only be registered after
+ * the server has registered the service.
+ *-----------------------------------------------------------------*/
+bool register_service(
+        reconfigure::systemControlRegisterService::Request &req, 
+        reconfigure::systemControlRegisterService::Response &res) {
+    
+    uint8_t direction = req.direction;
+    string node_name = req.node_name;
+    string callback_service = req.callback_service;
+    string direction = req.direction;
+    string service_name = req.dep_name;
+
+    /* Take locks on the NodeServices map #FIXME */
+
+    /* Check direction of service being registered */
+    if(SERVER == direction) {
+        /* Check if entry for node already exists */
+        if(NodeServices.find(node_name) == NodeServices.end()) {
+            /* Insert node to the map */
+            NodeServices.insert(std::pair<std::string, std::vector<std::string>> \
+                    (node_name, std::vector<std::string>()));
+        }
+
+        /* Update nodes service vector */
+        NodeServices[node_name].push_back(service_name); 
+
+    } else if(CLIENT == direction) {
+        /* Check if entry for this service already exists */
+        if(ServicesInfo.find() == ServicesInfo.end()) {
+            /* Insert service to the map */
+            ServicesInfo.insert(std::pair<std::string, std::vector<std::string>> \
+                    (service_name, std::vector<std::string>()));
+        }
+
+        /* Update the list of nodes for this service */
+        ServicesInfo[service_name].push_back(node_name);
+    }
+    return true;
+}
+
+/*------------------------------------------------------------------
+ * register_topic
+ * Registers the topic with the SCN i.e. records the dependency 
+ * for a topic for the respective node.
+ *
+ *-----------------------------------------------------------------*/
+bool register_topic(
+        reconfigure::systemControlRegisterService::Request &req, 
+        reconfigure::systemControlRegisterService::Response &res) {
+    
+    uint8_t direction = req.direction;
+    string node_name = req.node_name;
+    string callback_service = req.callback_service;
+    string direction = req.direction;
+    string topic_name = req.dep_name;
+
+    /* Take locks on the NodeTopics map #FIXME */
+
+    /* Check direction of service being registered */
+    if(PUBLISH == direction) {
+        /* Check if entry for node already exists */
+        if(NodeTopics.find(node_name) == NodeTopics.end()) {
+            /* Insert node to the map */
+            NodeTopics.insert(std::pair<std::string, std::vector<std::string>> \
+                    (node_name, std::vector<std::string>()));
+        }
+
+        /* Update nodes topic vector */
+        NodeTopics[node_name].push_back(topic_name); 
+
+    } else if(SUBS == direction) {
+        /* Check if entry for this topic already exists */
+        if(TopicsInfo.find() == TopicsInfo.end()) {
+            /* Insert topic to the map */
+            TopicsInfo.insert(std::pair<std::string, std::vector<std::string>> \
+                    (topic_name, std::vector<std::string>()));
+        }
+
+        /* Update the list of nodes for this service */
+        TopicsInfo[topic_name].push_back(node_name);
+    }
+    return true;
+}
+
+
+/*------------------------------------------------------------------
+ * scnRegister
+ * Request Format
+ *  node_name - Name of the node for which the dep is being 
+ *              registered
+ *  callback_service - service for node being registered
+ *  dependency  - Type of the dependency (Service/Topic/Action)
+ *  direction   - Direction of the dependency (Server/Client, PUB/SUB,
+ *                                              Act/provide)
+ *
+ *  Response Format 
+ *  result - OK/ERROR
+ *  #FIXME - add more error codes
+ *
+ *-----------------------------------------------------------------*/
+bool scnRegister(reconfigure::systemControlRegisterService::Request &req
+                 reconfigure::systemControlRegisterService::Response &res) {
+
+    /* Check the type of registration */
+    uint8_t reg_dep_type = req.dependency;
+    
+    switch(reg_dep_type) {
+        case SERVICE:
+            status = register_service(req, res);
+            break;
+        //case ACTION:
+        //    status = register_action(req, res);
+        //    break;
+        case TOPIC:
+            status = register_topic(req, res);
+            break;
+        default: 
+            ROS_ERROR("SCN: Unknown dependency type\n");
+            status = ERROR;
+            break;
+    }
+
+    return status;
+}
+
+
 
 /**
  * Request format

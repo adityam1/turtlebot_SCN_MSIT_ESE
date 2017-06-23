@@ -1,9 +1,22 @@
+#request constants
+uint8 SERVICE = 0
+uint8 ACTION  = 1
+uint8 TOPIC   = 2
+
+#Direction - Service/Action
+uint8 SERVER = 3
+uint8 CLIENT = 4
+
+#Direction - Topic
+uint8 PUBLISH   = 5
+uint8 SUBS      = 6
+
+#request fields
 string node_name
 string callback_service
-string[] services_provided
-string[] topics_published
-string[] services_used
-string[] topics_subscribed
+string dependency
+string dep_name
+string direction
 
 ---
 
