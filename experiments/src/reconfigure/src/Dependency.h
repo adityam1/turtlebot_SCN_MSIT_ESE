@@ -4,35 +4,41 @@
 #include <vector>
 #include <string>
 
-class DependencyNode {
-    private:
-        // node name
-        std::string name;
-        // list of dependencies for this node
-        std::vector<std::string> dependencies;
+class NodeInfo {
 
-    public:
-        DependencyNode(char const *_name);
-        DependencyNode(char const *_name, std::vector<std::string> &_dependencies);
-        ~DependencyNode();
-        std::string getName(void);
-        void addDependencies(std::string &_dependency);
-        std::vector<std::string> &getDependencies(void);
-        void addDependencies(std::vector<std::string> &_dependencies);
+private:
+    // node name
+    std::string name;
+    // list of services provided by this node
+    std::vector<std::string> servicesProvided;
+    //list of topics published to by this node
+    std::vector<std::string> topicsPublished;
+
+public:
+    NodeInfo(char const *_name);
+    NodeInfo(char const *_name, std::vector<std::string> &_servicesProvided, std::vector<std::string> &_topicsPublished);
+    ~NodeInfo();
+    std::string getName(void);
+    std::vector<std::string> &getServicesProvided(void);
+    std::vector<std::string> &getSTopicsPublished(void);
+    void addServicesProvided(std::string &_servicesProvided);
+    void addTopicsPublished(std::string &_topicsPublished);
+    void addServicesProvided(std::vector<std::string> &_servicesProvided);
+    void addTopicsPublished(std::vector<std::string> &_topicsPublished);
+
 };
 
-class DependencyTree {
+class NodeList {
     private:
-        // the dependency tree that's maintained by the framework
-        std::vector<DependencyNode*> tree;
+        // the dependency list that is maintained by the framework
+        std::vector<NodeInfo*> list;
         // TODO - add a lock to protect the data access
 
     public:
-        DependencyTree();
-        ~DependencyTree();
-        void addDependencyNode(DependencyNode *_node);
-        void addDependencyNode(std::vector<DependencyNode*> &_nodes);
-        bool isValidDependencyNode(std::string _node);
+        NodeList();
+        ~NodeList();
+        void addNode(NodeInfo *_node);
+        void addNode(std::vector<NodeInfo*> &_nodes);
 };
 
 #endif //__DEPENDENCY_H__

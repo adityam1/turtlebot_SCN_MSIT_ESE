@@ -1,6 +1,25 @@
-string node_name
-string callback_service
-string[] list_dependencies
+#request type
+uint8 REGISTER   = 0
+uint8 UNREGISTER = 1
+#request constants
+uint8 SERVICE = 1
+uint8 ACTION  = 2
+uint8 TOPIC   = 3
+
+#Direction - Service/Action
+uint8 SERVER = 4
+uint8 CLIENT = 5
+
+#Direction - Topic
+uint8 PUBLISH   = 6
+uint8 SUBS      = 7
+
+#request fields
+uint8 requestType
+uint8 direction
+uint8 dependency
+string nodeName
+string depName
 
 ---
 
