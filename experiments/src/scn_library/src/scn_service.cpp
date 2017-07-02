@@ -412,9 +412,3 @@ bool ScnServiceClient::call(MReq& req, MRes& res)
 	//call actual ServiceClient's call
 	return ros::ServiceClient::call(req, res);
 };
-
-
-int main()
-{
-	return 0;
-}
