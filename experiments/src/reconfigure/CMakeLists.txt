@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   message_generation
+  scn_library
 )
 
 find_package(PythonLibs REQUIRED)
@@ -60,7 +61,6 @@ include_directories(${PYTHON_INCLUDE_DIRS})
 add_service_files(
   FILES
   demoNodeService.srv
-  systemControlRegisterService.srv
   userInterfaceService.srv
 )
 
@@ -128,15 +128,11 @@ include_directories(
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/reconfigure.cpp
 # )
-#add_library(${PROJECT_NAME}
-#    src/Dependency.cpp
-#)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
 # add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
@@ -147,10 +143,10 @@ add_executable(demo_node1 src/demo_node1.cpp)
 add_executable(demo_node2 src/demo_node2.cpp)
 add_executable(demo_node3 src/demo_node3.cpp)
 
-add_dependencies(demo_node1 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
-add_dependencies(demo_node2 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
-add_dependencies(demo_node3 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS}) 
-add_dependencies(${PROJECT_NAME}_node ${catkin_EXPORTED_TARGETS} )
+add_dependencies(demo_node1 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library)
+add_dependencies(demo_node2 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library)
+add_dependencies(demo_node3 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library) 
+add_dependencies(${PROJECT_NAME}_node ${catkin_EXPORTED_TARGETS} scn_library)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -199,11 +195,11 @@ target_link_libraries(demo_node3
 # )
 
 ## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-# )
+#install(DIRECTORY include/${PROJECT_NAME}/
+#  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+#  FILES_MATCHING PATTERN "*.h"
+#  PATTERN ".svn" EXCLUDE
+#)
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES

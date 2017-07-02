@@ -7,7 +7,7 @@
 #include <errno.h>
 #include <python2.7/Python.h>
 
-#include <reconfigure/systemControlRegisterService.h>
+#include <scn_library/systemControlRegisterService.h>
 #include <reconfigure/userInterfaceService.h>
 #include <reconfigure/demoNodeService.h>
 
@@ -38,8 +38,8 @@ extern char **environ;
  * declaration
  */
 void systemControlSigintHandler(int sig);
-bool systemControlRegisterCallback(reconfigure::systemControlRegisterService::Request &req,
-                                   reconfigure::systemControlRegisterService::Response &res);
+bool systemControlRegisterCallback(scn_library::systemControlRegisterService::Request &req,
+                                   scn_library::systemControlRegisterService::Response &res);
 bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &req,
                                    reconfigure::userInterfaceService::Response &res);
 int launchNode(char* name);
@@ -72,8 +72,8 @@ int main(int argc, char **argv) {
  * Response format
  * uint8 result - the result of the service call
  */
-bool systemControlRegisterCallback(reconfigure::systemControlRegisterService::Request &req,
-                                   reconfigure::systemControlRegisterService::Response &res) {
+bool systemControlRegisterCallback(scn_library::systemControlRegisterService::Request &req,
+                                   scn_library::systemControlRegisterService::Response &res) {
 
 	//For each node store the list of services it provides
 	ROS_INFO("registered node name: %s", req.node_name.c_str());

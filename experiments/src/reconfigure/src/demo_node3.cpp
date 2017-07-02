@@ -1,6 +1,6 @@
 #include <ros/ros.h>
 #include <string>
-#include <reconfigure/systemControlRegisterService.h>
+#include <scn_library/systemControlRegisterService.h>
 #include <reconfigure/demoNodeService.h>
 
 #include "log.h"
@@ -29,9 +29,9 @@ int main(int argc, char ** argv) {
     ros::ServiceServer service = n.advertiseService(gCallbackService, demoNode3ClientCallback);
 
     // client used to register to the systemControlNode
-    ros::ServiceClient client = n.serviceClient<reconfigure::systemControlRegisterService>("systemControlRegisterService");
+    ros::ServiceClient client = n.serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
  
-    reconfigure::systemControlRegisterService srv;
+    scn_library::systemControlRegisterService srv;
     srv.request.node_name = node_name;
     srv.request.callback_service = gCallbackService;
 

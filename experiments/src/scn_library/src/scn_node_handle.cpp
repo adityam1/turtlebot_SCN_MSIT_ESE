@@ -1,5 +1,5 @@
 #include "scn_node_handle.h"
-#include <reconfigure/systemControlRegisterService.h>
+#include <scn_library/systemControlRegisterService.h>
 
 SCNNodeHandle::SCNNodeHandle(const std::string& ns, const M_string& remappings) : NodeHandle(ns, remappings) {
     localSCNState = 0;
@@ -46,9 +46,9 @@ SCNNodeHandle::updateLocalSCNState() {
 }
 
 bool
-SCNNodeHandle::registerDependenciesToSCN(const SCNNodeHandle &nh, std::string &node_name, std::string &name, int direction) {
-    ros::ServiceClient client = nh.serviceClient<reconfigure::systemControlRegisterService>("systemControlRegisterService");
-    reconfigure::systemControlRegisterService srv;
+SCNNodeHandle::registerDependenciesToSCN(SCNNodeHandle &nh, std::string &node_name, std::string &name, int direction) {
+    ros::ServiceClient client = nh.serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
+    scn_library::systemControlRegisterService srv;
     //srv.request.node_name = node_name;
     //srv.request.dep_name = name;
     //srv.request.direction = direction;

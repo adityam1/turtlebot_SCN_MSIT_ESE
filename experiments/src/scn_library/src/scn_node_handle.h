@@ -26,7 +26,7 @@ class ROSCPP_DECL SCNNodeHandle : public NodeHandle {
      * name - name of the topic, service, or action
      * direction - topic: 0, service: 1, action: 2
      */
-    bool registerDependenciesToSCN(const SCNNodeHandle &nh, std::string &node_name, std::string &name, int direction);
+    bool registerDependenciesToSCN(SCNNodeHandle &nh, std::string &node_name, std::string &name, int direction);
 
     public:
     SCNNodeHandle(const std::string& ns, const M_string& remappings);
