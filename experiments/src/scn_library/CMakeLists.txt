@@ -133,6 +133,7 @@ add_library(${PROJECT_NAME}
     # src/${PROJECT_NAME}/scn_library.cpp
     # add more files
     src/scn_node_handle.cpp
+    src/scn_service.cpp
  )
 
 ## Add cmake target dependencies of the library
