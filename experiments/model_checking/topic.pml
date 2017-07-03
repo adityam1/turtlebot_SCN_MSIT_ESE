@@ -25,12 +25,32 @@ int lastFeedbackRecv = NULL;
 
 bool inited = false;  // mutex for INIT to make sure SCN inited before other nodes
 int gSafeMode = 0;    // safe mode flag: 0 - normal, 1 - safe 
-int PRT_FREQ = 2000;  // print frequency
+int PRT_FREQ = 200000;  // print frequency
 
 bool isA2SCN = false;
 bool isSCN2A = false;
 bool isB2SCN = false;
 bool isSCN2B = false;
+
+/**
+ * Topic 
+ * property1: for any topic, subscriber will always stop subscribing a topic before publisher stop publishing to it.
+ */
+bool A2BStopPublishing = false;     // at the begining, A2B stop publishing hasn't happened
+bool A2BStopSubscribing = false;    // at the beginnning, A2B stop subscribing hasn't happened
+
+#define StopSubscribing (A2BStopPublishing == true)
+#define StopPublishing (A2BStopSubscribing == true)
+ltl property1 { [] (StopSubscribing -> <>  StopPublishing) }
+
+/**
+ * Topic 
+ * property2: for any topic, subscriber will always stop subscribing a topic before publisher stop publishing to it.
+ */
+//ltl property2 { [] (StopSubscribing -> <> ABStopPublishing) }
+
+
+//ltl property3 { [] (HighPriorityStopSubscribing -> <> LowPriorityStopSubscribing) }
 
 /**
   * Node B's process - subscribe topics of A
@@ -59,24 +79,24 @@ proctype NodeB(chan _B2SCN, _B2A, _SCN2B, _A2B) {
     :: (msgType != INIT) -> 
       printf("[NodeB] Recv INIT message from SCN\n");
       _B2SCN ! RES, ERR_B;
-      printf("[NodeB] Send OK message to SCN\n");
+      printf("[NodeB] Send OK message to SCN fail\n");
     fi
 
     do
       :: (nextStep == NOR) -> atomic {
         printf("[NodeB] start of normal operation of B\n");
         int i = 0;
-        /*
         do
-          :: (gSafeMode == 0) -> atomic {
-            _A2B ? TP;
+
+          :: (gSafeMode == 0 && i > 0) ->
+            //_A2B ? TP;
+            i--;
+          :: (gSafeMode == 0 && i < 0) -> 
             i++;
-          }
-          :: (gSafeMode == 0 && (i % PRT_FREQ == 0)) -> 
             printf(" ... B\n");
-          :: (gSafeMode == 1) -> break;
+          :: (gSafeMode == 1 || i == 0) -> 
+            break;
         od
-        */
         printf("[NodeB] end of normal operation of B\n");
       }
       :: (nextStep == ES && isSCN2B == true) -> atomic {
@@ -86,6 +106,7 @@ proctype NodeB(chan _B2SCN, _B2A, _SCN2B, _A2B) {
           :: (msgType == ES) -> 
             printf("[NodeB] Recv ES for B ...\n");
             localSafeMode = 1;
+            A2BStopSubscribing = true;
             _B2SCN ! RES, OK_B;
             printf("[NodeB] Recv ES for B done\n");
             isB2SCN = true;
@@ -93,7 +114,7 @@ proctype NodeB(chan _B2SCN, _B2A, _SCN2B, _A2B) {
             printf("[NodeB] Recv ES for B ...\n");
             localSafeMode = 1;
             _B2SCN ! RES, ERR_B;
-            printf("[NodeB] Recv ES for B done\n");
+            printf("[NodeB] Recv ES for B fail\n");
             isB2SCN = true;
         fi
       }
@@ -111,7 +132,7 @@ proctype NodeB(chan _B2SCN, _B2A, _SCN2B, _A2B) {
           printf("[NodeB] Recv LS for B...\n");
           _B2SCN ! RES, ERR_B;
           localSafeMode = 0;
-          printf("[NodeB] Recv LS for B done\n");
+          printf("[NodeB] Recv LS for B fail\n");
           isB2SCN = true;
         fi
         break;
@@ -141,30 +162,31 @@ proctype NodeA(chan _A2SCN, _A2B, _SCN2A, _B2A) {
     _SCN2A ? msgType, msgText;
     if 
       :: (msgType == INIT) ->
-        printf("[NodeA] ecv INIT message from SCN\n");
+        printf("[NodeA] Recv INIT message from SCN\n");
         _A2SCN ! RES, OK_A;
         printf("[NodeA] Send OK message to SCN\n");
         localSafeMode = 0;
       :: (msgType != INIT) ->
-        printf("[NodeA] ecv INIT message from SCN\n");
+        printf("[NodeA] Recv INIT message from SCN\n");
         _A2SCN ! RES, ERR_A;
-        printf("[NodeA] Send OK message to SCN\n");
+        printf("[NodeA] Send OK message to SCN fail\n");
     fi
    
     do
     :: (nextStep == NOR) -> atomic {
         printf("[NodeA] begin normal operation of A\n");
         int i = 0;
-        /*
+        
         do
-          :: (gSafeMode == 0) -> 
-            _A2B ! TP;
+          :: (gSafeMode == 0 && i < 0) -> 
+            //_A2B ! TP;
             i++;
-          :: (gSafeMode == 0 && (i % PRT_FREQ == 0)) -> 
+          :: (gSafeMode == 0 && i > 0) -> 
+            i--;
             printf("A ... \n");
-          :: (gSafeMode == 1) -> break;
+          :: (gSafeMode == 1 || i == 0) -> break;
         od
-        */
+        
         printf("[NodeA] end of normal operation of A\n");
     }
     :: (nextStep == ES && isSCN2A == true) -> atomic {
@@ -173,13 +195,14 @@ proctype NodeA(chan _A2SCN, _A2B, _SCN2A, _B2A) {
         :: (msgType == ES) -> 
             printf("[NodeA] Recv ES for A ...\n");
             localSafeMode = 1;
+            A2BStopPublishing = true;
             _A2SCN ! RES, OK_A;
             printf("[NodeA] Recv ES for A done\n");
         :: (msgType != ES) -> 
             printf("[NodeA] Recv ES for A ...\n");
             localSafeMode = 1;
             _A2SCN ! RES, ERR_A;
-            printf("[NodeA] Recv ES for A done\n");
+            printf("[NodeA] Recv ES for A fail\n");
         fi
         isA2SCN = true;
         isSCN2A = false;
@@ -196,7 +219,7 @@ proctype NodeA(chan _A2SCN, _A2B, _SCN2A, _B2A) {
           printf("[NodeA] Recv LS for A ...\n");
           _A2SCN ! RES, ERR_A;
           localSafeMode = 0;
-          printf("[NodeA] Recv LS for A done\n");
+          printf("[NodeA] Recv LS for A fail\n");
         fi
         isA2SCN = true;
         isSCN2A = false;
@@ -257,13 +280,17 @@ proctype SystemControlNode(chan _SCN2A, _SCN2B, _A2SCN, _B2SCN) {
       // put the system to safe mode
       :: (nextStep == NOR) -> 
         atomic {
-          printf("[SCN] enter normal mode started\n");
+          if 
+            :: (loop == 1) -> goto error;
+            :: (loop != 1) -> printf("[SCN] enter normal mode started\n");
+          fi
           int count = 0;
           do
           :: (count < 0) -> count = count + 1;
           :: (count >= 0) -> count = count - 1;
           :: (count == 0) -> break;
           od
+          loop++;
           nextStep = ES;
           printf("[SCN] enter normal mode done\n");
         }
@@ -271,35 +298,37 @@ proctype SystemControlNode(chan _SCN2A, _SCN2B, _A2SCN, _B2SCN) {
           atomic {
             printf("[SCN] enter safe mode started\n");
             gSafeMode = 1;
-            _SCN2A ! ES, 0;
-            printf("[SCN] send ES message to A\n");
-            isSCN2A = true;
+
             _SCN2B ! ES, 0;
             printf("[SCN] send ES message to B\n"); 
             isSCN2B = true;
+
+            (isB2SCN == true) -> 
+              _B2SCN ? RES, msg_B;
+              if 
+                :: (msg_B == OK_B) -> 
+                  lastFeedbackRecv = OK_B;
+                  printf("[SCN] recv OK message from B for ES\n");
+                :: (msg_B == ERR_B) -> goto error;
+                  printf("[SCN] recv ERR message from B for ES\n");
+              fi
+            isB2SCN = false;
+
+            _SCN2A ! ES, 0;
+            printf("[SCN] send ES message to A\n");
+            isSCN2A = true;
             
-            if 
-              :: (isA2SCN == true) ->  
-                _A2SCN ? RES, msg_A;
-                isA2SCN = false;
-                if 
-                  :: (msg_A == OK_A) -> 
-                    lastFeedbackRecv = OK_A;
-                    printf("[SCN] recv OK message from A\n");
-                  :: (msg_A == ERR_A) -> goto error;
-                    printf("[SCN] recv ERR message from A\n");
-                fi
-              :: (isB2SCN == true) -> 
-                _B2SCN ? RES, msg_B;
-                isB2SCN = false;
-                if 
-                  :: (msg_B == OK_B) -> 
-                    lastFeedbackRecv = OK_B;
-                    printf("[SCN] recv OK message from B\n");
-                  :: (msg_B == ERR_B) -> goto error;
-                    printf("[SCN] recv ERR message from B\n");
-                fi
-            fi
+            (isA2SCN == true) ->  
+              _A2SCN ? RES, msg_A;
+              if 
+                :: (msg_A == OK_A) -> 
+                  lastFeedbackRecv = OK_A;
+                  printf("[SCN] recv OK message from A for ES\n");
+                :: (msg_A == ERR_A) -> goto error;
+                  printf("[SCN] recv ERR message from A for ES\n");
+              fi
+            isA2SCN = false;
+       
             nextStep = LS;
             printf("[SCN] enter safe mode done\n");
           }
@@ -307,38 +336,40 @@ proctype SystemControlNode(chan _SCN2A, _SCN2B, _A2SCN, _B2SCN) {
       :: (nextStep == LS) ->
         atomic {
           printf("[SCN] leave safe mode started\n");
+
           _SCN2A ! LS, 0;
           printf("[SCN] send LS message to A\n");
           isSCN2A = true;
-          _SCN2B ! LS, 0;
-          printf("[SCN] send LS message to B\n");
-          isSCN2B = true;
-  
-          if 
-          :: (isA2SCN == true) ->  
+
+          (isA2SCN == true) ->  
             _A2SCN ? RES, msg;
             if 
               :: (msg == OK_A) -> 
                 lastFeedbackRecv = OK_A;
-                printf("[SCN] recv OK message from A\n");
+                printf("[SCN] recv OK message from A for LS\n");
               :: (msg == ERR_A) -> goto error;
-                printf("[SCN] recv ERR message from A\n");
+                printf("[SCN] recv ERR message from A for LS\n");
             fi
-            isA2SCN = false;
-          :: (isB2SCN == true) -> 
+          isA2SCN = false;
+
+          _SCN2B ! LS, 0;
+          printf("[SCN] send LS message to B\n");
+          isSCN2B = true;
+
+          (isB2SCN == true) -> 
             _B2SCN ? RES, msg;
             if 
               :: (msg == OK_B) -> 
                   lastFeedbackRecv = OK_B;
-                printf("[SCN] recv OK message from B\n");
+                printf("[SCN] recv OK message from B for LS\n");
               :: (msg == ERR_B) -> goto error;
-                printf("[SCN] recv ERR message from B\n");
+                printf("[SCN] recv ERR message from B for LS\n");
             fi
-            isB2SCN = false;
-          fi
+          isB2SCN = false;
+
           gSafeMode = 0;
           printf("[SCN] leave safe mode done\n");
-          //nextStep = NOR;
+          nextStep = NOR;
           break;
         }
     od
