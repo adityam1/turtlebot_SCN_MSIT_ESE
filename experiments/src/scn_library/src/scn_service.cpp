@@ -33,23 +33,26 @@ ScnService::ScnService()
 };
 
 template<class T, class MReq, class MRes>
-ros::ServiceServer ScnService::advertiseService(std::string node_name, std::vector<std::string> services_provided,
+ros::ServiceServer ScnService::advertiseService(std::string node_name, std::string services_provided,
 		const std::string& service, bool(T::*srv_func)(MReq &, MRes &), T *obj)
 {
 	scn_library::systemControlRegisterService srv;
-	srv.request.node_name = node_name;
-	srv.request.services_provided = services_provided;
+	srv.request.requestType = srv.request.REGISTER;
+	srv.request.direction = srv.request.SERVER;
+	srv.request.dependency = srv.request.SERVICE;
+	srv.request.nodeName = node_name;
+	srv.request.depName = services_provided;
 
 	if (client.call(srv))
 	{
     	std::string res;
-    	if (srv.response.result == 0)
+    	if (srv.response.result == srv.response.OK)
     	{
         	res = "OK";
     	} 
     	else 
     	{
-        res = "ERROR";
+    		res = "ERROR";
     	}
     	ROS_INFO("result: %s\n", res.c_str());
 	}
@@ -64,17 +67,20 @@ ros::ServiceServer ScnService::advertiseService(std::string node_name, std::vect
 };
 
 template<class T, class MReq, class MRes>
-ros::ServiceServer ScnService::advertiseService(std::string node_name, std::vector<std::string> services_provided,
+ros::ServiceServer ScnService::advertiseService(std::string node_name, std::string services_provided,
 		  const std::string& service, bool(T::*srv_func)(ros::ServiceEvent<MReq, MRes>&), T *obj)
 {
 	scn_library::systemControlRegisterService srv;
-	srv.request.node_name = node_name;
-	srv.request.services_provided = services_provided;
+	srv.request.requestType = srv.request.REGISTER;
+	srv.request.direction = srv.request.SERVER;
+	srv.request.dependency = srv.request.SERVICE;
+	srv.request.nodeName = node_name;
+	srv.request.depName = services_provided;
 
 	if (client.call(srv))
 	{
     	std::string res;
-    	if (srv.response.result == 0)
+    	if (srv.response.result == srv.response.OK)
     	{
         	res = "OK";
     	}
@@ -95,17 +101,20 @@ ros::ServiceServer ScnService::advertiseService(std::string node_name, std::vect
 };
 
 template<class T, class MReq, class MRes>
-ros::ServiceServer ScnService::advertiseService(std::string node_name, std::vector<std::string> services_provided,
+ros::ServiceServer ScnService::advertiseService(std::string node_name, std::string services_provided,
 		  const std::string& service, bool(T::*srv_func)(MReq &, MRes &), const boost::shared_ptr<T>& obj)
 {
 	scn_library::systemControlRegisterService srv;
-	srv.request.node_name = node_name;
-	srv.request.services_provided = services_provided;
+	srv.request.requestType = srv.request.REGISTER;
+	srv.request.direction = srv.request.SERVER;
+	srv.request.dependency = srv.request.SERVICE;
+	srv.request.nodeName = node_name;
+	srv.request.depName = services_provided;
 
 	if (client.call(srv))
 	{
     	std::string res;
-    	if (srv.response.result == 0)
+    	if (srv.response.result == srv.response.OK)
     	{
         	res = "OK";
     	}
@@ -126,17 +135,20 @@ ros::ServiceServer ScnService::advertiseService(std::string node_name, std::vect
 };
 
 template<class T, class MReq, class MRes>
-ros::ServiceServer ScnService::advertiseService(std::string node_name, std::vector<std::string> services_provided,
+ros::ServiceServer ScnService::advertiseService(std::string node_name, std::string services_provided,
 		  const std::string& service, bool(T::*srv_func)(ros::ServiceEvent<MReq, MRes>&), const boost::shared_ptr<T>& obj)
 {
 	scn_library::systemControlRegisterService srv;
-	srv.request.node_name = node_name;
-	srv.request.services_provided = services_provided;
+	srv.request.requestType = srv.request.REGISTER;
+	srv.request.direction = srv.request.SERVER;
+	srv.request.dependency = srv.request.SERVICE;
+	srv.request.nodeName = node_name;
+	srv.request.depName = services_provided;
 
 	if (client.call(srv))
 	{
     	std::string res;
-    	if (srv.response.result == 0)
+    	if (srv.response.result == srv.response.OK)
     	{
         	res = "OK";
     	}
@@ -157,17 +169,20 @@ ros::ServiceServer ScnService::advertiseService(std::string node_name, std::vect
 };
 
 template<class MReq, class MRes>
-ros::ServiceServer ScnService::advertiseService(std::string node_name, std::vector<std::string> services_provided,
+ros::ServiceServer ScnService::advertiseService(std::string node_name, std::string services_provided,
 		const std::string& service, bool(*srv_func)(MReq&, MRes&))
 {
 	scn_library::systemControlRegisterService srv;
-	srv.request.node_name = node_name;
-	srv.request.services_provided = services_provided;
+	srv.request.requestType = srv.request.REGISTER;
+	srv.request.direction = srv.request.SERVER;
+	srv.request.dependency = srv.request.SERVICE;
+	srv.request.nodeName = node_name;
+	srv.request.depName = services_provided;
 
 	if (client.call(srv))
 	{
     	std::string res;
-    	if (srv.response.result == 0)
+    	if (srv.response.result == srv.response.OK)
     	{
         	res = "OK";
     	}
@@ -188,17 +203,20 @@ ros::ServiceServer ScnService::advertiseService(std::string node_name, std::vect
 };
 
 template<class MReq, class MRes>
-ros::ServiceServer ScnService::advertiseService(std::string node_name, std::vector<std::string> services_provided,
+ros::ServiceServer ScnService::advertiseService(std::string node_name, std::string services_provided,
 		const std::string& service, bool(*srv_func)(ros::ServiceEvent<MReq, MRes>&))
 {
 	scn_library::systemControlRegisterService srv;
-	srv.request.node_name = node_name;
-	srv.request.services_provided = services_provided;
+	srv.request.requestType = srv.request.REGISTER;
+	srv.request.direction = srv.request.SERVER;
+	srv.request.dependency = srv.request.SERVICE;
+	srv.request.nodeName = node_name;
+	srv.request.depName = services_provided;
 
 	if (client.call(srv))
 	{
     	std::string res;
-    	if (srv.response.result == 0)
+    	if (srv.response.result == srv.response.OK)
     	{
         	res = "OK";
     	}
@@ -219,18 +237,21 @@ ros::ServiceServer ScnService::advertiseService(std::string node_name, std::vect
 };
 
 template<class MReq, class MRes>
-ros::ServiceServer ScnService::advertiseService(std::string node_name, std::vector<std::string> services_provided,
+ros::ServiceServer ScnService::advertiseService(std::string node_name, std::string services_provided,
 		  const std::string& service, const boost::function<bool(MReq&, MRes&)>& callback,
                                  const ros::VoidConstPtr& tracked_object = ros::VoidConstPtr())
 {
 	scn_library::systemControlRegisterService srv;
-	srv.request.node_name = node_name;
-	srv.request.services_provided = services_provided;
+	srv.request.requestType = srv.request.REGISTER;
+	srv.request.direction = srv.request.SERVER;
+	srv.request.dependency = srv.request.SERVICE;
+	srv.request.nodeName = node_name;
+	srv.request.depName = services_provided;
 
 	if (client.call(srv))
 	{
     	std::string res;
-    	if (srv.response.result == 0)
+    	if (srv.response.result == srv.response.OK)
     	{
         	res = "OK";
     	}
@@ -251,18 +272,21 @@ ros::ServiceServer ScnService::advertiseService(std::string node_name, std::vect
 };
 
 template<class S>
-ros::ServiceServer ScnService::advertiseService(std::string node_name, std::vector<std::string> services_provided,
+ros::ServiceServer ScnService::advertiseService(std::string node_name, std::string services_provided,
 		  const std::string& service, const boost::function<bool(S&)>& callback,
                                  const ros::VoidConstPtr& tracked_object = ros::VoidConstPtr())
 {
 	scn_library::systemControlRegisterService srv;
-	srv.request.node_name = node_name;
-	srv.request.services_provided = services_provided;
+	srv.request.requestType = srv.request.REGISTER;
+	srv.request.direction = srv.request.SERVER;
+	srv.request.dependency = srv.request.SERVICE;
+	srv.request.nodeName = node_name;
+	srv.request.depName = services_provided;
 
 	if (client.call(srv))
 	{
 		std::string res;
-		if (srv.response.result == 0)
+		if (srv.response.result == srv.response.OK)
 		{
 			res = "OK";
 		}
@@ -281,17 +305,20 @@ ros::ServiceServer ScnService::advertiseService(std::string node_name, std::vect
 	return ros::NodeHandle::advertiseService<S>(service, callback, tracked_object);
 };
 
-ros::ServiceServer ScnService::advertiseService(std::string node_name, std::vector<std::string> services_provided,
+ros::ServiceServer ScnService::advertiseService(std::string node_name, std::string services_provided,
 		ros::AdvertiseServiceOptions& ops)
 {
 	scn_library::systemControlRegisterService srv;
-	srv.request.node_name = node_name;
-	srv.request.services_provided = services_provided;
+	srv.request.requestType = srv.request.REGISTER;
+	srv.request.direction = srv.request.SERVER;
+	srv.request.dependency = srv.request.SERVICE;
+	srv.request.nodeName = node_name;
+	srv.request.depName = services_provided;
 
 	if (client.call(srv))
 	{
 		std::string res;
-		if (srv.response.result == 0)
+		if (srv.response.result == srv.response.OK)
 		{
 			res = "OK";
 		}
@@ -311,18 +338,21 @@ ros::ServiceServer ScnService::advertiseService(std::string node_name, std::vect
 };
 
 template<class MReq, class MRes>
-ros::ServiceClient ScnService::serviceClient(std::string node_name, std::vector<std::string> services_used,
+ros::ServiceClient ScnService::serviceClient(std::string node_name, std::string services_used,
 							const std::string& service_name, bool persistent = false,
                           const ros::M_string& header_values = ros::M_string())
 {
 	scn_library::systemControlRegisterService srv;
-	srv.request.node_name = node_name;
-	srv.request.services_used = services_used;
+	srv.request.requestType = srv.request.REGISTER;
+	srv.request.direction = srv.request.CLIENT;
+	srv.request.dependency = srv.request.SERVICE;
+	srv.request.nodeName = node_name;
+	srv.request.depName = services_used;
 
 	if (client.call(srv))
 	{
     	std::string res;
-    	if (srv.response.result == 0)
+    	if (srv.response.result == srv.response.OK)
     	{
         	res = "OK";
     	} 
@@ -343,18 +373,21 @@ ros::ServiceClient ScnService::serviceClient(std::string node_name, std::vector<
 };
 
 template<class Service>
-ros::ServiceClient ScnService::serviceClient(std::string node_name, std::vector<std::string> services_used,
+ros::ServiceClient ScnService::serviceClient(std::string node_name, std::string services_used,
 		  const std::string& service_name, bool persistent = false,
                               const ros::M_string& header_values = ros::M_string())
 {
 	scn_library::systemControlRegisterService srv;
-	srv.request.node_name = node_name;
-	srv.request.services_used = services_used;
+	srv.request.requestType = srv.request.REGISTER;
+	srv.request.direction = srv.request.CLIENT;
+	srv.request.dependency = srv.request.SERVICE;
+	srv.request.nodeName = node_name;
+	srv.request.depName = services_used;
 
 	if (client.call(srv))
 	{
     	std::string res;
-    	if (srv.response.result == 0)
+    	if (srv.response.result == srv.response.OK)
     	{
         	res = "OK";
     	}
@@ -374,17 +407,20 @@ ros::ServiceClient ScnService::serviceClient(std::string node_name, std::vector<
 	return ros::NodeHandle::serviceClient<Service>(service_name, persistent, header_values);
 };
 
-ros::ServiceClient ScnService::serviceClient(std::string node_name, std::vector<std::string> services_used,
+ros::ServiceClient ScnService::serviceClient(std::string node_name, std::string services_used,
 		ros::ServiceClientOptions& ops)
 {
 	scn_library::systemControlRegisterService srv;
-	srv.request.node_name = node_name;
-	srv.request.services_used = services_used;
+	srv.request.requestType = srv.request.REGISTER;
+	srv.request.direction = srv.request.CLIENT;
+	srv.request.dependency = srv.request.SERVICE;
+	srv.request.nodeName = node_name;
+	srv.request.depName = services_used;
 
 	if (client.call(srv))
 	{
     	std::string res;
-    	if (srv.response.result == 0)
+    	if (srv.response.result == srv.response.OK)
     	{
         	res = "OK";
     	}

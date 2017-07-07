@@ -42,53 +42,53 @@ public:
 	ScnService();
 
 	template<class T, class MReq, class MRes>
-	ros::ServiceServer advertiseService(std::string node_name, std::vector<std::string> services_provided,
+	ros::ServiceServer advertiseService(std::string node_name, std::string services_provided,
 			const std::string& service, bool(T::*srv_func)(MReq &, MRes &), T *obj);
 
 	template<class T, class MReq, class MRes>
-	ros::ServiceServer advertiseService(std::string node_name, std::vector<std::string> services_provided,
+	ros::ServiceServer advertiseService(std::string node_name, std::string services_provided,
 			  const std::string& service, bool(T::*srv_func)(ros::ServiceEvent<MReq, MRes>&), T *obj);
 
 	template<class T, class MReq, class MRes>
-	ros::ServiceServer advertiseService(std::string node_name, std::vector<std::string> services_provided,
+	ros::ServiceServer advertiseService(std::string node_name, std::string services_provided,
 			  const std::string& service, bool(T::*srv_func)(MReq &, MRes &), const boost::shared_ptr<T>& obj);
 
 	template<class T, class MReq, class MRes>
-	ros::ServiceServer advertiseService(std::string node_name, std::vector<std::string> services_provided,
+	ros::ServiceServer advertiseService(std::string node_name, std::string services_provided,
 			  const std::string& service, bool(T::*srv_func)(ros::ServiceEvent<MReq, MRes>&), const boost::shared_ptr<T>& obj);
 
 	template<class MReq, class MRes>
-	ros::ServiceServer advertiseService(std::string node_name, std::vector<std::string> services_provided,
+	ros::ServiceServer advertiseService(std::string node_name, std::string services_provided,
 			const std::string& service, bool(*srv_func)(MReq&, MRes&));
 
 	template<class MReq, class MRes>
-	ros::ServiceServer advertiseService(std::string node_name, std::vector<std::string> services_provided,
+	ros::ServiceServer advertiseService(std::string node_name, std::string services_provided,
 			const std::string& service, bool(*srv_func)(ros::ServiceEvent<MReq, MRes>&));
 
 	template<class MReq, class MRes>
-	ros::ServiceServer advertiseService(std::string node_name, std::vector<std::string> services_provided,
+	ros::ServiceServer advertiseService(std::string node_name, std::string services_provided,
 			  const std::string& service, const boost::function<bool(MReq&, MRes&)>& callback,
 	                                 const ros::VoidConstPtr& tracked_object);
 
 	template<class S>
-	ros::ServiceServer advertiseService(std::string node_name, std::vector<std::string> services_provided,
+	ros::ServiceServer advertiseService(std::string node_name, std::string services_provided,
 			  const std::string& service, const boost::function<bool(S&)>& callback,
 	                                 const ros::VoidConstPtr& tracked_object);
 
-	ros::ServiceServer advertiseService(std::string node_name, std::vector<std::string> services_provided,
+	ros::ServiceServer advertiseService(std::string node_name, std::string services_provided,
 			ros::AdvertiseServiceOptions& ops);
 
 	template<class MReq, class MRes>
-  	ros::ServiceClient serviceClient(std::string node_name, std::vector<std::string> services_used,
+  	ros::ServiceClient serviceClient(std::string node_name, std::string services_used,
   								const std::string& service_name, bool persistent,
                               const ros::M_string& header_values);
 
 	template<class Service>
-	ros::ServiceClient serviceClient(std::string node_name, std::vector<std::string> services_used,
+	ros::ServiceClient serviceClient(std::string node_name, std::string services_used,
 			  const std::string& service_name, bool persistent,
 	                              const ros::M_string& header_values);
 
-	ros::ServiceClient serviceClient(std::string node_name, std::vector<std::string> services_used,
+	ros::ServiceClient serviceClient(std::string node_name, std::string services_used,
 			ros::ServiceClientOptions& ops);
 };
 
