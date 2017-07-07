@@ -1,19 +1,22 @@
 #request type
 uint8 REGISTER   = 0
 uint8 UNREGISTER = 1
-#request constants
+
+#dependency constants
 uint8 SERVICE = 2
 uint8 ACTION  = 3
 uint8 TOPIC   = 4
 
-#Direction - Service/Action
+#Direction for: Service/Action
 uint8 SERVER = 5
 uint8 CLIENT = 6
 
-#Direction - Topic
+#Direction for: Topic
 uint8 PUBLISH   = 7
 uint8 SUBS      = 8
 
+#To unregister all dependencies of the respective
+#node
 uint8 ALL       = 9
 
 #request fields

@@ -61,7 +61,6 @@ include_directories(${PYTHON_INCLUDE_DIRS})
 add_service_files(
   FILES
   demoNodeService.srv
-  systemControlRegisterService.srv
   userInterfaceService.srv
 )
 
