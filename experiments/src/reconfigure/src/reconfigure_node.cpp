@@ -7,7 +7,7 @@
 #include <errno.h>
 #include <python2.7/Python.h>
 
-#include <reconfigure/systemControlRegisterService.h>
+#include <scn_library/systemControlRegisterService.h>
 #include <reconfigure/userInterfaceService.h>
 #include <reconfigure/demoNodeService.h>
 //#include <unordered_map>
@@ -97,7 +97,7 @@ class ScnCore
 
 ScnCore::ScnCore(ros::NodeHandle &n)
 {
-    ros::ServiceServer registerService = n.advertiseService("systemControlRegisterService", &ScnCore::scnCoreCb, this);
+        ros::ServiceServer registerService = n.advertiseService("systemControlRegisterService", &ScnCore::scnCoreCb, this);
 
     ros::ServiceServer userInterfaceService = n.advertiseService("userInterfaceService", &ScnCore::userInterfaceServiceCallback, this);
 
