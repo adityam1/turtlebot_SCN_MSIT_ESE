@@ -23,8 +23,38 @@
 #include "ros/init.h"
 
 #include <boost/bind.hpp>
-
 #include <XmlRpcValue.h>
+
+#include "scn_utils.h"
+
+bool
+ScnService::registerDependenciesToSCN(std::string &_nodeName, std::string &_depName, 
+            int _requestType, int _dependency, int _direction) {
+
+	scn_library::systemControlRegisterService srv;
+	srv.request.nodeName = _nodeName;
+	srv.request.depName = _depName;
+	srv.request.requestType = _requestType;;
+	srv.request.dependency = _dependency;
+	srv.request.direction = _direction;
+
+    bool ans;
+	if (client.call(srv)) {
+    	std::string res;
+    	if (srv.response.result == srv.response.OK) {
+        	res = "OK";
+            ans = true;
+    	} else {
+    		res = "ERROR";
+            ans = false;
+    	}
+    	ROS_INFO("result: %s\n", res.c_str());
+	} else {
+    	ROS_ERROR("Failed to call systemControlRegisterService");
+        ans = false;
+	}
+    return ans;
+}
 
 ScnService::ScnService()
 {
@@ -34,33 +64,9 @@ ScnService::ScnService()
 
 template<class T, class MReq, class MRes>
 ros::ServiceServer ScnService::advertiseService(std::string node_name, std::string services_provided,
-		const std::string& service, bool(T::*srv_func)(MReq &, MRes &), T *obj)
-{
-	scn_library::systemControlRegisterService srv;
-	srv.request.requestType = srv.request.REGISTER;
-	srv.request.direction = srv.request.SERVER;
-	srv.request.dependency = srv.request.SERVICE;
-	srv.request.nodeName = node_name;
-	srv.request.depName = services_provided;
+		const std::string& service, bool(T::*srv_func)(MReq &, MRes &), T *obj) {
 
-	if (client.call(srv))
-	{
-    	std::string res;
-    	if (srv.response.result == srv.response.OK)
-    	{
-        	res = "OK";
-    	} 
-    	else 
-    	{
-    		res = "ERROR";
-    	}
-    	ROS_INFO("result: %s\n", res.c_str());
-	}
-	else
-	{
-    	ROS_ERROR("Failed to call systemControlRegisterService");
-    	//return -1;
-	}
+    registerDependenciesToSCN(node_name, services_provided, REGISTER, SERVICE, SERVER);
 	
 	//Call exiting advertiseService
 	return ros::NodeHandle::advertiseService(service, srv_func, obj);
@@ -68,33 +74,9 @@ ros::ServiceServer ScnService::advertiseService(std::string node_name, std::stri
 
 template<class T, class MReq, class MRes>
 ros::ServiceServer ScnService::advertiseService(std::string node_name, std::string services_provided,
-		  const std::string& service, bool(T::*srv_func)(ros::ServiceEvent<MReq, MRes>&), T *obj)
-{
-	scn_library::systemControlRegisterService srv;
-	srv.request.requestType = srv.request.REGISTER;
-	srv.request.direction = srv.request.SERVER;
-	srv.request.dependency = srv.request.SERVICE;
-	srv.request.nodeName = node_name;
-	srv.request.depName = services_provided;
+		  const std::string& service, bool(T::*srv_func)(ros::ServiceEvent<MReq, MRes>&), T *obj) {
 
-	if (client.call(srv))
-	{
-    	std::string res;
-    	if (srv.response.result == srv.response.OK)
-    	{
-        	res = "OK";
-    	}
-    	else
-    	{
-        res = "ERROR";
-    	}
-    	ROS_INFO("result: %s\n", res.c_str());
-	}
-	else
-	{
-    	ROS_ERROR("Failed to call systemControlRegisterService");
-    	//return -1;
-	}
+    registerDependenciesToSCN(node_name, services_provided, REGISTER, SERVICE, SERVER);
 
 	//Call exiting advertiseService
 	return ros::NodeHandle::advertiseService<T, MReq, MRes>(service, srv_func, obj);
@@ -102,33 +84,9 @@ ros::ServiceServer ScnService::advertiseService(std::string node_name, std::stri
 
 template<class T, class MReq, class MRes>
 ros::ServiceServer ScnService::advertiseService(std::string node_name, std::string services_provided,
-		  const std::string& service, bool(T::*srv_func)(MReq &, MRes &), const boost::shared_ptr<T>& obj)
-{
-	scn_library::systemControlRegisterService srv;
-	srv.request.requestType = srv.request.REGISTER;
-	srv.request.direction = srv.request.SERVER;
-	srv.request.dependency = srv.request.SERVICE;
-	srv.request.nodeName = node_name;
-	srv.request.depName = services_provided;
+		  const std::string& service, bool(T::*srv_func)(MReq &, MRes &), const boost::shared_ptr<T>& obj) {
 
-	if (client.call(srv))
-	{
-    	std::string res;
-    	if (srv.response.result == srv.response.OK)
-    	{
-        	res = "OK";
-    	}
-    	else
-    	{
-        res = "ERROR";
-    	}
-    	ROS_INFO("result: %s\n", res.c_str());
-	}
-	else
-	{
-    	ROS_ERROR("Failed to call systemControlRegisterService");
-    	//return -1;
-	}
+    registerDependenciesToSCN(node_name, services_provided, REGISTER, SERVICE, SERVER);
 
 	//Call exiting advertiseService
 	return ros::NodeHandle::advertiseService<T, MReq, MRes>(service, srv_func, obj);
@@ -136,101 +94,29 @@ ros::ServiceServer ScnService::advertiseService(std::string node_name, std::stri
 
 template<class T, class MReq, class MRes>
 ros::ServiceServer ScnService::advertiseService(std::string node_name, std::string services_provided,
-		  const std::string& service, bool(T::*srv_func)(ros::ServiceEvent<MReq, MRes>&), const boost::shared_ptr<T>& obj)
-{
-	scn_library::systemControlRegisterService srv;
-	srv.request.requestType = srv.request.REGISTER;
-	srv.request.direction = srv.request.SERVER;
-	srv.request.dependency = srv.request.SERVICE;
-	srv.request.nodeName = node_name;
-	srv.request.depName = services_provided;
-
-	if (client.call(srv))
-	{
-    	std::string res;
-    	if (srv.response.result == srv.response.OK)
-    	{
-        	res = "OK";
-    	}
-    	else
-    	{
-        res = "ERROR";
-    	}
-    	ROS_INFO("result: %s\n", res.c_str());
-	}
-	else
-	{
-    	ROS_ERROR("Failed to call systemControlRegisterService");
-    	//return -1;
-	}
-
+		  const std::string& service, bool(T::*srv_func)(ros::ServiceEvent<MReq, MRes>&), const boost::shared_ptr<T>& obj) {
+	
+    registerDependenciesToSCN(node_name, services_provided, REGISTER, SERVICE, SERVER);
+    
 	//Call exiting advertiseService
 	return ros::NodeHandle::advertiseService<T, MReq, MRes>(service, srv_func, obj);
 };
 
 template<class MReq, class MRes>
 ros::ServiceServer ScnService::advertiseService(std::string node_name, std::string services_provided,
-		const std::string& service, bool(*srv_func)(MReq&, MRes&))
-{
-	scn_library::systemControlRegisterService srv;
-	srv.request.requestType = srv.request.REGISTER;
-	srv.request.direction = srv.request.SERVER;
-	srv.request.dependency = srv.request.SERVICE;
-	srv.request.nodeName = node_name;
-	srv.request.depName = services_provided;
-
-	if (client.call(srv))
-	{
-    	std::string res;
-    	if (srv.response.result == srv.response.OK)
-    	{
-        	res = "OK";
-    	}
-    	else
-    	{
-        res = "ERROR";
-    	}
-    	ROS_INFO("result: %s\n", res.c_str());
-	}
-	else
-	{
-    	ROS_ERROR("Failed to call systemControlRegisterService");
-    	//return -1;
-	}
-
+		const std::string& service, bool(*srv_func)(MReq&, MRes&)) {
+    
+    registerDependenciesToSCN(node_name, services_provided, REGISTER, SERVICE, SERVER);
+	
 	//Call exiting advertiseService
 	return ros::NodeHandle::advertiseService<MReq, MRes>(service, srv_func);
 };
 
 template<class MReq, class MRes>
 ros::ServiceServer ScnService::advertiseService(std::string node_name, std::string services_provided,
-		const std::string& service, bool(*srv_func)(ros::ServiceEvent<MReq, MRes>&))
-{
-	scn_library::systemControlRegisterService srv;
-	srv.request.requestType = srv.request.REGISTER;
-	srv.request.direction = srv.request.SERVER;
-	srv.request.dependency = srv.request.SERVICE;
-	srv.request.nodeName = node_name;
-	srv.request.depName = services_provided;
+		const std::string& service, bool(*srv_func)(ros::ServiceEvent<MReq, MRes>&)) {
 
-	if (client.call(srv))
-	{
-    	std::string res;
-    	if (srv.response.result == srv.response.OK)
-    	{
-        	res = "OK";
-    	}
-    	else
-    	{
-        res = "ERROR";
-    	}
-    	ROS_INFO("result: %s\n", res.c_str());
-	}
-	else
-	{
-    	ROS_ERROR("Failed to call systemControlRegisterService");
-    	//return -1;
-	}
+    registerDependenciesToSCN(node_name, services_provided, REGISTER, SERVICE, SERVER);
 
 	//Call exiting advertiseService
 	return ros::NodeHandle::advertiseService<MReq, MRes>(service, srv_func);
@@ -239,34 +125,10 @@ ros::ServiceServer ScnService::advertiseService(std::string node_name, std::stri
 template<class MReq, class MRes>
 ros::ServiceServer ScnService::advertiseService(std::string node_name, std::string services_provided,
 		  const std::string& service, const boost::function<bool(MReq&, MRes&)>& callback,
-                                 const ros::VoidConstPtr& tracked_object = ros::VoidConstPtr())
-{
-	scn_library::systemControlRegisterService srv;
-	srv.request.requestType = srv.request.REGISTER;
-	srv.request.direction = srv.request.SERVER;
-	srv.request.dependency = srv.request.SERVICE;
-	srv.request.nodeName = node_name;
-	srv.request.depName = services_provided;
+                                 const ros::VoidConstPtr& tracked_object = ros::VoidConstPtr()) {
 
-	if (client.call(srv))
-	{
-    	std::string res;
-    	if (srv.response.result == srv.response.OK)
-    	{
-        	res = "OK";
-    	}
-    	else
-    	{
-        res = "ERROR";
-    	}
-    	ROS_INFO("result: %s\n", res.c_str());
-	}
-	else
-	{
-    	ROS_ERROR("Failed to call systemControlRegisterService");
-    	//return -1;
-	}
-
+    registerDependenciesToSCN(node_name, services_provided, REGISTER, SERVICE, SERVER);
+	
 	//Call exiting advertiseService
 	return ros::NodeHandle::advertiseService<MReq, MRes>(service, callback, tracked_object);
 };
@@ -274,65 +136,19 @@ ros::ServiceServer ScnService::advertiseService(std::string node_name, std::stri
 template<class S>
 ros::ServiceServer ScnService::advertiseService(std::string node_name, std::string services_provided,
 		  const std::string& service, const boost::function<bool(S&)>& callback,
-                                 const ros::VoidConstPtr& tracked_object = ros::VoidConstPtr())
-{
-	scn_library::systemControlRegisterService srv;
-	srv.request.requestType = srv.request.REGISTER;
-	srv.request.direction = srv.request.SERVER;
-	srv.request.dependency = srv.request.SERVICE;
-	srv.request.nodeName = node_name;
-	srv.request.depName = services_provided;
+                                 const ros::VoidConstPtr& tracked_object = ros::VoidConstPtr()) {
 
-	if (client.call(srv))
-	{
-		std::string res;
-		if (srv.response.result == srv.response.OK)
-		{
-			res = "OK";
-		}
-		else
-		{
-		res = "ERROR";
-		}
-		ROS_INFO("result: %s\n", res.c_str());
-	}
-	else
-	{
-		ROS_ERROR("Failed to call systemControlRegisterService");
-	}
+    registerDependenciesToSCN(node_name, services_provided, REGISTER, SERVICE, SERVER);
 
-	//Call exiting advertiseService
+    //Call exiting advertiseService
 	return ros::NodeHandle::advertiseService<S>(service, callback, tracked_object);
 };
 
 ros::ServiceServer ScnService::advertiseService(std::string node_name, std::string services_provided,
-		ros::AdvertiseServiceOptions& ops)
-{
-	scn_library::systemControlRegisterService srv;
-	srv.request.requestType = srv.request.REGISTER;
-	srv.request.direction = srv.request.SERVER;
-	srv.request.dependency = srv.request.SERVICE;
-	srv.request.nodeName = node_name;
-	srv.request.depName = services_provided;
+		ros::AdvertiseServiceOptions& ops) {
 
-	if (client.call(srv))
-	{
-		std::string res;
-		if (srv.response.result == srv.response.OK)
-		{
-			res = "OK";
-		}
-		else
-		{
-		res = "ERROR";
-		}
-		ROS_INFO("result: %s\n", res.c_str());
-	}
-	else
-	{
-		ROS_ERROR("Failed to call systemControlRegisterService");
-	}
-
+    registerDependenciesToSCN(node_name, services_provided, REGISTER, SERVICE, SERVER);
+	
 	//Call exiting advertiseService
 	return ros::NodeHandle::advertiseService(ops);
 };
@@ -340,33 +156,9 @@ ros::ServiceServer ScnService::advertiseService(std::string node_name, std::stri
 template<class MReq, class MRes>
 ros::ServiceClient ScnService::serviceClient(std::string node_name, std::string services_used,
 							const std::string& service_name, bool persistent = false,
-                          const ros::M_string& header_values = ros::M_string())
-{
-	scn_library::systemControlRegisterService srv;
-	srv.request.requestType = srv.request.REGISTER;
-	srv.request.direction = srv.request.CLIENT;
-	srv.request.dependency = srv.request.SERVICE;
-	srv.request.nodeName = node_name;
-	srv.request.depName = services_used;
-
-	if (client.call(srv))
-	{
-    	std::string res;
-    	if (srv.response.result == srv.response.OK)
-    	{
-        	res = "OK";
-    	} 
-    	else 
-    	{
-        res = "ERROR";
-    	}
-    	ROS_INFO("result: %s\n", res.c_str());
-	}
-	else
-	{
-    	ROS_ERROR("Failed to call systemControlRegisterService");
-    	//return -1;
-	}
+                          const ros::M_string& header_values = ros::M_string()) {
+    
+    registerDependenciesToSCN(node_name, services_used, REGISTER, SERVICE, CLIENT);
 
 	//Call exiting serviceClient
 	return ros::NodeHandle::serviceClient<MReq, MRes>(service_name, persistent, header_values);
@@ -375,67 +167,19 @@ ros::ServiceClient ScnService::serviceClient(std::string node_name, std::string 
 template<class Service>
 ros::ServiceClient ScnService::serviceClient(std::string node_name, std::string services_used,
 		  const std::string& service_name, bool persistent = false,
-                              const ros::M_string& header_values = ros::M_string())
-{
-	scn_library::systemControlRegisterService srv;
-	srv.request.requestType = srv.request.REGISTER;
-	srv.request.direction = srv.request.CLIENT;
-	srv.request.dependency = srv.request.SERVICE;
-	srv.request.nodeName = node_name;
-	srv.request.depName = services_used;
+                              const ros::M_string& header_values = ros::M_string()) {
 
-	if (client.call(srv))
-	{
-    	std::string res;
-    	if (srv.response.result == srv.response.OK)
-    	{
-        	res = "OK";
-    	}
-    	else
-    	{
-        res = "ERROR";
-    	}
-    	ROS_INFO("result: %s\n", res.c_str());
-	}
-	else
-	{
-    	ROS_ERROR("Failed to call systemControlRegisterService");
-    	//return -1;
-	}
-
-	//Call exiting serviceClient
+    registerDependenciesToSCN(node_name, services_used, REGISTER, SERVICE, CLIENT);
+	
+    //Call exiting serviceClient
 	return ros::NodeHandle::serviceClient<Service>(service_name, persistent, header_values);
 };
 
 ros::ServiceClient ScnService::serviceClient(std::string node_name, std::string services_used,
-		ros::ServiceClientOptions& ops)
-{
-	scn_library::systemControlRegisterService srv;
-	srv.request.requestType = srv.request.REGISTER;
-	srv.request.direction = srv.request.CLIENT;
-	srv.request.dependency = srv.request.SERVICE;
-	srv.request.nodeName = node_name;
-	srv.request.depName = services_used;
+		ros::ServiceClientOptions& ops) {
 
-	if (client.call(srv))
-	{
-    	std::string res;
-    	if (srv.response.result == srv.response.OK)
-    	{
-        	res = "OK";
-    	}
-    	else
-    	{
-        res = "ERROR";
-    	}
-    	ROS_INFO("result: %s\n", res.c_str());
-	}
-	else
-	{
-    	ROS_ERROR("Failed to call systemControlRegisterService");
-    	//return -1;
-	}
-
+    registerDependenciesToSCN(node_name, services_used, REGISTER, SERVICE, CLIENT);
+	
 	//Call exiting serviceClient
 	return ros::NodeHandle::serviceClient(ops);
 };

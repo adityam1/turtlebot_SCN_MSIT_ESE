@@ -35,9 +35,13 @@
 
 class ScnService: public ros::NodeHandle
 {
-	//Register node and service to SCN
-	ros::NodeHandle n;
-	ros::ServiceClient client;
+private:
+    //Register node and service to SCN
+	static ros::NodeHandle n;
+	static ros::ServiceClient client;
+    bool registerDependenciesToSCN(std::string &_nodeName, std::string &_depName, 
+            int _requestType, int _dependency, int _direction);
+
 public:
 	ScnService();
 
