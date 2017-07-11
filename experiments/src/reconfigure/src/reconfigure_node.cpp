@@ -10,34 +10,18 @@
 #include <scn_library/systemControlRegisterService.h>
 #include <reconfigure/userInterfaceService.h>
 #include <reconfigure/demoNodeService.h>
-//#include <unordered_map>
 #include <iostream>
 #include <vector>
 
+#include <scn_library/scn_utils.h>
 #include "log.h"
 #include "Dependency.h"
-
-#define REGISTER   0
-#define UNREGISTER 1
-#define SERVICE    2
-#define ACTION     3
-#define TOPIC      4
-#define SERVER     5
-#define CLIENT     6
-#define PUBLISH    7
-#define SUBS       8
-#define ALL        9
-
-#define OK         0
-#define ERROR      1
 
 /**
  * global definitions
  */
 NodeList nodeList;
 typedef std::map<std::string, std::vector<std::string> > my_map;
-
-
 extern char **environ;
 
 /**
@@ -51,56 +35,52 @@ int killNode(char* name);
  * APIs
  */
 
-class ScnCore 
-{
+class ScnCore {
     private:
-    // key - node name, values - services it provides
-    std::map<std::string, std::vector<std::string> > NodeServices;
+        // key - node name, values - services it provides
+        std::map<std::string, std::vector<std::string> > NodeServices;
 
-    // key - node name, values - topics it publishes
-    std::map<std::string, std::vector<std::string> > NodeTopics;
+        // key - node name, values - topics it publishes
+        std::map<std::string, std::vector<std::string> > NodeTopics;
 
-    // key - service name, values - nodes used the service
-    std::map<std::string, std::vector<std::string> > ServicesInfo;
+        // key - service name, values - nodes used the service
+        std::map<std::string, std::vector<std::string> > ServicesInfo;
 
-    // key - topic name, values - nodes subscribed to the topic
-    std::map<std::string, std::vector<std::string> > TopicsInfo;
+        // key - topic name, values - nodes subscribed to the topic
+        std::map<std::string, std::vector<std::string> > TopicsInfo;
 
-    bool registerService(
-            reconfigure::systemControlRegisterService::Request &req, 
-            reconfigure::systemControlRegisterService::Response &res); 
+        bool registerService(
+                scn_library::systemControlRegisterService::Request &req, 
+                scn_library::systemControlRegisterService::Response &res); 
 
-    bool registerTopic(
-            reconfigure::systemControlRegisterService::Request &req, 
-            reconfigure::systemControlRegisterService::Response &res); 
+        bool registerTopic(
+                scn_library::systemControlRegisterService::Request &req, 
+                scn_library::systemControlRegisterService::Response &res); 
 
-    bool unRegisterService(
-            reconfigure::systemControlRegisterService::Request &req, 
-            reconfigure::systemControlRegisterService::Response &res); 
+        bool unRegisterService(
+                scn_library::systemControlRegisterService::Request &req, 
+                scn_library::systemControlRegisterService::Response &res); 
 
-    bool unRegisterTopic(
-            reconfigure::systemControlRegisterService::Request &req, 
-            reconfigure::systemControlRegisterService::Response &res); 
+        bool unRegisterTopic(
+                scn_library::systemControlRegisterService::Request &req, 
+                scn_library::systemControlRegisterService::Response &res); 
 
-    bool unRegisterAll(
-            reconfigure::systemControlRegisterService::Request &req, 
-            reconfigure::systemControlRegisterService::Response &res); 
+        bool unRegisterAll(
+                scn_library::systemControlRegisterService::Request &req, 
+                scn_library::systemControlRegisterService::Response &res); 
     public:
-    ScnCore(ros::NodeHandle &n);
-    bool scnCoreCb(reconfigure::systemControlRegisterService::Request &req,
-                 reconfigure::systemControlRegisterService::Response &res); 
+        ScnCore(ros::NodeHandle &n);
+        bool scnCoreCb(scn_library::systemControlRegisterService::Request &req,
+                scn_library::systemControlRegisterService::Response &res); 
 
-    bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &req,
-                                   reconfigure::userInterfaceService::Response &res);
+        bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &req,
+                reconfigure::userInterfaceService::Response &res);
 
 };
 
-ScnCore::ScnCore(ros::NodeHandle &n)
-{
-        ros::ServiceServer registerService = n.advertiseService("systemControlRegisterService", &ScnCore::scnCoreCb, this);
-
+ScnCore::ScnCore(ros::NodeHandle &n) {
+    ros::ServiceServer registerService = n.advertiseService("systemControlRegisterService", &ScnCore::scnCoreCb, this);
     ros::ServiceServer userInterfaceService = n.advertiseService("userInterfaceService", &ScnCore::userInterfaceServiceCallback, this);
-
 }
 
 /*------------------------------------------------------------------
@@ -119,8 +99,8 @@ ScnCore::ScnCore(ros::NodeHandle &n)
  * the server has registered the service.
  *-----------------------------------------------------------------*/
 bool ScnCore::registerService(
-        reconfigure::systemControlRegisterService::Request &req, 
-        reconfigure::systemControlRegisterService::Response &res) 
+        scn_library::systemControlRegisterService::Request &req, 
+        scn_library::systemControlRegisterService::Response &res) 
 {
     uint8_t direction = req.direction;
     std::string node_name = req.nodeName;
@@ -170,8 +150,8 @@ bool ScnCore::registerService(
  *-----------------------------------------------------------------*/
 
 bool ScnCore::registerTopic(
-        reconfigure::systemControlRegisterService::Request &req, 
-        reconfigure::systemControlRegisterService::Response &res) 
+        scn_library::systemControlRegisterService::Request &req, 
+        scn_library::systemControlRegisterService::Response &res) 
 {
     uint8_t direction = req.direction;
     std::string node_name = req.nodeName;
@@ -191,7 +171,7 @@ bool ScnCore::registerTopic(
         /* Update nodes topic vector */
         NodeTopics[node_name].push_back(topic_name); 
 
-    } else if(SUBS == direction) {
+    } else if(SUBSCRIBE == direction) {
         /* Check if entry for this topic already exists */
         if(TopicsInfo.find(topic_name) == TopicsInfo.end()) {
             /* Insert topic to the map */
@@ -223,8 +203,8 @@ bool ScnCore::registerTopic(
  * the server has registered the service.
  *-----------------------------------------------------------------*/
 bool ScnCore::unRegisterService(
-        reconfigure::systemControlRegisterService::Request &req, 
-        reconfigure::systemControlRegisterService::Response &res) 
+        scn_library::systemControlRegisterService::Request &req, 
+        scn_library::systemControlRegisterService::Response &res) 
 {
     uint8_t direction = req.direction;
     std::string node_name = req.nodeName;
@@ -240,8 +220,8 @@ bool ScnCore::unRegisterService(
  *-----------------------------------------------------------------*/
 
 bool ScnCore::unRegisterTopic(
-        reconfigure::systemControlRegisterService::Request &req, 
-        reconfigure::systemControlRegisterService::Response &res) 
+        scn_library::systemControlRegisterService::Request &req, 
+        scn_library::systemControlRegisterService::Response &res) 
 {
     uint8_t direction = req.direction;
     std::string node_name = req.nodeName;
@@ -258,8 +238,8 @@ bool ScnCore::unRegisterTopic(
  *-----------------------------------------------------------------*/
 
 bool ScnCore::unRegisterAll(
-        reconfigure::systemControlRegisterService::Request &req, 
-        reconfigure::systemControlRegisterService::Response &res) 
+        scn_library::systemControlRegisterService::Request &req, 
+        scn_library::systemControlRegisterService::Response &res) 
 {
     uint8_t direction = req.direction;
     std::string node_name = req.nodeName;
@@ -282,8 +262,8 @@ bool ScnCore::unRegisterAll(
  *  #FIXME - add more error codes
  *
  *-----------------------------------------------------------------*/
-bool ScnCore::scnCoreCb(reconfigure::systemControlRegisterService::Request &req,
-                 reconfigure::systemControlRegisterService::Response &res) 
+bool ScnCore::scnCoreCb(scn_library::systemControlRegisterService::Request &req,
+                 scn_library::systemControlRegisterService::Response &res) 
 {
     bool status = false;
     uint8_t request = req.requestType;
@@ -297,15 +277,15 @@ bool ScnCore::scnCoreCb(reconfigure::systemControlRegisterService::Request &req,
             case SERVICE:
                 status = registerService(req, res);
                 break;
-            //case ACTION:
-            //    status = register_action(req, res);
-            //    break;
+                //case ACTION:
+                //    status = register_action(req, res);
+                //    break;
             case TOPIC:
                 status = registerTopic(req, res);
                 break;
             default: 
                 ROS_ERROR("SCN: Unknown dependency type\n");
-                status = ERROR;
+                status = SCN_ERROR;
                 break;
         }
         return status;
@@ -317,9 +297,9 @@ bool ScnCore::scnCoreCb(reconfigure::systemControlRegisterService::Request &req,
             case SERVICE:
                 status = unRegisterService(req, res);
                 break;
-            //case ACTION:
-            //    status = unregister_action(req, res);
-            //    break;
+                //case ACTION:
+                //    status = unregister_action(req, res);
+                //    break;
             case TOPIC:
                 status = unRegisterTopic(req, res);
                 break;
@@ -327,13 +307,11 @@ bool ScnCore::scnCoreCb(reconfigure::systemControlRegisterService::Request &req,
                 status = unRegisterAll(req, res);
             default: 
                 ROS_ERROR("SCN: Unknown dependency type\n");
-                status = ERROR;
+                status = SCN_ERROR;
                 break;
         }
     }
 }
-
-
 
 /**
  * Request format
@@ -347,7 +325,7 @@ bool ScnCore::userInterfaceServiceCallback(reconfigure::userInterfaceService::Re
 {
     std::string old_node = req.old_node;
     std::string new_node = req.new_node;
-    
+
     ROS_INFO("request old_node: %s", old_node.c_str());
     ROS_INFO("request new_node: %s", new_node.c_str());
 
@@ -373,7 +351,7 @@ bool ScnCore::userInterfaceServiceCallback(reconfigure::userInterfaceService::Re
         ROS_ERROR("Invalid old node specified");
         return false;
     }
-   
+
     // tell all nodes affected by this reconfiguration into safe mode
     std::vector<std::string> &oldNodeServiceList = this->NodeServices[old_node];
     for (int i = 0; i < oldNodeServiceList.size(); i++) {

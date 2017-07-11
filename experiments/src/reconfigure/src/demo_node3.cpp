@@ -1,7 +1,14 @@
 #include <ros/ros.h>
 #include <string>
-#include <scn_library/systemControlRegisterService.h>
+
 #include <reconfigure/demoNodeService.h>
+#include <scn_library/systemControlRegisterService.h>
+#include <scn_library/scn_utils.h>
+#include <scn_library/scn_node_handle.h>
+#include <scn_library/scn_service_client.h>
+#include <scn_library/scn_service_server.h>
+#include <scn_library/scn_publisher.h>
+#include <scn_library/scn_subscriber.h>
 
 #include "log.h"
 
@@ -22,42 +29,16 @@ bool demoNode3ClientCallback(reconfigure::demoNodeService::Request &req,
 int main(int argc, char ** argv) {
     std::string node_name = "demoNode3";
     ros::init(argc, argv, node_name);
-    ros::NodeHandle n;
+    ros::SCNNodeHandle n;
     
     // service specified for this node in the reconfigure mode
-    gCallbackService = node_name + "Service";
-    ros::ServiceServer service = n.advertiseService(gCallbackService, demoNode3ClientCallback);
+    gCallbackService = node_name;
+    ros::ServiceServer service = n.advertiseService(node_name, gCallbackService, demoNode3ClientCallback);
 
+    // FIXME has already moved to wrapper
     // client used to register to the systemControlNode
-    ros::ServiceClient client = n.serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
+    //ros::ServiceClient client = n.serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
  
-    scn_library::systemControlRegisterService srv;
-    srv.request.node_name = node_name;
-    srv.request.callback_service = gCallbackService;
-
-    std::vector<std::string> services_provided;
-    //std::vector<std::string> topics_published;
-    std::vector<std::string> services_used;
-    services_used.push_back("demoNode1TestService");
-    services_provided.push_back(gCallbackService);
-    
-    // FIXME change to actual services, topics
-    srv.request.services_provided = services_provided;
-    //srv.request.topics_published = topics_published;
-    srv.request.services_used = services_used;
-
-    if (client.call(srv)) {
-        std::string res;
-        if (srv.response.result == 0) {
-            res = "OK";
-        } else {
-            res = "ERROR";
-        }
-        ROS_INFO("result: %s\n", res.c_str());
-    } else {
-        ROS_ERROR("Failed to call systemControlRegisterService");
-        return -1;
-    }
     ros::spin();
 
     return 0;

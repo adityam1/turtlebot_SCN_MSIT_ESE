@@ -1,7 +1,13 @@
 #include <ros/ros.h>
 #include <string>
-#include <scn_library/systemControlRegisterService.h>
 #include <reconfigure/demoNodeService.h>
+#include <scn_library/systemControlRegisterService.h>
+#include <scn_library/scn_utils.h>
+#include <scn_library/scn_node_handle.h>
+#include <scn_library/scn_service_client.h>
+#include <scn_library/scn_service_server.h>
+#include <scn_library/scn_publisher.h>
+#include <scn_library/scn_subscriber.h>
 
 #include "log.h"
 
@@ -15,7 +21,6 @@ std::string gCallbackService;
  */
 bool demoNode2ClientCallback(reconfigure::demoNodeService::Request &req, 
                              reconfigure::demoNodeService::Response &res);
-
 bool demoNode2CallBack(reconfigure::demoNodeService::Request &req, 
                              reconfigure::demoNodeService::Response &res);
 
@@ -25,46 +30,22 @@ bool demoNode2CallBack(reconfigure::demoNodeService::Request &req,
 int main(int argc, char ** argv) {
     std::string node_name = "demoNode2";
     ros::init(argc, argv, node_name);
-    ros::NodeHandle n;
+    ros::SCNNodeHandle n;
     
     // service specified for this node in the reconfigure mode
-    gCallbackService = node_name + "Service";
-    ros::ServiceServer service = n.advertiseService(gCallbackService, demoNode2ClientCallback);
+    gCallbackService = node_name;
+    // FIXME, currently register the scn callback service of the node using the node name
+    // to identify this is a special service
+    ros::SCNServiceServer service = n.advertiseService(node_name, gCallbackService, demoNode2ClientCallback);
 
+    //FIXME has alread moved to wrapper
     // client used to register to the systemControlNode
-    ros::ServiceClient client = n.serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
+    //ros::ServiceClient client = n.serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
 
     // client used to register to the systemControlNode
     std::string testService2 = "demoNode1TestService";
-    ros::ServiceServer testService = n.advertiseService(testService2, demoNode2CallBack);
+    ros::SCNServiceServer testService = n.advertiseService(node_name, testService2, demoNode2CallBack);
  
-    scn_library::systemControlRegisterService srv;
-    srv.request.node_name = node_name;
-    srv.request.callback_service = gCallbackService;
-
-    std::vector<std::string> services_provided;
-    //std::vector<std::string> topics_published;
-    services_provided.push_back(gCallbackService);
-    services_provided.push_back(testService2);
-    
-    // FIXME change to actual services, topics
-    srv.request.services_provided = services_provided;
-    //srv.request.topics_published = topics_published;
-    //srv.request.services_used = NULL;
-    //srv.request.topics_subscribed = NULL;
-
-    if (client.call(srv)) {
-        std::string res;
-        if (srv.response.result == 0) {
-            res = "OK";
-        } else {
-            res = "ERROR";
-        }
-        ROS_INFO("result: %s\n", res.c_str());
-    } else {
-        ROS_ERROR("Failed to call systemControlRegisterService");
-        return -1;
-    }
     ros::spin();
 
     return 0;

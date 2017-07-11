@@ -164,8 +164,8 @@ target_link_libraries(${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
   ${PYTHON_LIBRARIES}
 )
-target_link_libraries(demo_node1
-  ${catkin_LIBRARIES}
+target_link_libraries(demo_node1 
+${catkin_LIBRARIES}
 )
 target_link_libraries(demo_node2
   ${catkin_LIBRARIES}
