@@ -4,9 +4,44 @@
 #include "scn_library/scn_utils.h"
 #include "scn_library/scn_node_handle.h"
 
+ros::SCNNodeHandle::SCNNodeHandle(const std::string& ns, const M_string& remappings) : NodeHandle(ns, remappings) {
+
+    client = n.serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
+    localSCNState = 0;
+    inited = true;
+};
+
+ros::SCNNodeHandle::SCNNodeHandle(const SCNNodeHandle& rhs) : NodeHandle(rhs) {
+    
+    client = n.serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
+    localSCNState = 0;
+    inited = true;
+};
+
+ros::SCNNodeHandle::SCNNodeHandle(const SCNNodeHandle& parent, const std::string &ns) : NodeHandle(parent, ns) {
+    
+    client = n.serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
+    localSCNState = 0;
+    inited = true;
+};
+
+ros::SCNNodeHandle::SCNNodeHandle(const SCNNodeHandle& parent, const std::string &ns, const M_string &remappings) : NodeHandle(parent, ns, remappings) {
+
+    client = n.serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
+        localSCNState = 0;   
+        inited = true;
+    };
+
+ros::SCNNodeHandle::~SCNNodeHandle() {
+    inited = false;
+};
+
+
+
 /**
  * private method to used for communicating with SCN
  */
+#if 0
 bool
 SCNNodeHandle::registerDependenciesToSCN(const std::string &_nodeName, const std::string &_depName, 
         int _requestType, int _dependency, int _direction) {
@@ -121,89 +156,89 @@ SCNNodeHandle::subscribe(const std::string &node_name,
  * the following wrappers are provided for ROS service
  */
 template<class T, class MReq, class MRes> ros::ServiceServer 
-SCNNodeHandle::advertiseService(std::string node_name, std::string services_provided,
-		const std::string& service, bool(T::*srv_func)(MReq &, MRes &), T *obj) {
+SCNNodeHandle::advertiseService(const std::string &node_name, const std::string &services_provided, 
+        bool(T::*srv_func)(MReq &, MRes &), T *obj) {
 
     registerDependenciesToSCN(node_name, services_provided, REGISTER, SERVICE, SERVER);
 	
 	//Call exiting advertiseService
-	return ros::NodeHandle::advertiseService(service, srv_func, obj);
+	return ros::NodeHandle::advertiseService(services_provided, srv_func, obj);
 };
 
 template<class T, class MReq, class MRes> ros::ServiceServer 
-SCNNodeHandle::advertiseService(std::string node_name, std::string services_provided,
-		  const std::string& service, bool(T::*srv_func)(ros::ServiceEvent<MReq, MRes>&), T *obj) {
+SCNNodeHandle::advertiseService(const std::string &node_name, const std::string &services_provided, 
+        bool(T::*srv_func)(ros::ServiceEvent<MReq, MRes>&), T *obj) {
 
     registerDependenciesToSCN(node_name, services_provided, REGISTER, SERVICE, SERVER);
 
 	//Call exiting advertiseService
-	return ros::NodeHandle::advertiseService<T, MReq, MRes>(service, srv_func, obj);
+	return ros::NodeHandle::advertiseService<T, MReq, MRes>(services_provided, srv_func, obj);
 };
 
 template<class T, class MReq, class MRes> ros::ServiceServer 
-SCNNodeHandle::advertiseService(std::string node_name, std::string services_provided,
-		  const std::string& service, bool(T::*srv_func)(MReq &, MRes &), const boost::shared_ptr<T>& obj) {
+SCNNodeHandle::advertiseService(const std::string &node_name, const std::string &services_provided,
+        bool(T::*srv_func)(MReq &, MRes &), const boost::shared_ptr<T>& obj) {
 
     registerDependenciesToSCN(node_name, services_provided, REGISTER, SERVICE, SERVER);
 
 	//Call exiting advertiseService
-	return ros::NodeHandle::advertiseService<T, MReq, MRes>(service, srv_func, obj);
+	return ros::NodeHandle::advertiseService<T, MReq, MRes>(services_provided, srv_func, obj);
 };
 
 template<class T, class MReq, class MRes> ros::ServiceServer 
-SCNNodeHandle::advertiseService(std::string node_name, std::string services_provided,
-		  const std::string& service, bool(T::*srv_func)(ros::ServiceEvent<MReq, MRes>&), const boost::shared_ptr<T>& obj) {
+SCNNodeHandle::advertiseService(const std::string &node_name, const std::string &services_provided,
+        bool(T::*srv_func)(ros::ServiceEvent<MReq, MRes>&), const boost::shared_ptr<T>& obj) {
 	
     registerDependenciesToSCN(node_name, services_provided, REGISTER, SERVICE, SERVER);
     
 	//Call exiting advertiseService
-	return ros::NodeHandle::advertiseService<T, MReq, MRes>(service, srv_func, obj);
+	return ros::NodeHandle::advertiseService<T, MReq, MRes>(services_provided, srv_func, obj);
 };
 
 template<class MReq, class MRes> ros::ServiceServer 
-SCNNodeHandle::advertiseService(std::string node_name, std::string services_provided,
-		const std::string& service, bool(*srv_func)(MReq&, MRes&)) {
+SCNNodeHandle::advertiseService(const std::string &node_name, const std::string &services_provided,
+        bool(*srv_func)(MReq&, MRes&)) {
     
     registerDependenciesToSCN(node_name, services_provided, REGISTER, SERVICE, SERVER);
 	
 	//Call exiting advertiseService
-	return ros::NodeHandle::advertiseService<MReq, MRes>(service, srv_func);
+	return ros::NodeHandle::advertiseService<MReq, MRes>(services_provided, srv_func);
 };
 
 template<class MReq, class MRes> ros::ServiceServer 
-SCNNodeHandle::advertiseService(std::string node_name, std::string services_provided,
-		const std::string& service, bool(*srv_func)(ros::ServiceEvent<MReq, MRes>&)) {
+SCNNodeHandle::advertiseService(const std::string &node_name, const std::string &services_provided,
+        bool(*srv_func)(ros::ServiceEvent<MReq, MRes>&)) {
 
     registerDependenciesToSCN(node_name, services_provided, REGISTER, SERVICE, SERVER);
 
 	//Call exiting advertiseService
-	return ros::NodeHandle::advertiseService<MReq, MRes>(service, srv_func);
+	return ros::NodeHandle::advertiseService<MReq, MRes>(services_provided, srv_func);
 };
 
 template<class MReq, class MRes> ros::ServiceServer 
-SCNNodeHandle::advertiseService(std::string node_name, std::string services_provided,
-		  const std::string& service, const boost::function<bool(MReq&, MRes&)>& callback,
-                                 const ros::VoidConstPtr& tracked_object = ros::VoidConstPtr()) {
+SCNNodeHandle::advertiseService(const std::string &node_name, const std::string &services_provided,
+		  const boost::function<bool(MReq&, MRes&)>& callback,
+          const ros::VoidConstPtr& tracked_object = ros::VoidConstPtr()) {
 
     registerDependenciesToSCN(node_name, services_provided, REGISTER, SERVICE, SERVER);
 	
 	//Call exiting advertiseService
-	return ros::NodeHandle::advertiseService<MReq, MRes>(service, callback, tracked_object);
+	return ros::NodeHandle::advertiseService<MReq, MRes>(services_provided, callback, tracked_object);
 };
 
 template<class S> ros::ServiceServer
-SCNNodeHandle::advertiseService(std::string node_name, std::string services_provided,
-		  const std::string& service, const boost::function<bool(S&)>& callback,
-                                 const ros::VoidConstPtr& tracked_object = ros::VoidConstPtr()) {
+SCNNodeHandle::advertiseService(const std::string &node_name, const std::string &services_provided,
+        const boost::function<bool(S&)>& callback,
+        const ros::VoidConstPtr& tracked_object = ros::VoidConstPtr()) {
 
     registerDependenciesToSCN(node_name, services_provided, REGISTER, SERVICE, SERVER);
 
     //Call exiting advertiseService
-	return ros::NodeHandle::advertiseService<S>(service, callback, tracked_object);
+	return ros::NodeHandle::advertiseService<S>(services_provided, callback, tracked_object);
 };
 
 ros::ServiceServer 
-SCNNodeHandle::advertiseService(std::string node_name, std::string services_provided,
+SCNNodeHandle::advertiseService(const std::string &node_name, const std::string &services_provided,
 		ros::AdvertiseServiceOptions& ops) {
 
     registerDependenciesToSCN(node_name, services_provided, REGISTER, SERVICE, SERVER);
@@ -213,29 +248,29 @@ SCNNodeHandle::advertiseService(std::string node_name, std::string services_prov
 };
 
 template<class MReq, class MRes> ros::ServiceClient 
-SCNNodeHandle::serviceClient(std::string node_name, std::string services_used,
-							const std::string& service_name, bool persistent = false,
-                          const ros::M_string& header_values = ros::M_string()) {
-    
+SCNNodeHandle::serviceClient(const std::string &node_name, const std::string &services_used,
+        bool persistent = false,
+        const ros::M_string& header_values = ros::M_string()) {
+
     registerDependenciesToSCN(node_name, services_used, REGISTER, SERVICE, CLIENT);
 
 	//Call exiting serviceClient
-	return ros::NodeHandle::serviceClient<MReq, MRes>(service_name, persistent, header_values);
+	return ros::NodeHandle::serviceClient<MReq, MRes>(services_used, persistent, header_values);
 };
 
 template<class Service> ros::ServiceClient 
-SCNNodeHandle::serviceClient(std::string node_name, std::string services_used,
-		  const std::string& service_name, bool persistent = false,
-                              const ros::M_string& header_values = ros::M_string()) {
+SCNNodeHandle::serviceClient(const std::string &node_name, const std::string &services_used,
+        bool persistent = false,
+        const ros::M_string& header_values = ros::M_string()) {
 
     registerDependenciesToSCN(node_name, services_used, REGISTER, SERVICE, CLIENT);
 	
     //Call exiting serviceClient
-	return ros::NodeHandle::serviceClient<Service>(service_name, persistent, header_values);
+	return ros::NodeHandle::serviceClient<Service>(services_used, persistent, header_values);
 };
 
 ros::ServiceClient
-SCNNodeHandle::serviceClient(std::string node_name, std::string services_used,
+SCNNodeHandle::serviceClient(const std::string &node_name, const std::string &services_used,
 		ros::ServiceClientOptions& ops) {
 
     registerDependenciesToSCN(node_name, services_used, REGISTER, SERVICE, CLIENT);
@@ -250,9 +285,11 @@ SCNNodeHandle::serviceClient(std::string node_name, std::string services_used,
 // public method for one node to get its state, used by publisher and subscriber
 int
 SCNNodeHandle::getLocalSCNState() {
-    if (inited) {
+    if (this->inited) {
         ROS_ERROR("Node Handle is not inited!\n");
         return -1;
     }
     return this->localSCNState;
 }
+
+#endif

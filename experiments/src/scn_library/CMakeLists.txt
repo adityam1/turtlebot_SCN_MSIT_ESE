@@ -135,6 +135,10 @@ add_library(${PROJECT_NAME}
     # src/${PROJECT_NAME}/scn_library.cpp
     # add more files
     src/scn_node_handle.cpp
+    src/scn_publisher.cpp
+    src/scn_subscriber.cpp
+    src/scn_service_client.cpp
+    src/scn_service_server.cpp
  )
 
 ## Add cmake target dependencies of the library
@@ -211,3 +215,5 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+set (CMAKE_CXX_STANDARD 11)
