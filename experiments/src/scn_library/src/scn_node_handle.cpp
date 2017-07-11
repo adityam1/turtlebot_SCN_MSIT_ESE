@@ -2,7 +2,7 @@
 #include <scn_library/systemControlRegisterService.h>
 
 #include "scn_library/scn_utils.h"
-#include "scn_node_handle.h"
+#include "scn_library/scn_node_handle.h"
 
 /**
  * private method to used for communicating with SCN
