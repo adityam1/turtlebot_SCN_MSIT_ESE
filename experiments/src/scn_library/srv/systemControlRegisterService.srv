@@ -12,8 +12,8 @@ uint8 SERVER = 5
 uint8 CLIENT = 6
 
 #Direction for: Topic
-uint8 PUBLISH   = 7
-uint8 SUBS      = 8
+uint8 PUBLISH    = 7
+uint8 SUBSCRIBE  = 8
 
 #To unregister all dependencies of the respective
 #node
