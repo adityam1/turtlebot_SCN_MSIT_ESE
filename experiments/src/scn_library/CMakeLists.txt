@@ -132,8 +132,7 @@ include_directories(
 add_library(${PROJECT_NAME}
     # src/${PROJECT_NAME}/scn_library.cpp
     # add more files
-    src/scn_topic.cpp
-    src/scn_service.cpp
+    src/scn_node_handle.cpp
  )
 
 ## Add cmake target dependencies of the library
