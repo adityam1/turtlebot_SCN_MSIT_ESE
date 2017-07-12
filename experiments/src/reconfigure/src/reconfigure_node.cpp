@@ -283,20 +283,20 @@ bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &re
                 return -1;
             }
         }
-        // after put all the dependent nodes into safe mode, also put this node into safe mode
-        ros::NodeHandle n;
-        std::string serviceName = old_node + "Service";
-        ROS_INFO("node name: %s, reconfigure service name: %s\n", old_node.c_str(), serviceName.c_str());
-        ros::ServiceClient client = n.serviceClient<reconfigure::demoNodeService>(serviceName);
-        reconfigure::demoNodeService srv;
-        srv.request.callback_service = serviceName;
-        if (client.call(srv)) {
-            std::string res = srv.response.result == 0 ? "OK" : "ERROR";
-            ROS_INFO("result: %s\n", res.c_str());
-        } else {
-            ROS_ERROR("Failed to call demoNodeService");
-            return -1;
-        }
+    }
+    // after put all the dependent nodes into safe mode, also put this node into safe mode
+    ros::NodeHandle n;
+    std::string serviceName = old_node + "Service";
+    ROS_INFO("node name: %s, reconfigure service name: %s\n", old_node.c_str(), serviceName.c_str());
+    ros::ServiceClient client = n.serviceClient<reconfigure::demoNodeService>(serviceName);
+    reconfigure::demoNodeService srv;
+    srv.request.callback_service = serviceName;
+    if (client.call(srv)) {
+        std::string res = srv.response.result == 0 ? "OK" : "ERROR";
+        ROS_INFO("result: %s\n", res.c_str());
+    } else {
+        ROS_ERROR("Failed to call demoNodeService");
+        return -1;
     }
     // TODO add topics reconfigure
 
