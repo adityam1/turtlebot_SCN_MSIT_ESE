@@ -65,7 +65,7 @@ Dependency::addToTopicsInfo(const std::string &topicName, const std::string &nod
 }
 
 void 
-Dependency::traverseNodeServiers() {
+Dependency::traverseNodeServices() {
     for (my_map::iterator it = NodeServices.begin(); it != NodeServices.end(); it++) {
         std::string const &key = it->first;
         std::vector<std::string> &value = it->second;
@@ -186,7 +186,7 @@ Dependency::isValidTopicForNode(const std::string &topicName) {
  * APIs for NodeInfo, currently not used
  */
 NodeInfo::NodeInfo(char const *_name){
-	this->name = std::string(_name);
+    this->name = std::string(_name);
 }
 NodeInfo::NodeInfo(char const *_name, std::vector<std::string> &_servicesProvided, std::vector<std::string> &_topicsPublished){
     this->name = std::string(_name);
@@ -197,19 +197,19 @@ NodeInfo::~NodeInfo(){
 
 }
 std::string NodeInfo::getName(void){
-	return this->name;
+    return this->name;
 }
 std::vector<std::string> & NodeInfo::getServicesProvided(void){
-	return this->servicesProvided;
+    return this->servicesProvided;
 }
 std::vector<std::string> & NodeInfo::getSTopicsPublished(void){
-	return this->topicsPublished;
+    return this->topicsPublished;
 }
 void NodeInfo::addServicesProvided(std::string &_servicesProvided){
-	this->servicesProvided.push_back(_servicesProvided);
+    this->servicesProvided.push_back(_servicesProvided);
 }
 void NodeInfo::addTopicsPublished(std::string &_topicsPublished){
-	this->topicsPublished.push_back(_topicsPublished);
+    this->topicsPublished.push_back(_topicsPublished);
 }
 void NodeInfo::addServicesProvided(std::vector<std::string> &_servicesProvided){
     int size = _servicesProvided.size();

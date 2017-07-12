@@ -61,7 +61,7 @@ bool registerService(
     ENTER();
     uint8_t direction = req.direction;
     std::string nodeName = req.nodeName;
-    
+
     /* #FIXME: Callback service is not needed as the name of 
      * the service provided by the respective node (for the SCN to
      * communicate with it) will be the same as the name of the node
@@ -187,7 +187,7 @@ bool unRegisterAll(
  *
  *-----------------------------------------------------------------*/
 bool scnCoreCb(scn_library::systemControlRegisterService::Request &req,
-                 scn_library::systemControlRegisterService::Response &res) 
+        scn_library::systemControlRegisterService::Response &res) 
 {
     ENTER();
     bool status = false;
@@ -248,7 +248,7 @@ bool scnCoreCb(scn_library::systemControlRegisterService::Request &req,
  * uint8 result - the result of the service call
  */
 bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &req, 
-                                   reconfigure::userInterfaceService::Response &res) 
+        reconfigure::userInterfaceService::Response &res) 
 {
     ENTER();
     std::string old_node = req.old_node;
@@ -258,20 +258,16 @@ bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &re
     ROS_INFO("request new_node: %s", new_node.c_str());
 
     // print the current dependency
-    gDependency->traverseNodeServiers();
+    gDependency->traverseNodeServices();
     gDependency->traverseServicesInfo();
- 
+
     // based on the dependencies of the old and new noderithms, invoke service call for corresponding nodes and do the reconfigurations
     // tell all nodes affected by this reconfiguration into safe mode
     std::vector<std::string> &oldNodeServiceList = gDependency->getNodeServiceList(old_node);
     for (int i = 0; i < oldNodeServiceList.size(); i++) {
         std::string service = oldNodeServiceList[i];
-        // if this serivice is not used by any nodes, no need to put the node to safe mode
         std::vector<std::string> &nodeList = gDependency->getServiceNodeList(service);
-        if (nodeList.size() == 0) {
-            continue;
-        }
-
+        // if this serivice is not used by any nodes, no need to put the node to safe mode
         for (int j = 0; j < nodeList.size(); j++) {
             ros::NodeHandle n;
             std::string serviceName = nodeList[j] + "Service";
@@ -334,7 +330,7 @@ void systemControlSigintHandler(int sig) {
     // TODO
     // do some custom action
     // For example, publish a stop message to some other nodes.
-    
+
     // default sigint handler: call shutdown()
     ros::shutdown();
 }
@@ -371,7 +367,7 @@ int launchNode(char *name) {
     {   
         /*  Child  */
         setpgid(0,0);           /*  Assigning child its own group ID  */
-        
+
         /* Redirect I/O */
 #if 0
         io_redirect(&stdin_rep, &stdout_rep, &tok);
@@ -402,7 +398,7 @@ int killNode(char *name) {
     argv[1] = (char *)"/home/turtlebot/ese_team_project/yunpengx/experiments/src/reconfigure/src/kill_node.py";
     argv[2] = name;
     argv[3] = NULL;
-       
+
     if (pid == 0) {
         error = execve(argv[0], argv, environ);
         if(error)

@@ -21,7 +21,7 @@ std::string gCallbackService;
  * declaration
  */
 bool demoNode3ClientCallback(reconfigure::demoNodeService::Request &req, 
-                             reconfigure::demoNodeService::Response &res);
+        reconfigure::demoNodeService::Response &res);
 
 /**
  * APIs
@@ -31,15 +31,11 @@ int main(int argc, char ** argv) {
     std::string node_name = "demoNode3";
     ros::init(argc, argv, node_name);
     ros::SCNNodeHandle n;
-    
+
     // service specified for this node in the reconfigure mode
     gCallbackService = node_name + "Service";
-    ros::ServiceServer service = n.advertiseService(node_name, gCallbackService, demoNode3ClientCallback);
+    ros::SCNServiceServer service = n.advertiseService(node_name, gCallbackService, demoNode3ClientCallback);
 
-    // FIXME has already moved to wrapper
-    // client used to register to the systemControlNode
-    //ros::ServiceClient client = n.serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
- 
     ros::spin();
     LEAVE();
     return 0;
@@ -58,9 +54,9 @@ bool demoNode3ClientCallback(reconfigure::demoNodeService::Request &req, reconfi
     // TODO
     // specify the behavior for this node
     ROS_INFO("Enter safe mode!\n");
-    
+
     ROS_INFO("Currently, nothing to do in safe mode, will specify later!\n");
-    
+
     ROS_INFO("Leave safe mode!\n");
     LEAVE();
     return true;

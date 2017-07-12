@@ -36,7 +36,7 @@ class Dependency {
         bool isValidNodeForTopic(const std::string &nodeName);
         bool isValidServiceForNode(const std::string &serviceName);
         bool isValidTopicForNode(const std::string &topicName);
-        
+
     public:
         Dependency();
         ~Dependency();
@@ -46,7 +46,7 @@ class Dependency {
         void addToNodeTopics(const std::string &nodeName, const std::string &topicName);
         void addToServicesInfo(const std::string &serviceName, const std::string &nodeName);
         void addToTopicsInfo(const std::string &topicName, const std::string &nodeName);
-       
+
         // getters
         std::vector<std::string> &getNodeServiceList(const std::string &nodeName);
         std::vector<std::string> &getServiceNodeList(const std::string &serviceName);
@@ -54,7 +54,7 @@ class Dependency {
         std::vector<std::string> &getTopicNodeList(const std::string &topicName);
 
         // traverse dependency
-        void traverseNodeServiers();
+        void traverseNodeServices();
         void traverseNodeTopics();
         void traverseServicesInfo();
         void traverseTopicsInfo();
