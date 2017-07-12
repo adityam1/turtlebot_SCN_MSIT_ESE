@@ -140,9 +140,9 @@ add_dependencies(${catkin_EXPORTED_TARGETS})
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/reconfigure_node.cpp)
 add_executable(${PROJECT_NAME}_node src/reconfigure_node.cpp src/Dependency.cpp)
-add_executable(demo_node1 src/demo_node1.cpp)
-add_executable(demo_node2 src/demo_node2.cpp)
-add_executable(demo_node3 src/demo_node3.cpp)
+add_executable(demo_node1 usecase/demo_node1.cpp)
+add_executable(demo_node2 usecase/demo_node2.cpp)
+add_executable(demo_node3 usecase/demo_node3.cpp)
 
 add_dependencies(demo_node1 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library)
 add_dependencies(demo_node2 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library)
