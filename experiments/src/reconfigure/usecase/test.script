@@ -1,0 +1,7 @@
+# this file list those commands that can be used to test the implemented framework
+
+# rosservice call command to test the systemControlRegisterService with node_name, callback_service and list_dependencies specified
+rosservice call /systemControlRegisterService '{node_name : demoNodeClient1, callback_service : demoNodeClient1, list_dependencies : [node1, node2] }'
+
+# roservice call command to test userInterfaceService, this can be used to invoke the noderithm switch
+rosservice call /userInterfaceService '{old_node: demoNode1, new_node: demoNode2}'
