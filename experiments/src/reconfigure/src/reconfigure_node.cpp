@@ -31,59 +31,25 @@ void systemControlSigintHandler(int sig);
 int launchNode(char* name);
 int killNode(char* name);
 
+bool scnCoreCb(scn_library::systemControlRegisterService::Request &req,
+        scn_library::systemControlRegisterService::Response &res); 
+
+bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &req,
+        reconfigure::userInterfaceService::Response &res);
+
+
 /**
  * APIs
  */
+// key - node name, values - services it provides
+std::map<std::string, std::vector<std::string> > NodeServices;
+// key - node name, values - topics it publishes
+std::map<std::string, std::vector<std::string> > NodeTopics;
+// key - service name, values - nodes used the service
+std::map<std::string, std::vector<std::string> > ServicesInfo;
+// key - topic name, values - nodes subscribed to the topic
+std::map<std::string, std::vector<std::string> > TopicsInfo;
 
-class ScnCore {
-    private:
-        // key - node name, values - services it provides
-        std::map<std::string, std::vector<std::string> > NodeServices;
-
-        // key - node name, values - topics it publishes
-        std::map<std::string, std::vector<std::string> > NodeTopics;
-
-        // key - service name, values - nodes used the service
-        std::map<std::string, std::vector<std::string> > ServicesInfo;
-
-        // key - topic name, values - nodes subscribed to the topic
-        std::map<std::string, std::vector<std::string> > TopicsInfo;
-
-        bool registerService(
-                scn_library::systemControlRegisterService::Request &req, 
-                scn_library::systemControlRegisterService::Response &res); 
-
-        bool registerTopic(
-                scn_library::systemControlRegisterService::Request &req, 
-                scn_library::systemControlRegisterService::Response &res); 
-
-        bool unRegisterService(
-                scn_library::systemControlRegisterService::Request &req, 
-                scn_library::systemControlRegisterService::Response &res); 
-
-        bool unRegisterTopic(
-                scn_library::systemControlRegisterService::Request &req, 
-                scn_library::systemControlRegisterService::Response &res); 
-
-        bool unRegisterAll(
-                scn_library::systemControlRegisterService::Request &req, 
-                scn_library::systemControlRegisterService::Response &res); 
-    public:
-        ScnCore(ros::NodeHandle &n);
-        bool scnCoreCb(scn_library::systemControlRegisterService::Request &req,
-                scn_library::systemControlRegisterService::Response &res); 
-
-        bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &req,
-                reconfigure::userInterfaceService::Response &res);
-
-};
-
-ScnCore::ScnCore(ros::NodeHandle &n) {
-    ENTER();
-    ros::ServiceServer registerService = n.advertiseService("systemControlRegisterService", &ScnCore::scnCoreCb, this);
-    ros::ServiceServer userInterfaceService = n.advertiseService("userInterfaceService", &ScnCore::userInterfaceServiceCallback, this);
-    LEAVE();
-}
 
 /*------------------------------------------------------------------
  * #FIXME
@@ -100,7 +66,7 @@ ScnCore::ScnCore(ros::NodeHandle &n) {
  * It is expected that a service client can only be registered after
  * the server has registered the service.
  *-----------------------------------------------------------------*/
-bool ScnCore::registerService(
+bool registerService(
         scn_library::systemControlRegisterService::Request &req, 
         scn_library::systemControlRegisterService::Response &res) 
 {
@@ -122,21 +88,19 @@ bool ScnCore::registerService(
     /* Check direction of service being registered */
     if(SERVER == direction) {
         /* Check if entry for node already exists */
-        if(this->NodeServices.find(node_name) == this->NodeServices.end()) {
+        if(NodeServices.find(node_name) == NodeServices.end()) {
             /* Insert node to the map */
-            this->NodeServices.insert(std::pair<std::string, std::vector<std::string> > \
-                    (node_name, std::vector<std::string>()));
+            NodeServices.insert(std::pair<std::string, std::vector<std::string> > (node_name, std::vector<std::string>()));
         }
 
         /* Update nodes service vector */
-        this->NodeServices[node_name].push_back(service_name); 
+        NodeServices[node_name].push_back(service_name); 
 
     } else if(CLIENT == direction) {
         /* Check if entry for this service already exists */
         if(ServicesInfo.find(service_name) == ServicesInfo.end()) {
             /* Insert service to the map */
-            ServicesInfo.insert(std::pair<std::string, std::vector<std::string> > \
-                    (service_name, std::vector<std::string>()));
+            ServicesInfo.insert(std::pair<std::string, std::vector<std::string> > (service_name, std::vector<std::string>()));
         }
 
         /* Update the list of nodes for this service */
@@ -152,8 +116,7 @@ bool ScnCore::registerService(
  * for a topic for the respective node.
  *
  *-----------------------------------------------------------------*/
-
-bool ScnCore::registerTopic(
+bool registerTopic(
         scn_library::systemControlRegisterService::Request &req, 
         scn_library::systemControlRegisterService::Response &res) 
 {
@@ -169,8 +132,7 @@ bool ScnCore::registerTopic(
         /* Check if entry for node already exists */
         if(NodeTopics.find(node_name) == NodeTopics.end()) {
             /* Insert node to the map */
-            NodeTopics.insert(std::pair<std::string, std::vector<std::string> > \
-                    (node_name, std::vector<std::string>()));
+            NodeTopics.insert(std::pair<std::string, std::vector<std::string> > (node_name, std::vector<std::string>()));
         }
 
         /* Update nodes topic vector */
@@ -180,8 +142,7 @@ bool ScnCore::registerTopic(
         /* Check if entry for this topic already exists */
         if(TopicsInfo.find(topic_name) == TopicsInfo.end()) {
             /* Insert topic to the map */
-            TopicsInfo.insert(std::pair<std::string, std::vector<std::string> > \
-                    (topic_name, std::vector<std::string>()));
+            TopicsInfo.insert(std::pair<std::string, std::vector<std::string> > (topic_name, std::vector<std::string>()));
         }
 
         /* Update the list of nodes for this service */
@@ -190,8 +151,6 @@ bool ScnCore::registerTopic(
     LEAVE();
     return true;
 }
-
-
 
 /*------------------------------------------------------------------
  * #FIXME
@@ -208,7 +167,7 @@ bool ScnCore::registerTopic(
  * It is expected that a service client can only be registered after
  * the server has registered the service.
  *-----------------------------------------------------------------*/
-bool ScnCore::unRegisterService(
+bool unRegisterService(
         scn_library::systemControlRegisterService::Request &req, 
         scn_library::systemControlRegisterService::Response &res) 
 {
@@ -226,8 +185,7 @@ bool ScnCore::unRegisterService(
  * for a topic for the respective node.
  *
  *-----------------------------------------------------------------*/
-
-bool ScnCore::unRegisterTopic(
+bool unRegisterTopic(
         scn_library::systemControlRegisterService::Request &req, 
         scn_library::systemControlRegisterService::Response &res) 
 {
@@ -246,8 +204,7 @@ bool ScnCore::unRegisterTopic(
  * for a topic for the respective node.
  *
  *-----------------------------------------------------------------*/
-
-bool ScnCore::unRegisterAll(
+bool unRegisterAll(
         scn_library::systemControlRegisterService::Request &req, 
         scn_library::systemControlRegisterService::Response &res) 
 {
@@ -274,7 +231,7 @@ bool ScnCore::unRegisterAll(
  *  #FIXME - add more error codes
  *
  *-----------------------------------------------------------------*/
-bool ScnCore::scnCoreCb(scn_library::systemControlRegisterService::Request &req,
+bool scnCoreCb(scn_library::systemControlRegisterService::Request &req,
                  scn_library::systemControlRegisterService::Response &res) 
 {
     ENTER();
@@ -335,7 +292,7 @@ bool ScnCore::scnCoreCb(scn_library::systemControlRegisterService::Request &req,
  * Response format
  * uint8 result - the result of the service call
  */
-bool ScnCore::userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &req, 
+bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &req, 
                                    reconfigure::userInterfaceService::Response &res) 
 {
     ENTER();
@@ -345,7 +302,7 @@ bool ScnCore::userInterfaceServiceCallback(reconfigure::userInterfaceService::Re
     ROS_INFO("request old_node: %s", old_node.c_str());
     ROS_INFO("request new_node: %s", new_node.c_str());
 
-    for (my_map::iterator it = this->NodeServices.begin(); it != this->NodeServices.end(); it++) {
+    for (my_map::iterator it = NodeServices.begin(); it != NodeServices.end(); it++) {
         std::string const &key = it->first;
         std::vector<std::string> &value = it->second;
         ROS_INFO("node name: %s\n", key.c_str());
@@ -363,13 +320,13 @@ bool ScnCore::userInterfaceServiceCallback(reconfigure::userInterfaceService::Re
     }
 
     // based on the dependencies of the old and new noderithms, invoke service call for corresponding nodes and do the reconfigurations
-    if (this->NodeServices.find(old_node) == this->NodeServices.end()) {
+    if (NodeServices.find(old_node) == NodeServices.end()) {
         ROS_ERROR("Invalid old node specified");
         return false;
     }
 
     // tell all nodes affected by this reconfiguration into safe mode
-    std::vector<std::string> &oldNodeServiceList = this->NodeServices[old_node];
+    std::vector<std::string> &oldNodeServiceList = NodeServices[old_node];
     for (int i = 0; i < oldNodeServiceList.size(); i++) {
         std::string service = oldNodeServiceList[i];
         // if this serivice is not used by any nodes, no need to put the node to safe mode
@@ -423,8 +380,8 @@ int main(int argc, char **argv)
     //ros::init(argc, argv, "systemControlNode");
     ros::NodeHandle n;
 
-    ScnCore coreObject(n);
-
+    ros::ServiceServer registerService = n.advertiseService("systemControlRegisterService", scnCoreCb);
+    ros::ServiceServer userInterfaceService = n.advertiseService("userInterfaceService", userInterfaceServiceCallback);
 
     // override the default ros sigint handler
     signal(SIGINT, systemControlSigintHandler);

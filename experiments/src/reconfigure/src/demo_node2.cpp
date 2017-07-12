@@ -34,7 +34,7 @@ int main(int argc, char ** argv) {
     ros::SCNNodeHandle n;
     
     // service specified for this node in the reconfigure mode
-    gCallbackService = node_name;
+    gCallbackService = node_name + "Service";
     // FIXME, currently register the scn callback service of the node using the node name
     // to identify this is a special service
     ros::SCNServiceServer service = n.advertiseService(node_name, gCallbackService, demoNode2ClientCallback);

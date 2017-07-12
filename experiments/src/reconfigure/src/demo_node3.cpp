@@ -33,7 +33,7 @@ int main(int argc, char ** argv) {
     ros::SCNNodeHandle n;
     
     // service specified for this node in the reconfigure mode
-    gCallbackService = node_name;
+    gCallbackService = node_name + "Service";
     ros::ServiceServer service = n.advertiseService(node_name, gCallbackService, demoNode3ClientCallback);
 
     // FIXME has already moved to wrapper
