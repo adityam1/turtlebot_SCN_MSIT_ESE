@@ -10,8 +10,7 @@
 #include <scn_library/scn_publisher.h>
 #include <scn_library/scn_subscriber.h>
 
-#include "log.h"
-
+//static int log_level = LOG_DBG;
 /**
  * global definitions
  */
@@ -29,6 +28,7 @@ bool demoNode1CallBack(reconfigure::demoNodeService::Request &req,
  * APIs
  */
 int main(int argc, char ** argv) {
+    ENTER();
     std::string node_name = "demoNode1";
     ros::init(argc, argv, node_name);
     ros::SCNNodeHandle n;
@@ -49,6 +49,7 @@ int main(int argc, char ** argv) {
  
     ros::spin();
 
+    LEAVE();
     return 0;
 }
 
@@ -56,6 +57,7 @@ int main(int argc, char ** argv) {
  * callback function that specifies the behaviors of the node in the reconfigure mode
  */
 bool demoNode1ClientCallback(reconfigure::demoNodeService::Request &req, reconfigure::demoNodeService::Response &res) {
+    ENTER();
     std::string service = req.callback_service;
     if (service.compare(gCallbackService) != 0) {
         ROS_ERROR("Invalid callback service is raised!");
@@ -69,6 +71,7 @@ bool demoNode1ClientCallback(reconfigure::demoNodeService::Request &req, reconfi
     
     ROS_INFO("Leave safe mode!\n");
 
+    LEAVE();
     return true;
 }
 
@@ -76,8 +79,10 @@ bool demoNode1ClientCallback(reconfigure::demoNodeService::Request &req, reconfi
  * callback function that specifies the behaviors when the test service is called
  */
 bool demoNode1CallBack(reconfigure::demoNodeService::Request &req, reconfigure::demoNodeService::Response &res) {
+    ENTER();
     std::string service = req.callback_service;
 
     ROS_INFO("Inside demoNode 1 test service!\n");
+    LEAVE();
     return true;
 }

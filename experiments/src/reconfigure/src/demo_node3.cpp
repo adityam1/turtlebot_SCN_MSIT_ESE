@@ -10,7 +10,7 @@
 #include <scn_library/scn_publisher.h>
 #include <scn_library/scn_subscriber.h>
 
-#include "log.h"
+//static int log_level = LOG_DBG;
 
 /**
  * global definitions
@@ -27,6 +27,7 @@ bool demoNode3ClientCallback(reconfigure::demoNodeService::Request &req,
  * APIs
  */
 int main(int argc, char ** argv) {
+    ENTER();
     std::string node_name = "demoNode3";
     ros::init(argc, argv, node_name);
     ros::SCNNodeHandle n;
@@ -40,7 +41,7 @@ int main(int argc, char ** argv) {
     //ros::ServiceClient client = n.serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
  
     ros::spin();
-
+    LEAVE();
     return 0;
 }
 
@@ -48,6 +49,7 @@ int main(int argc, char ** argv) {
  * callback function that specifies the behaviors of the node in the reconfigure mode
  */
 bool demoNode3ClientCallback(reconfigure::demoNodeService::Request &req, reconfigure::demoNodeService::Response &res) {
+    ENTER();
     std::string service = req.callback_service;
     if (service.compare(gCallbackService) != 0) {
         ROS_ERROR("Invalid callback service is raised!");
@@ -60,6 +62,6 @@ bool demoNode3ClientCallback(reconfigure::demoNodeService::Request &req, reconfi
     ROS_INFO("Currently, nothing to do in safe mode, will specify later!\n");
     
     ROS_INFO("Leave safe mode!\n");
-
+    LEAVE();
     return true;
 }

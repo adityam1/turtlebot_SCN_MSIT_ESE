@@ -14,9 +14,9 @@
 #include <vector>
 
 #include <scn_library/scn_utils.h>
-#include "log.h"
 #include "Dependency.h"
 
+static int log_level = LOG_DBG;
 /**
  * global definitions
  */
@@ -79,8 +79,10 @@ class ScnCore {
 };
 
 ScnCore::ScnCore(ros::NodeHandle &n) {
+    ENTER();
     ros::ServiceServer registerService = n.advertiseService("systemControlRegisterService", &ScnCore::scnCoreCb, this);
     ros::ServiceServer userInterfaceService = n.advertiseService("userInterfaceService", &ScnCore::userInterfaceServiceCallback, this);
+    LEAVE();
 }
 
 /*------------------------------------------------------------------
@@ -102,6 +104,7 @@ bool ScnCore::registerService(
         scn_library::systemControlRegisterService::Request &req, 
         scn_library::systemControlRegisterService::Response &res) 
 {
+    ENTER();
     uint8_t direction = req.direction;
     std::string node_name = req.nodeName;
     
@@ -139,6 +142,7 @@ bool ScnCore::registerService(
         /* Update the list of nodes for this service */
         ServicesInfo[service_name].push_back(node_name);
     }
+    LEAVE();
     return true;
 }
 
@@ -153,6 +157,7 @@ bool ScnCore::registerTopic(
         scn_library::systemControlRegisterService::Request &req, 
         scn_library::systemControlRegisterService::Response &res) 
 {
+    ENTER();
     uint8_t direction = req.direction;
     std::string node_name = req.nodeName;
     std::string topic_name = req.depName;
@@ -182,6 +187,7 @@ bool ScnCore::registerTopic(
         /* Update the list of nodes for this service */
         TopicsInfo[topic_name].push_back(node_name);
     }
+    LEAVE();
     return true;
 }
 
@@ -206,9 +212,11 @@ bool ScnCore::unRegisterService(
         scn_library::systemControlRegisterService::Request &req, 
         scn_library::systemControlRegisterService::Response &res) 
 {
+    ENTER();
     uint8_t direction = req.direction;
     std::string node_name = req.nodeName;
 
+    LEAVE();
     return true;
 }
 
@@ -223,10 +231,12 @@ bool ScnCore::unRegisterTopic(
         scn_library::systemControlRegisterService::Request &req, 
         scn_library::systemControlRegisterService::Response &res) 
 {
+    ENTER();
     uint8_t direction = req.direction;
     std::string node_name = req.nodeName;
     std::string topic_name = req.depName;
 
+    LEAVE();
     return true;
 }
 
@@ -241,10 +251,12 @@ bool ScnCore::unRegisterAll(
         scn_library::systemControlRegisterService::Request &req, 
         scn_library::systemControlRegisterService::Response &res) 
 {
+    ENTER();
     uint8_t direction = req.direction;
     std::string node_name = req.nodeName;
     std::string topic_name = req.depName;
 
+    LEAVE();
     return true;
 }
 
@@ -265,6 +277,7 @@ bool ScnCore::unRegisterAll(
 bool ScnCore::scnCoreCb(scn_library::systemControlRegisterService::Request &req,
                  scn_library::systemControlRegisterService::Response &res) 
 {
+    ENTER();
     bool status = false;
     uint8_t request = req.requestType;
     /* Check the type of registration */
@@ -311,6 +324,8 @@ bool ScnCore::scnCoreCb(scn_library::systemControlRegisterService::Request &req,
                 break;
         }
     }
+
+    LEAVE();
 }
 
 /**
@@ -323,6 +338,7 @@ bool ScnCore::scnCoreCb(scn_library::systemControlRegisterService::Request &req,
 bool ScnCore::userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &req, 
                                    reconfigure::userInterfaceService::Response &res) 
 {
+    ENTER();
     std::string old_node = req.old_node;
     std::string new_node = req.new_node;
 
@@ -396,11 +412,13 @@ bool ScnCore::userInterfaceServiceCallback(reconfigure::userInterfaceService::Re
     // kill the dependecies of old node and launch the dependency of new node
     launchNode((char *)"python /home/turtlebot/ese_team_project/yunpengx/experiments/src/reconfigure/src/with_launch_file.py");
     res.result = 0;
+    LEAVE();
     return true;
 }
 
 int main(int argc, char **argv) 
 {
+    ENTER();
     ros::init(argc, argv, "systemControlNode", ros::init_options::NoSigintHandler);
     //ros::init(argc, argv, "systemControlNode");
     ros::NodeHandle n;
@@ -412,6 +430,7 @@ int main(int argc, char **argv)
     signal(SIGINT, systemControlSigintHandler);
 
     ros::spin();
+    LEAVE();
     return 0;
 }
 
