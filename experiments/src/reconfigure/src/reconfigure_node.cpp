@@ -16,13 +16,15 @@
 #include <scn_library/scn_utils.h>
 #include "Dependency.h"
 
+using namespace std;
+
 static int log_level = LOG_DBG;
 /**
  * global definitions
  */
-NodeList nodeList;
-typedef std::map<std::string, std::vector<std::string> > my_map;
 extern char **environ;
+// global dependency used by reconfigure node
+Dependency *gDependency;
 
 /**
  * declaration
@@ -33,22 +35,8 @@ int killNode(char* name);
 
 bool scnCoreCb(scn_library::systemControlRegisterService::Request &req,
         scn_library::systemControlRegisterService::Response &res); 
-
 bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &req,
         reconfigure::userInterfaceService::Response &res);
-
-
-/**
- * APIs
- */
-// key - node name, values - services it provides
-std::map<std::string, std::vector<std::string> > NodeServices;
-// key - node name, values - topics it publishes
-std::map<std::string, std::vector<std::string> > NodeTopics;
-// key - service name, values - nodes used the service
-std::map<std::string, std::vector<std::string> > ServicesInfo;
-// key - topic name, values - nodes subscribed to the topic
-std::map<std::string, std::vector<std::string> > TopicsInfo;
 
 
 /*------------------------------------------------------------------
@@ -72,7 +60,7 @@ bool registerService(
 {
     ENTER();
     uint8_t direction = req.direction;
-    std::string node_name = req.nodeName;
+    std::string nodeName = req.nodeName;
     
     /* #FIXME: Callback service is not needed as the name of 
      * the service provided by the respective node (for the SCN to
@@ -80,31 +68,13 @@ bool registerService(
      * This use the name of the node for the service call at time of 
      * reconfiguration communication.
      */
-
-    std::string service_name = req.depName;
-
-    /* Take locks on the NodeServices map #FIXME */
+    std::string serviceName = req.depName;
 
     /* Check direction of service being registered */
     if(SERVER == direction) {
-        /* Check if entry for node already exists */
-        if(NodeServices.find(node_name) == NodeServices.end()) {
-            /* Insert node to the map */
-            NodeServices.insert(std::pair<std::string, std::vector<std::string> > (node_name, std::vector<std::string>()));
-        }
-
-        /* Update nodes service vector */
-        NodeServices[node_name].push_back(service_name); 
-
+        gDependency->addToNodeServices(nodeName, serviceName);
     } else if(CLIENT == direction) {
-        /* Check if entry for this service already exists */
-        if(ServicesInfo.find(service_name) == ServicesInfo.end()) {
-            /* Insert service to the map */
-            ServicesInfo.insert(std::pair<std::string, std::vector<std::string> > (service_name, std::vector<std::string>()));
-        }
-
-        /* Update the list of nodes for this service */
-        ServicesInfo[service_name].push_back(node_name);
+        gDependency->addToServicesInfo(serviceName, nodeName);
     }
     LEAVE();
     return true;
@@ -122,32 +92,17 @@ bool registerTopic(
 {
     ENTER();
     uint8_t direction = req.direction;
-    std::string node_name = req.nodeName;
-    std::string topic_name = req.depName;
+    std::string nodeName = req.nodeName;
+    std::string topicName = req.depName;
 
     /* Take locks on the NodeTopics map #FIXME */
 
     /* Check direction of service being registered */
     if(PUBLISH == direction) {
-        /* Check if entry for node already exists */
-        if(NodeTopics.find(node_name) == NodeTopics.end()) {
-            /* Insert node to the map */
-            NodeTopics.insert(std::pair<std::string, std::vector<std::string> > (node_name, std::vector<std::string>()));
-        }
-
-        /* Update nodes topic vector */
-        NodeTopics[node_name].push_back(topic_name); 
-
+        gDependency->addToNodeTopics(nodeName, topicName);
     } else if(SUBSCRIBE == direction) {
-        /* Check if entry for this topic already exists */
-        if(TopicsInfo.find(topic_name) == TopicsInfo.end()) {
-            /* Insert topic to the map */
-            TopicsInfo.insert(std::pair<std::string, std::vector<std::string> > (topic_name, std::vector<std::string>()));
-        }
-
-        /* Update the list of nodes for this service */
-        TopicsInfo[topic_name].push_back(node_name);
-    }
+        gDependency->addToTopicsInfo(topicName, nodeName);
+    }       
     LEAVE();
     return true;
 }
@@ -302,38 +257,21 @@ bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &re
     ROS_INFO("request old_node: %s", old_node.c_str());
     ROS_INFO("request new_node: %s", new_node.c_str());
 
-    for (my_map::iterator it = NodeServices.begin(); it != NodeServices.end(); it++) {
-        std::string const &key = it->first;
-        std::vector<std::string> &value = it->second;
-        ROS_INFO("node name: %s\n", key.c_str());
-        for (int i = 0; i < value.size(); i++) {
-            ROS_INFO("service provided by this node: %s\n", value[i].c_str());
-        }
-    }
-    for (my_map::iterator it = ServicesInfo.begin(); it != ServicesInfo.end(); it++) {
-        std::string const &key = it->first;
-        std::vector<std::string> &value = it->second;
-        ROS_INFO("service name: %s\n", key.c_str());
-        for (int i = 0; i < value.size(); i++) {
-            ROS_INFO("node used this service: %s\n", value[i].c_str());
-        }
-    }
-
+    // print the current dependency
+    gDependency->traverseNodeServiers();
+    gDependency->traverseServicesInfo();
+ 
     // based on the dependencies of the old and new noderithms, invoke service call for corresponding nodes and do the reconfigurations
-    if (NodeServices.find(old_node) == NodeServices.end()) {
-        ROS_ERROR("Invalid old node specified");
-        return false;
-    }
-
     // tell all nodes affected by this reconfiguration into safe mode
-    std::vector<std::string> &oldNodeServiceList = NodeServices[old_node];
+    std::vector<std::string> &oldNodeServiceList = gDependency->getNodeServiceList(old_node);
     for (int i = 0; i < oldNodeServiceList.size(); i++) {
         std::string service = oldNodeServiceList[i];
         // if this serivice is not used by any nodes, no need to put the node to safe mode
-        if (ServicesInfo.find(service) == ServicesInfo.end()) {
+        std::vector<std::string> &nodeList = gDependency->getServiceNodeList(service);
+        if (nodeList.size() == 0) {
             continue;
         }
-        std::vector<std::string> &nodeList = ServicesInfo[service];
+
         for (int j = 0; j < nodeList.size(); j++) {
             ros::NodeHandle n;
             std::string serviceName = nodeList[j] + "Service";
@@ -379,6 +317,7 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "systemControlNode", ros::init_options::NoSigintHandler);
     //ros::init(argc, argv, "systemControlNode");
     ros::NodeHandle n;
+    gDependency = new Dependency();
 
     ros::ServiceServer registerService = n.advertiseService("systemControlRegisterService", scnCoreCb);
     ros::ServiceServer userInterfaceService = n.advertiseService("userInterfaceService", userInterfaceServiceCallback);
