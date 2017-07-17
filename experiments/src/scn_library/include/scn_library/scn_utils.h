@@ -24,6 +24,8 @@
 #define SCN_OK          (0)
 #define SCN_ERROR       (1)
 
+#define SCN_AUTH        (0x90)
+
 typedef enum {
     LOG_ERR,
     LOG_MSG,

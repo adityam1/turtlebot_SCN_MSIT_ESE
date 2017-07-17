@@ -8,6 +8,7 @@
 #include <python2.7/Python.h>
 
 #include <scn_library/systemControlRegisterService.h>
+#include <scn_library/kill.h>
 #include <reconfigure/userInterfaceService.h>
 #include <reconfigure/demoNodeService.h>
 #include <iostream>
@@ -30,8 +31,8 @@ Dependency *gDependency;
  * declaration
  */
 void systemControlSigintHandler(int sig);
-int launchNode(char* name);
-int killNode(char* name);
+static bool launchNode(char* packageName, char *nodeName);
+static void killNode(char* name);
 
 bool scnCoreCb(scn_library::systemControlRegisterService::Request &req,
         scn_library::systemControlRegisterService::Response &res); 
@@ -269,11 +270,13 @@ bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &re
         reconfigure::userInterfaceService::Response &res) 
 {
     ENTER();
-    string old_node = req.old_node;
-    string new_node = req.new_node;
+   std::string old_node = req.old_node;
+    std::string new_node = req.new_node;
+    std::string new_node_package = req.new_node_package;
 
     ROS_INFO("request old_node: %s", old_node.c_str());
     ROS_INFO("request new_node: %s", new_node.c_str());
+    ROS_INFO("request new_node_package: %s", new_node_package.c_str());
 
     // here we only reconfigure one node, the old node specified
     vector<string> orderedList = gDependency->getReconNodeList(old_node);
@@ -295,7 +298,8 @@ bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &re
     // TODO add topics reconfigure
 
     // kill the dependecies of old node and launch the dependency of new node
-    launchNode((char *)"python /home/turtlebot/ese_team_project/yunpengx/experiments/src/reconfigure/src/with_launch_file.py");
+    //launchNode((char *)"python /home/turtlebot/ese_team_project/yunpengx/experiments/src/reconfigure/src/with_launch_file.py");
+    launchNode(new_node_package.c_str(), new_node.c_str());
     res.result = 0;
     LEAVE();
     return true;
@@ -329,76 +333,66 @@ void systemControlSigintHandler(int sig) {
     ros::shutdown();
 }
 
-int launchNode(char *name) {
-#if 0
-    ROS_INFO("enter %s\n", __func__);
-    pid_t pid = fork();
+/*------------------------------------------------------------------
+ * launchNode
+ * Starts the node specified by packageName and nodeName.
+ * 
+ *-----------------------------------------------------------------*/
+static bool launchNode(char *packageName, char *nodeName) {
+    FILE *fp_which;
     int error = 0;
-    char *argv_node[1] = {0};
-
-    if (pid == 0) {
-        //Py_SetProgramName(argv[0]);  /* optional but recommended */
-        Py_Initialize();
-        PyRun_SimpleString("from time import time,ctime\n"
-                "print 'Today is',ctime(time())\n");
-        const char *cmd = name.c_str();
-        FILE* PythonScriptFile = fopen(cmd, "r");
-        if(PythonScriptFile) {
-            PyRun_SimpleFile(PythonScriptFile, cmd);
-            //fclose(PythonScriptFile);
-        }
-
-        Py_Finalize();
-    }
-
-    ROS_INFO("leave %s\n", __func__);
-    return error;
-#endif
-    std::cout << "In Launch function " <<std::endl;
-
+    char rosrun_path[200] = {0};
+    char argv[4] = {0};
     pid_t pid;
-    if(0 == (pid = fork())) 
-    {   
-        /*  Child  */
-        setpgid(0,0);           /*  Assigning child its own group ID  */
 
-        /* Redirect I/O */
-#if 0
-        io_redirect(&stdin_rep, &stdout_rep, &tok);
-        dup2(stdin_rep, STDIN_FILENO);
-        dup2(stdout_rep, STDOUT_FILENO);
-        close_redirect(&stdin_rep, &stdout_rep);
-#endif   
-        char *argv[3] = {0};
-        argv[0] = (char *)"/usr/bin/python";
-        argv[1] = (char *)"/home/turtlebot/ese_team_project/yunpengx/experiments/src/reconfigure/src/with_launch_file.py";
-        argv[2] = NULL;
+    if((fp_which = popen("/usr/bin/which rosrun")) != NULL) {
+        fgets(rosrun_path, 200, "r");
+        pclose(fp_which);
+        
+        rosrun_path[strlen(rosrun_path) -1] = '\0';
 
-        //std::cout << argv[0] << "\t" << argv[1] <<std::endl;
-        /*  Unblock signals and Execute command  */
-        int error = execve(argv[0], argv, environ);
-        if(error)
-        {
-            std::cout << "What is the reason: errno = " << errno << std::endl;
+        if(0 == (pid = fork())) {
+            setpgid(0, 0);
+            argv[0] = (char *) rosrun_path;
+            argv[1] = (char *) packageName;
+            argv[2] = (char *) nodeName;
+            argv[3] = NULL;
+
+            ROS_INFO("Attempting to start node %s", nodeName);
+
+            error = execve(argv[0], argv, environ);
+            if(error) {
+                ROS_ERROR("Unable to start node");
+                return FALSE;
+            }
         }
+        return TRUE;
+    }
+    else {
+        ROS_ERROR("Unable to launch node");
+        return FALSE;
     }
 }
 
-int killNode(char *name) {
-    pid_t pid = fork();
-    int32_t error = 0;
-    char *argv[4] = {0};
-    argv[0] = (char *)"/usr/bin/python";
-    argv[1] = (char *)"/home/turtlebot/ese_team_project/yunpengx/experiments/src/reconfigure/src/kill_node.py";
-    argv[2] = name;
-    argv[3] = NULL;
+/*------------------------------------------------------------------
+ * killNode
+ * Kills the node specified by name.
+ * 
+ *-----------------------------------------------------------------*/
+static void killNode(char *name) {
 
-    if (pid == 0) {
-        error = execve(argv[0], argv, environ);
-        if(error)
-        {   
-            ROS_ERROR("Error in killing node %s!\n", name);
-        }   
-    }
-    return error;
+    /* Request the node to commit suicide */
+    ros::NodeHandle n;
+    std::string serviceName = name + "Kill";
+    
+    ROS_INFO("SCN: Attempting to kill %s\n", name);
+
+    ros::ServiceClient client = n.serviceClient<scn_library::kill>(serviceName);
+
+    scn_library::kill srv;
+    
+    srv.request.auth = SCN_AUTH;
+
+    /* We don't expect a service failure here */
+    client.call(srv);
 }
