@@ -72,7 +72,7 @@ bool registerService(
 
     /* Check direction of service being registered */
     if(SERVER == direction) {
-        gDependency->addToNodeServices(nodeName, serviceName);
+        gDependency->addToOutgoingNodeServices(nodeName, serviceName);
     } else if(CLIENT == direction) {
         gDependency->addToServicesInfo(serviceName, nodeName);
     }
@@ -99,7 +99,7 @@ bool registerTopic(
 
     /* Check direction of service being registered */
     if(PUBLISH == direction) {
-        gDependency->addToNodeTopics(nodeName, topicName);
+        gDependency->addToOutgoingNodeTopics(nodeName, topicName);
     } else if(SUBSCRIBE == direction) {
         gDependency->addToTopicsInfo(topicName, nodeName);
     }       
@@ -258,12 +258,12 @@ bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &re
     ROS_INFO("request new_node: %s", new_node.c_str());
 
     // print the current dependency
-    gDependency->traverseNodeServices();
+    gDependency->traverseOutgoingNodeServices();
     gDependency->traverseServicesInfo();
 
     // based on the dependencies of the old and new noderithms, invoke service call for corresponding nodes and do the reconfigurations
     // tell all nodes affected by this reconfiguration into safe mode
-    std::vector<std::string> &oldNodeServiceList = gDependency->getNodeServiceList(old_node);
+    std::vector<std::string> &oldNodeServiceList = gDependency->getOutgoingNodeServiceList(old_node);
     for (int i = 0; i < oldNodeServiceList.size(); i++) {
         std::string service = oldNodeServiceList[i];
         std::vector<std::string> &nodeList = gDependency->getServiceNodeList(service);

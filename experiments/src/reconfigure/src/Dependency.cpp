@@ -17,27 +17,27 @@ Dependency::~Dependency() {
 }
 
 void 
-Dependency::addToNodeServices(const std::string &nodeName, const std::string &serviceName) {
+Dependency::addToOutgoingNodeServices(const std::string &nodeName, const std::string &serviceName) {
     /* Check if entry for node already exists */
-    if(NodeServices.find(nodeName) == NodeServices.end()) {
+    if(OutgoingNodeServices.find(nodeName) == OutgoingNodeServices.end()) {
         /* Insert node to the map */
-        NodeServices.insert(std::pair<std::string, std::vector<std::string> > (nodeName, std::vector<std::string>()));
+        OutgoingNodeServices.insert(std::pair<std::string, std::vector<std::string> > (nodeName, std::vector<std::string>()));
     }
 
     /* Update nodes service vector */
-    NodeServices[nodeName].push_back(serviceName); 
+    OutgoingNodeServices[nodeName].push_back(serviceName); 
 }
 
 void 
-Dependency::addToNodeTopics(const std::string &nodeName, const std::string &topicName) {
+Dependency::addToOutgoingNodeTopics(const std::string &nodeName, const std::string &topicName) {
     /* Check if entry for node already exists */
-    if(NodeTopics.find(nodeName) == NodeTopics.end()) {
+    if(OutgoingNodeTopics.find(nodeName) == OutgoingNodeTopics.end()) {
         /* Insert node to the map */
-        NodeTopics.insert(std::pair<std::string, std::vector<std::string> > (nodeName, std::vector<std::string>()));
+        OutgoingNodeTopics.insert(std::pair<std::string, std::vector<std::string> > (nodeName, std::vector<std::string>()));
     }
 
     /* Update nodes topic vector */
-    NodeTopics[nodeName].push_back(topicName); 
+    OutgoingNodeTopics[nodeName].push_back(topicName); 
 }
 
 void 
@@ -65,8 +65,8 @@ Dependency::addToTopicsInfo(const std::string &topicName, const std::string &nod
 }
 
 void 
-Dependency::traverseNodeServices() {
-    for (my_map::iterator it = NodeServices.begin(); it != NodeServices.end(); it++) {
+Dependency::traverseOutgoingNodeServices() {
+    for (my_map::iterator it = OutgoingNodeServices.begin(); it != OutgoingNodeServices.end(); it++) {
         std::string const &key = it->first;
         std::vector<std::string> &value = it->second;
         ROS_INFO("node name: %s\n", key.c_str());
@@ -77,8 +77,8 @@ Dependency::traverseNodeServices() {
 }
 
 void 
-Dependency::traverseNodeTopics() {
-    for (my_map::iterator it = NodeTopics.begin(); it != NodeTopics.end(); it++) {
+Dependency::traverseOutgoingNodeTopics() {
+    for (my_map::iterator it = OutgoingNodeTopics.begin(); it != OutgoingNodeTopics.end(); it++) {
         std::string const &key = it->first;
         std::vector<std::string> &values = it->second;
         ROS_INFO("node name: %s\n", key.c_str());
@@ -113,32 +113,32 @@ Dependency::traverseTopicsInfo() {
 }
 
 std::vector<std::string> &
-Dependency::getNodeServiceList(const std::string &nodeName) {
-    if (!isValidNodeForService(nodeName)) {
+Dependency::getOutgoingNodeServiceList(const std::string &nodeName) {
+    if (!isValidOutgoingNodeService(nodeName)) {
         return empty_vector;
     }
-    return NodeServices[nodeName];
+    return OutgoingNodeServices[nodeName];
 }
 
 std::vector<std::string> &
 Dependency::getServiceNodeList(const std::string &serviceName) {
-    if (!isValidServiceForNode(serviceName)) {
+    if (!isValidServiceNode(serviceName)) {
         return empty_vector;
     }
     return ServicesInfo[serviceName];
 }
 
 std::vector<std::string> &
-Dependency::getNodeTopicList(const std::string &nodeName) {
-    if (!isValidNodeForTopic(nodeName)) {
+Dependency::getOutgoingNodeTopicList(const std::string &nodeName) {
+    if (!isValidOutgoingNodeTopic(nodeName)) {
         return empty_vector;
     }
-    return NodeTopics[nodeName];
+    return OutgoingNodeTopics[nodeName];
 }
 
 std::vector<std::string> &
 Dependency::getTopicNodeList(const std::string &topicName) {
-    if (!isValidTopicForNode(topicName)) {
+    if (!isValidTopicNode(topicName)) {
         return empty_vector;
     }
     return TopicsInfo[topicName];
@@ -148,8 +148,8 @@ Dependency::getTopicNodeList(const std::string &topicName) {
  * private methods
  */
 bool 
-Dependency::isValidNodeForService(const std::string &nodeName) {
-    if (NodeServices.find(nodeName) == NodeServices.end()) {
+Dependency::isValidOutgoingNodeService(const std::string &nodeName) {
+    if (OutgoingNodeServices.find(nodeName) == OutgoingNodeServices.end()) {
         ROS_ERROR("Invalid node specified for services");
         return false;
     }
@@ -157,8 +157,8 @@ Dependency::isValidNodeForService(const std::string &nodeName) {
 }
 
 bool 
-Dependency::isValidNodeForTopic(const std::string &nodeName) {
-    if (NodeTopics.find(nodeName) == NodeTopics.end()) {
+Dependency::isValidOutgoingNodeTopic(const std::string &nodeName) {
+    if (OutgoingNodeTopics.find(nodeName) == OutgoingNodeTopics.end()) {
         ROS_ERROR("Invalid node specified for topics");
         return false;
     }
@@ -166,7 +166,7 @@ Dependency::isValidNodeForTopic(const std::string &nodeName) {
 }
 
 bool 
-Dependency::isValidServiceForNode(const std::string &serviceName) {
+Dependency::isValidServiceNode(const std::string &serviceName) {
     if (ServicesInfo.find(serviceName) == ServicesInfo.end()) {
         ROS_INFO("No node uses the service specified");
         return false;
@@ -174,7 +174,7 @@ Dependency::isValidServiceForNode(const std::string &serviceName) {
     return true;
 }
 bool 
-Dependency::isValidTopicForNode(const std::string &topicName) {
+Dependency::isValidTopicNode(const std::string &topicName) {
     if (TopicsInfo.find(topicName) == TopicsInfo.end()) {
         ROS_INFO("No node subscribes the node specified");
         return false;
