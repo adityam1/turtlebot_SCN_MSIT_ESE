@@ -72,9 +72,19 @@ bool registerService(
 
     /* Check direction of service being registered */
     if(SERVER == direction) {
-        gDependency->addToOutgoingNodeServices(nodeName, serviceName);
+        /**
+         * Attention: for service server the dependency direction is from client to server
+         * so it's incomingServices for nodeName
+         */
+        ROS_INFO("add incoming for node:%s with service:%s", nodeName.c_str(), serviceName.c_str());;
+        gDependency->addIncomingServices(nodeName, serviceName);
     } else if(CLIENT == direction) {
-        gDependency->addToServicesInfo(serviceName, nodeName);
+        /**
+         * Attention: for servce client the dependency direction is from client to server
+         * so it's outgoingServices for nodeName
+         */
+        ROS_INFO("add outgoing for node:%s with service:%s", nodeName.c_str(), serviceName.c_str());;
+        gDependency->addOutgoingServices(nodeName, serviceName);
     }
     LEAVE();
     return true;
@@ -99,9 +109,19 @@ bool registerTopic(
 
     /* Check direction of service being registered */
     if(PUBLISH == direction) {
-        gDependency->addToOutgoingNodeTopics(nodeName, topicName);
+        /**
+         * Attention: for topic server the dependency direction is from 
+         * subscriber to publisher, so it's incomingTopics for nodeName
+         */
+        ROS_INFO("add incoming for node:%s with topic:%s", nodeName.c_str(), topicName.c_str());;
+        gDependency->addIncomingTopics(nodeName, topicName);
     } else if(SUBSCRIBE == direction) {
-        gDependency->addToTopicsInfo(topicName, nodeName);
+        /**
+         * Attention: for topic server the dependency direction is from 
+         * subscriber to publisher, so it's outgoingTopics for nodeName
+         */
+        ROS_INFO("add outgoing for node:%s with topic:%s", nodeName.c_str(), topicName.c_str());;
+        gDependency->addOutgogingTopics(topicName, nodeName);
     }       
     LEAVE();
     return true;
@@ -213,10 +233,7 @@ bool scnCoreCb(scn_library::systemControlRegisterService::Request &req,
                 status = SCN_ERROR;
                 break;
         }
-        return status;
-    }
-    else if(UNREGISTER == request)
-    {
+    } else if(UNREGISTER == request) {
         switch(reg_dep_type)
         {
             case SERVICE:
@@ -237,6 +254,7 @@ bool scnCoreCb(scn_library::systemControlRegisterService::Request &req,
         }
     }
 
+    return status;
     LEAVE();
 }
 
@@ -251,52 +269,28 @@ bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &re
         reconfigure::userInterfaceService::Response &res) 
 {
     ENTER();
-    std::string old_node = req.old_node;
-    std::string new_node = req.new_node;
+    string old_node = req.old_node;
+    string new_node = req.new_node;
 
     ROS_INFO("request old_node: %s", old_node.c_str());
     ROS_INFO("request new_node: %s", new_node.c_str());
 
-    // print the current dependency
-    gDependency->traverseOutgoingNodeServices();
-    gDependency->traverseServicesInfo();
-
-    // based on the dependencies of the old and new noderithms, invoke service call for corresponding nodes and do the reconfigurations
-    // tell all nodes affected by this reconfiguration into safe mode
-    std::vector<std::string> &oldNodeServiceList = gDependency->getOutgoingNodeServiceList(old_node);
-    for (int i = 0; i < oldNodeServiceList.size(); i++) {
-        std::string service = oldNodeServiceList[i];
-        std::vector<std::string> &nodeList = gDependency->getServiceNodeList(service);
-        // if this serivice is not used by any nodes, no need to put the node to safe mode
-        for (int j = 0; j < nodeList.size(); j++) {
-            ros::NodeHandle n;
-            std::string serviceName = nodeList[j] + "Service";
-            ROS_INFO("node name: %s, reconfigure service name: %s\n", nodeList[j].c_str(), serviceName.c_str());
-            ros::ServiceClient client = n.serviceClient<reconfigure::demoNodeService>(serviceName);
-            reconfigure::demoNodeService srv;
-            srv.request.callback_service = serviceName;
-            if (client.call(srv)) {
-                std::string res = srv.response.result == 0 ? "OK" : "ERROR";
-                ROS_INFO("result: %s\n", res.c_str());
-            } else {
-                ROS_ERROR("Failed to call demoNodeService");
-                return -1;
-            }
+    // here we only reconfigure one node, the old node specified
+    vector<string> orderedList = gDependency->getReconNodeList(old_node);
+    for (int j = 0; j < orderedList.size(); j++) {
+        ros::NodeHandle n;
+        std::string serviceName = orderedList[j] + "Service";
+        ROS_INFO("node name: %s, reconfigure service name: %s\n", orderedList[j].c_str(), serviceName.c_str());
+        ros::ServiceClient client = n.serviceClient<reconfigure::demoNodeService>(serviceName);
+        reconfigure::demoNodeService srv;
+        srv.request.callback_service = serviceName;
+        if (client.call(srv)) {
+            std::string res = srv.response.result == 0 ? "OK" : "ERROR";
+            ROS_INFO("result: %s\n", res.c_str());
+        } else {
+            ROS_ERROR("Failed to call demoNodeService");
+            return -1;
         }
-    }
-    // after put all the dependent nodes into safe mode, also put this node into safe mode
-    ros::NodeHandle n;
-    std::string serviceName = old_node + "Service";
-    ROS_INFO("node name: %s, reconfigure service name: %s\n", old_node.c_str(), serviceName.c_str());
-    ros::ServiceClient client = n.serviceClient<reconfigure::demoNodeService>(serviceName);
-    reconfigure::demoNodeService srv;
-    srv.request.callback_service = serviceName;
-    if (client.call(srv)) {
-        std::string res = srv.response.result == 0 ? "OK" : "ERROR";
-        ROS_INFO("result: %s\n", res.c_str());
-    } else {
-        ROS_ERROR("Failed to call demoNodeService");
-        return -1;
     }
     // TODO add topics reconfigure
 

@@ -1,10 +1,159 @@
 #include <cstring>
+#include <queue>
 #include <ros/ros.h>
 #include "Dependency.h"
+#include "scn_library/scn_utils.h"
 
-using namespace std;
-typedef std::map<std::string, std::vector<std::string> > my_map;
-static vector<string> empty_vector;
+static int log_level = LOG_DBG;
+
+/**
+ * APIs for Node class
+ */
+Node::Node(const char *_name) {
+    this->name = string(_name);
+}
+
+Node::Node(const string _name) {
+    this->name = _name;
+}
+
+Node::~Node(){
+
+}
+
+// getters
+string
+Node::getName(void){
+    return this->name;
+}
+
+void 
+Node::setName(string _name) {
+    this->name = _name;
+}
+
+bool
+Node::getVisited() {
+    return this->visited;
+}
+
+void 
+Node::setVisited(bool _visited) {
+    this->visited = _visited;
+}
+
+vector<string> &
+Node::getOutgoingServices(void) {
+    return this->outgoingServices;
+}
+
+vector<string> &
+Node::getIncomingServices(void) {
+    return this->incomingServices;
+}
+
+vector<string> &
+Node::getOutgoingTopics(void) {
+    return this->outgoingTopics;
+}
+
+vector<string> &
+Node::getIncomingTopics(void) {
+    return this->incomingTopics;
+}
+
+int 
+Node::getOutgoingServicesSize() {
+    return this->outgoingServices.size();
+}
+
+int 
+Node::getIncomingServicesSize() {
+    return this->incomingServices.size();
+}
+
+int 
+Node::getOutgoingTopicsSize() {
+    return this->outgoingTopics.size();
+}
+
+int 
+Node::getIncomingTopicsSize() {
+    return this->incomingTopics.size();
+}
+
+// setters
+void
+Node::setOutgoingServices(vector<string> &_outgoingServices) {
+    this->outgoingServices = _outgoingServices;
+}
+void 
+Node::setIncomingServices(vector<string> &_incomingServices) {
+    this->incomingServices = _incomingServices;
+}
+void 
+Node::setOutgoingTopics(vector<string> &_outgoingTopics) {
+    this->outgoingTopics = _outgoingTopics;
+}
+
+void 
+Node::setIncomingTopics(vector<string> &_incomingTopics) {
+    this->incomingTopics = _incomingTopics;
+}
+
+// adders
+void 
+Node::addOutgoingServices(string &_serviceProvided) {
+    this->outgoingServices.push_back(_serviceProvided);
+}
+
+void 
+Node::addIncomingServices(string  &_servicesUsed) {
+    this->incomingServices.push_back(_servicesUsed);
+}
+
+void 
+Node::addOutgogingTopics(string &_topicsPublished) {
+    this->outgoingTopics.push_back(_topicsPublished);
+}
+
+void 
+Node::addIncomingTopics(string &_topicsSubscribed) {
+    this->incomingTopics.push_back(_topicsSubscribed);
+}
+
+// erasers
+void 
+Node::eraseOutgoingServices(string &_serviceProvided) {
+    vector<string>::iterator pos = find(outgoingServices.begin(), outgoingServices.end(), _serviceProvided);
+    if (pos != outgoingServices.end()) {
+        outgoingServices.erase(pos);
+    }
+}
+void 
+Node::eraseIncomingServices(string  &_servicesUsed) {
+    vector<string>::iterator pos = find(incomingServices.begin(), incomingServices.end(), _servicesUsed);
+    if (pos != incomingServices.end()) {
+        incomingServices.erase(pos);
+    }
+}
+
+void
+Node::earseOutgogingTopics(string &_topicsPublished) {
+    vector<string>::iterator pos = find(outgoingTopics.begin(), outgoingTopics.end(), _topicsPublished);
+    if (pos != outgoingTopics.end()) {
+        outgoingTopics.erase(pos);
+    }
+}
+
+void 
+Node::eraseIncomingTopics(string &_topicsSubscribed) {
+    vector<string>::iterator pos = find(incomingTopics.begin(), incomingTopics.end(), _topicsSubscribed);
+    if (pos != incomingTopics.end()) {
+        incomingTopics.erase(pos);
+    }
+}
+
 /**
  * APIs for Dependency class
  */
@@ -16,210 +165,311 @@ Dependency::~Dependency() {
 
 }
 
+// adders
 void 
-Dependency::addToOutgoingNodeServices(const std::string &nodeName, const std::string &serviceName) {
-    /* Check if entry for node already exists */
-    if(OutgoingNodeServices.find(nodeName) == OutgoingNodeServices.end()) {
-        /* Insert node to the map */
-        OutgoingNodeServices.insert(std::pair<std::string, std::vector<std::string> > (nodeName, std::vector<std::string>()));
-    }
-
-    /* Update nodes service vector */
-    OutgoingNodeServices[nodeName].push_back(serviceName); 
+Dependency::addServiceNode(const string service, Node* _node) {
+    this->serviceInfo[service] = _node;
 }
 
 void 
-Dependency::addToOutgoingNodeTopics(const std::string &nodeName, const std::string &topicName) {
-    /* Check if entry for node already exists */
-    if(OutgoingNodeTopics.find(nodeName) == OutgoingNodeTopics.end()) {
-        /* Insert node to the map */
-        OutgoingNodeTopics.insert(std::pair<std::string, std::vector<std::string> > (nodeName, std::vector<std::string>()));
-    }
-
-    /* Update nodes topic vector */
-    OutgoingNodeTopics[nodeName].push_back(topicName); 
+Dependency::addTopicNode(const string topic, Node* _node) {
+    this->topicInfo[topic] = _node;
 }
 
-void 
-Dependency::addToServicesInfo(const std::string &serviceName, const std::string &nodeName) {
-    /* Check if entry for this service already exists */
-    if(ServicesInfo.find(serviceName) == ServicesInfo.end()) {
-        /* Insert service to the map */
-        ServicesInfo.insert(std::pair<std::string, std::vector<std::string> > (serviceName, std::vector<std::string>()));
-    }
-
-    /* Update the list of nodes for this service */
-    ServicesInfo[serviceName].push_back(nodeName);
-}
-
-void 
-Dependency::addToTopicsInfo(const std::string &topicName, const std::string &nodeName) {
-    /* Check if entry for this topic already exists */
-    if(TopicsInfo.find(topicName) == TopicsInfo.end()) {
-        /* Insert topic to the map */
-        TopicsInfo.insert(std::pair<std::string, std::vector<std::string> > (topicName, std::vector<std::string>()));
-    }
-
-    /* Update the list of nodes for this service */
-    TopicsInfo[topicName].push_back(nodeName);
-}
-
-void 
-Dependency::traverseOutgoingNodeServices() {
-    for (my_map::iterator it = OutgoingNodeServices.begin(); it != OutgoingNodeServices.end(); it++) {
-        std::string const &key = it->first;
-        std::vector<std::string> &value = it->second;
-        ROS_INFO("node name: %s\n", key.c_str());
-        for (int i = 0; i < value.size(); i++) {
-            ROS_INFO("service provided by this node: %s\n", value[i].c_str());
+// getters
+Node *
+Dependency::getNodeWithName(string &nodeName) {
+    Node *res = NULL;
+    for (int i = 0; i < list.size(); i++) {
+        Node *node = list[i];
+        if (node->getName().compare(nodeName) == 0) {
+            res = node;
+            break;
         }
     }
+    return res;
+}
+
+vector<Node *>
+Dependency::getNodeUsingService(string &serviceName) {
+    vector<Node *> res;
+    for (int i = 0; i < list.size(); i++) {
+        Node *tmp = list[i];
+        vector<string> serviceList = tmp->getOutgoingServices();
+        for (int j = 0; j < serviceList.size(); j++) {
+            if (serviceList[j].compare(serviceName) == 0) {
+                res.push_back(tmp);
+                break;
+            } 
+        }
+    }
+    return res;
+}
+
+Node *
+Dependency::getNodeProvidingService(string &serviceName) {
+    Node *res = NULL;
+    map<string, Node*>::iterator it;
+    it = serviceInfo.find(serviceName);
+    if (it != serviceInfo.end()) {
+        res = it->second;
+    }
+    return res;
+}
+
+vector<Node *>
+Dependency::getNodeSubscribingTopic(string &topicName) {
+    vector<Node *> res;
+    for (int i = 0; i < list.size(); i++) {
+        Node *tmp = list[i];
+        vector<string> topicList = tmp->getOutgoingTopics();
+        for (int j = 0; j < topicList.size(); j++) {
+            if (topicList[j].compare(topicName) == 0) {
+                res.push_back(tmp);
+                break;
+            }
+        }
+    }
+    return res;
+}
+
+Node *
+Dependency::getNodePublishingTopic(string &topicName) {
+    Node *res = NULL;
+    map<string, Node*>::iterator it;
+    it = topicInfo.find(topicName);
+    if (it != topicInfo.end()) {
+        res = it->second;
+    }
+    return res;
+}
+
+// add node to the dependency
+void 
+Dependency::addNode(Node *_node) {
+    this->list.push_back(_node);
 }
 
 void 
-Dependency::traverseOutgoingNodeTopics() {
-    for (my_map::iterator it = OutgoingNodeTopics.begin(); it != OutgoingNodeTopics.end(); it++) {
-        std::string const &key = it->first;
-        std::vector<std::string> &values = it->second;
-        ROS_INFO("node name: %s\n", key.c_str());
-        for (int i = 0; i < values.size(); i++) {
-            ROS_INFO("topics published by this node: %s\n", values[i].c_str());
-        }
+Dependency::removeNode(Node *_node) {
+   vector<Node*>::iterator pos = find(list.begin(), list.end(), _node);
+   if (pos != list.end()) {
+       list.erase(pos);
+   }
+}
+
+
+// add node and topic to dependency
+void 
+Dependency::addOutgoingServices(string &nodeName, string &serviceName) {
+    // the node doesn't exist, then only add the dependency
+    Node *node;
+    if ((node=getNodeWithName(nodeName)) == NULL) {
+        node = new Node(nodeName);
+        list.push_back(node);
     }
+
+    // fill outgoingServices
+    node->addOutgoingServices(serviceName);
 }
 
 void 
-Dependency::traverseServicesInfo() {
-    for (my_map::iterator it = ServicesInfo.begin(); it != ServicesInfo.end(); it++) {
-        std::string const &key = it->first;
-        std::vector<std::string> &value = it->second;
-        ROS_INFO("service name: %s\n", key.c_str());
-        for (int i = 0; i < value.size(); i++) {
-            ROS_INFO("node used this service: %s\n", value[i].c_str());
-        }
+Dependency::addIncomingServices(string &nodeName, string &serviceName) {
+    Node *node;
+    if ((node = getNodeWithName(nodeName)) == NULL) {
+        node = new Node(nodeName);
+        list.push_back(node);
     }
+
+    // fill serviceInfo and incomingServices
+    serviceInfo[serviceName] = node;
+    node->addIncomingServices(serviceName);
 }
 
 void 
-Dependency::traverseTopicsInfo() {
-    for (my_map::iterator it = TopicsInfo.begin(); it != TopicsInfo.end(); it++) {
-        std::string const &key = it->first;
-        std::vector<std::string> &value = it->second;
-        ROS_INFO("service name: %s\n", key.c_str());
-        for (int i = 0; i < value.size(); i++) {
-            ROS_INFO("node subscribed to the topic: %s\n", value[i].c_str());
+Dependency::addOutgogingTopics(string &nodeName, string &topicName) {
+    Node *node;
+    if ((node = getNodeWithName(nodeName)) == NULL) {
+        node = new Node(nodeName);
+        list.push_back(node);
+    }
+
+    // fill outgoingTopics
+    node->addOutgogingTopics(topicName);
+}
+
+void
+Dependency::addIncomingTopics(string &nodeName, string &topicName) {
+    Node *node;
+    if ((node = getNodeWithName(nodeName)) == NULL) {
+        node = new Node(nodeName);
+        list.push_back(node);
+    }
+    
+    //fill topicInfo and incomingTopics
+    topicInfo[topicName] = node;
+    node->addIncomingTopics(topicName);
+}
+
+vector<string>
+Dependency::getReconNodeList() {
+    // root node means those without any incoming services
+    vector<Node *> rootList; 
+    vector<string> orderedList; //return vector
+
+    resetVisited();
+    getRootNodeList(rootList);
+    /**
+     * in case that the rootList is empty, it means all those nodes are actually in cyclic dependencies
+     * then, we can just return the list we have
+     */
+    if (rootList.empty()) {
+        return getAllNodes();
+    } 
+
+    /**
+     * in case the rootList is not empty, it means we find some root nodes, then we need to do 
+     * a BFS traverse for all those nodes, since BFS have the property that node has a smaller distance 
+     * to the root will be accessed. (if there're multiple root, we can consider there's a dummy root
+     * that can access all those root nodes)
+     */
+    queue<Node*> queue;
+    Node *node;
+    for (int i = 0; i < rootList.size(); i++) {
+        node = rootList[i];
+        node->setVisited(true);
+        queue.push(node);
+    }
+
+    while (!queue.empty()) {
+        node = queue.front();
+        orderedList.push_back(node->getName());
+        queue.pop();
+
+        /**
+         * get all outgoingServices of the dequeued node
+         * if the node that service provides has not been visited, then mark it as visited
+         * and enqueue it
+         */
+        vector<string> &outgoingServices = node->getOutgoingServices();
+        int size = outgoingServices.size();
+        for (int i = 0; i < size; i++) {
+            string service = outgoingServices[i];
+            Node *tmp = getNodeProvidingService(service);
+            if (!tmp->getVisited()) {
+                tmp->setVisited(true);
+                queue.push(tmp);
+            }
         }
     }
+    /**
+     * FIXME after processing based on service, then do it on topic dependencies
+     * currently, only add all unvisited nodes at the end of the list
+     */
+    for (int i = 0; i < list.size(); i++) {
+        if (list[i]->getVisited()) continue;
+        orderedList.push_back(list[i]->getName());
+    }
+
+    return orderedList;
 }
 
-std::vector<std::string> &
-Dependency::getOutgoingNodeServiceList(const std::string &nodeName) {
-    if (!isValidOutgoingNodeService(nodeName)) {
-        return empty_vector;
+vector<string> 
+Dependency::getReconNodeList(string &nodeName) {
+    vector<string> orderedList; //return vector
+    
+    Node *root = getNodeWithName(nodeName);
+    if (!root) {
+        ROS_ERROR("Invalid node name specified");
+        return orderedList;
     }
-    return OutgoingNodeServices[nodeName];
-}
+    resetVisited();
+    /**
+     * The algorithm for this part can be divided into two parts:
+     * 1. use BFS to traserse all the imcoming nodes of the node specified until reach a root(source) node, 
+     *    and then reverse the accessing order, so we can obtain all the paths from source to this node
+     * 2. use BFS starting from this node and traverse all the outgoing nodes and get all the paths from 
+     *    this node to all sink nodes
+     */
+    // part 1. BFS and reverse
+    queue<Node*> queue;
+    Node *node;
+    root->setVisited(true);
+    queue.push(root);
+    
+    while (!queue.empty()) {
+       node = queue.front();
+       orderedList.push_back(node->getName());
+       DBG("orderedList push:%s", node->getName().c_str());
+       queue.pop();
 
-std::vector<std::string> &
-Dependency::getServiceNodeList(const std::string &serviceName) {
-    if (!isValidServiceNode(serviceName)) {
-        return empty_vector;
+       vector<string> &incomingServices = node->getIncomingServices();
+       int size = incomingServices.size();
+       for (int i = 0; i < size; i++) {
+           string service = incomingServices[i];
+           vector<Node *> tmpList = getNodeUsingService(service);
+           for (int j = 0; j < tmpList.size(); j++) {
+               Node *tmp = tmpList[j];
+               if (!tmp->getVisited()) {
+                   tmp->setVisited(true);
+                   queue.push(tmp);
+               }
+           }
+       }
     }
-    return ServicesInfo[serviceName];
-}
+    reverse(orderedList.begin(), orderedList.end());
+    DBG("orderedList size:%ld", orderedList.size());
 
-std::vector<std::string> &
-Dependency::getOutgoingNodeTopicList(const std::string &nodeName) {
-    if (!isValidOutgoingNodeTopic(nodeName)) {
-        return empty_vector;
+    // part 2. BFS
+    queue.push(root);
+    while (!queue.empty()) {
+        node = queue.front();
+        if (node != root) {
+            orderedList.push_back(node->getName());
+        }
+        queue.pop();
+        vector<string> &outgoingServices = node->getOutgoingServices();
+        int size = outgoingServices.size();
+        for (int i = 0; i < size; i++) {
+            string service = outgoingServices[i];
+            Node *tmp = getNodeProvidingService(service);
+            if (!tmp->getVisited()) {
+                tmp->setVisited(true);
+                queue.push(tmp);
+            }
+        }
     }
-    return OutgoingNodeTopics[nodeName];
-}
-
-std::vector<std::string> &
-Dependency::getTopicNodeList(const std::string &topicName) {
-    if (!isValidTopicNode(topicName)) {
-        return empty_vector;
-    }
-    return TopicsInfo[topicName];
+    DBG("orderedList size:%ld", orderedList.size());
+    return orderedList;
 }
 
 /**
- * private methods
+ * private methods 
  */
-bool 
-Dependency::isValidOutgoingNodeService(const std::string &nodeName) {
-    if (OutgoingNodeServices.find(nodeName) == OutgoingNodeServices.end()) {
-        ROS_ERROR("Invalid node specified for services");
-        return false;
+vector<string> 
+Dependency::getAllNodes() {
+    vector<string> orderedList; 
+    for (int i = 0; i < list.size(); i++) {
+        orderedList.push_back(list[i]->getName());
     }
-    return true;
+    return orderedList;
 }
 
-bool 
-Dependency::isValidOutgoingNodeTopic(const std::string &nodeName) {
-    if (OutgoingNodeTopics.find(nodeName) == OutgoingNodeTopics.end()) {
-        ROS_ERROR("Invalid node specified for topics");
-        return false;
+void 
+Dependency::resetVisited() {
+    for (int i = 0; i < list.size(); i++) {
+        list[i]->setVisited(false);
     }
-    return true;
+    return;
 }
 
-bool 
-Dependency::isValidServiceNode(const std::string &serviceName) {
-    if (ServicesInfo.find(serviceName) == ServicesInfo.end()) {
-        ROS_INFO("No node uses the service specified");
-        return false;
-    }
-    return true;
-}
-bool 
-Dependency::isValidTopicNode(const std::string &topicName) {
-    if (TopicsInfo.find(topicName) == TopicsInfo.end()) {
-        ROS_INFO("No node subscribes the node specified");
-        return false;
-    }
-    return true;
-}
-
-/**
- * APIs for NodeInfo, currently not used
- */
-NodeInfo::NodeInfo(char const *_name){
-    this->name = std::string(_name);
-}
-NodeInfo::NodeInfo(char const *_name, std::vector<std::string> &_servicesProvided, std::vector<std::string> &_topicsPublished){
-    this->name = std::string(_name);
-    this->servicesProvided = _servicesProvided;
-    this->topicsPublished = _topicsPublished;
-}
-NodeInfo::~NodeInfo(){
-
-}
-std::string NodeInfo::getName(void){
-    return this->name;
-}
-std::vector<std::string> & NodeInfo::getServicesProvided(void){
-    return this->servicesProvided;
-}
-std::vector<std::string> & NodeInfo::getSTopicsPublished(void){
-    return this->topicsPublished;
-}
-void NodeInfo::addServicesProvided(std::string &_servicesProvided){
-    this->servicesProvided.push_back(_servicesProvided);
-}
-void NodeInfo::addTopicsPublished(std::string &_topicsPublished){
-    this->topicsPublished.push_back(_topicsPublished);
-}
-void NodeInfo::addServicesProvided(std::vector<std::string> &_servicesProvided){
-    int size = _servicesProvided.size();
-    for (int i = 0; i < size; i++) {
-        this->servicesProvided.push_back(_servicesProvided[i]);
-    }
-}
-void NodeInfo::addTopicsPublished(std::vector<std::string> &_topicsPublished){
-    int size = _topicsPublished.size();
-    for (int i = 0; i < size; i++) {
-        this->topicsPublished.push_back(_topicsPublished[i]);
+void
+Dependency::getRootNodeList(vector<Node*> &rootList) {
+    for (int i = 0; i < list.size(); i++) {
+        // currently, only consider no incoming service as root
+        Node *node = rootList[i];
+        if (node->getIncomingServicesSize() == 0) {
+            rootList.push_back(node); 
+        }
     }
 }
