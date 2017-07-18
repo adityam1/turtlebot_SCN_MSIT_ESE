@@ -14,7 +14,7 @@
 #include <vector>
 
 #include <scn_library/scn_utils.h>
-#include "Dependency.h"
+#include "reconfigure/Dependency.h"
 
 using namespace std;
 

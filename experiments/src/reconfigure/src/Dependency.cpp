@@ -1,10 +1,10 @@
 #include <cstring>
 #include <queue>
 #include <ros/ros.h>
-#include "Dependency.h"
+#include "reconfigure/Dependency.h"
 #include "scn_library/scn_utils.h"
 
-static int log_level = LOG_DBG;
+static int log_level = LOG_INFO;
 
 /**
  * APIs for Node class
@@ -313,6 +313,7 @@ Dependency::addIncomingTopics(string &nodeName, string &topicName) {
 
 vector<string>
 Dependency::getReconNodeList() {
+    ENTER();
     // root node means those without any incoming services
     vector<Node *> rootList; 
     vector<string> orderedList; //return vector
@@ -341,6 +342,11 @@ Dependency::getReconNodeList() {
         queue.push(node);
     }
 
+    //DBG("rootList size: %ld", rootList.size());
+    //for (int i = 0; i < rootList.size(); i++) {
+    //    DBG("root: %s", rootList[i]->getName().c_str());
+    //}
+
     while (!queue.empty()) {
         node = queue.front();
         orderedList.push_back(node->getName());
@@ -351,12 +357,13 @@ Dependency::getReconNodeList() {
          * if the node that service provides has not been visited, then mark it as visited
          * and enqueue it
          */
+        DBG("current node: %s", node->getName().c_str());
         vector<string> &outgoingServices = node->getOutgoingServices();
         int size = outgoingServices.size();
         for (int i = 0; i < size; i++) {
             string service = outgoingServices[i];
             Node *tmp = getNodeProvidingService(service);
-            if (!tmp->getVisited()) {
+            if (tmp != NULL && !tmp->getVisited()) {
                 tmp->setVisited(true);
                 queue.push(tmp);
             }
@@ -371,6 +378,7 @@ Dependency::getReconNodeList() {
         orderedList.push_back(list[i]->getName());
     }
 
+    LEAVE();
     return orderedList;
 }
 
@@ -433,7 +441,7 @@ Dependency::getReconNodeList(string &nodeName) {
         for (int i = 0; i < size; i++) {
             string service = outgoingServices[i];
             Node *tmp = getNodeProvidingService(service);
-            if (!tmp->getVisited()) {
+            if (tmp != NULL && !tmp->getVisited()) {
                 tmp->setVisited(true);
                 queue.push(tmp);
             }
@@ -465,11 +473,13 @@ Dependency::resetVisited() {
 
 void
 Dependency::getRootNodeList(vector<Node*> &rootList) {
+    ENTER();
     for (int i = 0; i < list.size(); i++) {
         // currently, only consider no incoming service as root
-        Node *node = rootList[i];
+        Node *node = list[i];
         if (node->getIncomingServicesSize() == 0) {
             rootList.push_back(node); 
         }
     }
+    LEAVE();
 }
