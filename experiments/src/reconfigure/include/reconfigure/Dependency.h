@@ -54,7 +54,7 @@ class Node {
         // erasers
         void eraseOutgoingServices(string &_serviceProvided);
         void eraseIncomingServices(string  &_servicesUsed);
-        void earseOutgogingTopics(string &_topicsPublished);
+        void eraseOutgoingTopics(string &_topicsPublished);
         void eraseIncomingTopics(string &_topicsSubscribed);
         // validators
         bool isValidOutgoingService(const string &service);
@@ -80,6 +80,10 @@ class Dependency {
         map<string, Node*> topicInfo;
 
         // private methods
+        /**
+         * erase orphan node (without any incoming or outgoing dependency)
+         */
+        void eraseOrphanNode(Node *node);
         /**
          * reset all the nodes to be visited false
          */
@@ -130,6 +134,16 @@ class Dependency {
         void addIncomingServices(string &nodeName, string &serviceName);
         void addOutgogingTopics(string &nodeName, string &topicName);
         void addIncomingTopics(string &nodeName, string &topicName);
+        /**
+         * erase dependency for the node specified
+         * params:
+         *  nodeName: the node specified
+         *  serviceName/topicName: the name of topic/service
+         */
+        void eraseOutgoingServices(string &nodeName, string &serviceName);
+        void eraseIncomingServices(string &nodeName, string &serviceName);
+        void eraseOutgoingTopics(string &nodeName, string &topiceName);
+        void eraseIncomingTopics(string &nodeName, string &topicName);
         /**
          * add dependency according to service/topic
          * used at service client and topic subscribed

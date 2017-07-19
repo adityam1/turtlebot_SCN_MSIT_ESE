@@ -98,6 +98,38 @@ int main(int argc, char** argv) {
     cout << "reconfigure ordered list of only one node 6 is as follows for case 2" << endl;
     printList(reconfigureOrderedList4);
 
+    /**
+     * use case 3 - test remove node dependency
+     *      1    7                 1  
+     *     / \    \               / \
+     *    2   5   8              2   5
+     *   /    /  /    --->      /    /
+     *  3    6 -               3    6 
+     *  \   /                   \  /
+     *    4                      4
+     */
+
+    node = "7";
+    serviceUsing = "8_service";
+    depency->eraseOutgoingServices(node ,serviceUsing);
+
+    node = "8";
+    serviceUsing = "6_service";
+    depency->eraseOutgoingServices(node, serviceUsing);
+    serviceProviding = "8_service";
+    depency->eraseIncomingServices(node, serviceProviding);
+    
+    // reconfigure all nodes
+    vector<string> reconfigureOrderedList5 = depency->getReconNodeList();
+    cout << "reconfigure ordered list of all nodes is as follows for case 3:" << endl;
+    printList(reconfigureOrderedList5);
+
+    // reconfigure only one node: 6
+    node = "6";
+    vector<string> reconfigureOrderedList6 = depency->getReconNodeList(node);
+    cout << "reconfigure ordered list of only one node 6 is as follows for case 3:" << endl;
+    printList(reconfigureOrderedList6);
+
     return 0;
 }
 

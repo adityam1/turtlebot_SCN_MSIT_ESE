@@ -139,7 +139,7 @@ Node::eraseIncomingServices(string  &_servicesUsed) {
 }
 
 void
-Node::earseOutgogingTopics(string &_topicsPublished) {
+Node::eraseOutgoingTopics(string &_topicsPublished) {
     vector<string>::iterator pos = find(outgoingTopics.begin(), outgoingTopics.end(), _topicsPublished);
     if (pos != outgoingTopics.end()) {
         outgoingTopics.erase(pos);
@@ -311,6 +311,50 @@ Dependency::addIncomingTopics(string &nodeName, string &topicName) {
     node->addIncomingTopics(topicName);
 }
 
+void 
+Dependency::eraseOutgoingServices(string &nodeName, string &serviceName) {
+    Node *node;
+    if ((node = getNodeWithName(nodeName)) == NULL) {
+        ROS_ERROR("Invalid node name specified: %s", nodeName.c_str());
+        return;
+    }
+    node->eraseOutgoingServices(serviceName);
+    eraseOrphanNode(node);
+}
+
+void 
+Dependency::eraseIncomingServices(string &nodeName, string &serviceName) {
+    Node *node;
+    if ((node = getNodeWithName(nodeName)) == NULL) {
+        ROS_ERROR("Invalid node name specified: %s", nodeName.c_str());
+        return;
+    }
+    node->eraseIncomingServices(serviceName);
+    eraseOrphanNode(node);
+}
+
+void 
+Dependency::eraseOutgoingTopics(string &nodeName, string &topicName) {
+    Node *node;
+    if ((node = getNodeWithName(nodeName)) == NULL) {
+        ROS_ERROR("Invalid node name specified: %s", nodeName.c_str());
+        return;
+    }
+    node->eraseOutgoingTopics(topicName);
+    eraseOrphanNode(node);
+}
+
+void 
+Dependency::eraseIncomingTopics(string &nodeName, string &topicName) {
+    Node *node;
+    if ((node = getNodeWithName(nodeName)) == NULL) {
+        ROS_ERROR("Invalid node name specified: %s", nodeName.c_str());
+        return;
+    }
+    node->eraseIncomingTopics(topicName);
+    eraseOrphanNode(node);
+}
+
 vector<string>
 Dependency::getReconNodeList() {
     ENTER();
@@ -454,6 +498,18 @@ Dependency::getReconNodeList(string &nodeName) {
 /**
  * private methods 
  */
+void 
+Dependency::eraseOrphanNode(Node *node) {
+    // remove orphan node from list
+    if (node != NULL &&
+            node->getOutgoingServicesSize() == 0 && 
+            node->getIncomingServicesSize() == 0 && 
+            node->getOutgoingTopicsSize() == 0 &&
+            node->getIncomingTopicsSize() == 0) {
+        removeNode(node);
+    }
+}
+
 vector<string> 
 Dependency::getAllNodes() {
     vector<string> orderedList; 
