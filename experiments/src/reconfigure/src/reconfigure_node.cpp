@@ -9,7 +9,9 @@
 
 #include <scn_library/systemControlRegisterService.h>
 #include <scn_library/kill.h>
+#include <scn_library/presence.h>
 #include <reconfigure/userInterfaceService.h>
+#include <reconfigure/presence.h>
 #include <reconfigure/demoNodeService.h>
 #include <iostream>
 #include <vector>
@@ -194,6 +196,19 @@ bool unRegisterAll(
 }
 
 /*------------------------------------------------------------------
+ * presenceCb
+ *  Response Format 
+ *  result - OK/ERROR
+ *
+ *-----------------------------------------------------------------*/
+bool presenceCb(reconfigure::presence::Request &req,
+        reconfigure::presence::Response &res)
+{
+    res.result = OK;
+    return true;
+}
+
+/*------------------------------------------------------------------
  * scnCoreCb
  * Request Format
  *  node_name - Name of the node for which the dep is being 
@@ -254,9 +269,8 @@ bool scnCoreCb(scn_library::systemControlRegisterService::Request &req,
                 break;
         }
     }
-
-    return status;
     LEAVE();
+    return status;
 }
 
 /**
@@ -299,7 +313,7 @@ bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &re
 
     // kill the dependecies of old node and launch the dependency of new node
     //launchNode((char *)"python /home/turtlebot/ese_team_project/yunpengx/experiments/src/reconfigure/src/with_launch_file.py");
-    launchNode(new_node_package.c_str(), new_node.c_str());
+    launchNode((char *)new_node_package.c_str(), (char *)new_node.c_str());
     res.result = 0;
     LEAVE();
     return true;
@@ -312,6 +326,12 @@ int main(int argc, char **argv)
     //ros::init(argc, argv, "systemControlNode");
     ros::NodeHandle n;
     gDependency = new Dependency();
+
+    /* Create the presence service 
+     * This is for the other nodes to know that the SCN is present in 
+     * the system */
+    ros::ServiceServer presence = n.advertiseService("presence", presenceCb);
+
 
     ros::ServiceServer registerService = n.advertiseService("systemControlRegisterService", scnCoreCb);
     ros::ServiceServer userInterfaceService = n.advertiseService("userInterfaceService", userInterfaceServiceCallback);
@@ -338,24 +358,23 @@ void systemControlSigintHandler(int sig) {
  * Starts the node specified by packageName and nodeName.
  * 
  *-----------------------------------------------------------------*/
-static bool launchNode(char *packageName, char *nodeName) {
-    FILE *fp_which;
+static bool launchNode(char *packageName, char *nodeName)  *fp_which;
     int error = 0;
     char rosrun_path[200] = {0};
-    char argv[4] = {0};
+    char *argv[4] = {0};
     pid_t pid;
 
-    if((fp_which = popen("/usr/bin/which rosrun")) != NULL) {
-        fgets(rosrun_path, 200, "r");
+    if((fp_which = popen("/usr/bin/which rosrun", "r")) != NULL) {
+        fgets(rosrun_path, 200, fp_which);
         pclose(fp_which);
         
         rosrun_path[strlen(rosrun_path) -1] = '\0';
 
         if(0 == (pid = fork())) {
             setpgid(0, 0);
-            argv[0] = (char *) rosrun_path;
-            argv[1] = (char *) packageName;
-            argv[2] = (char *) nodeName;
+            argv[0] = rosrun_path;
+            argv[1] = packageName;
+            argv[2] = nodeName;
             argv[3] = NULL;
 
             ROS_INFO("Attempting to start node %s", nodeName);
@@ -363,14 +382,14 @@ static bool launchNode(char *packageName, char *nodeName) {
             error = execve(argv[0], argv, environ);
             if(error) {
                 ROS_ERROR("Unable to start node");
-                return FALSE;
+                return SCN_ERROR;
             }
         }
-        return TRUE;
+        return SCN_OK;
     }
     else {
         ROS_ERROR("Unable to launch node");
-        return FALSE;
+        return SCN_ERROR;
     }
 }
 
@@ -383,7 +402,8 @@ static void killNode(char *name) {
 
     /* Request the node to commit suicide */
     ros::NodeHandle n;
-    std::string serviceName = name + "Kill";
+    std::string serviceName = (const char *)name;
+    serviceName += "Kill";
     
     ROS_INFO("SCN: Attempting to kill %s\n", name);
 

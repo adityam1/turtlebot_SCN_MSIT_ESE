@@ -66,6 +66,7 @@ add_service_files(
   FILES
   systemControlRegisterService.srv
   kill.srv
+  presence.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -135,6 +136,7 @@ include_directories(
 add_library(${PROJECT_NAME}
     # src/${PROJECT_NAME}/scn_library.cpp
     # add more files
+    src/scn_core.cpp
     src/scn_node_handle.cpp
     src/scn_publisher.cpp
     src/scn_subscriber.cpp
