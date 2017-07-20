@@ -1,3 +1,0 @@
-<launch>
-<node name="demoNode2" pkg="reconfigure" type="demo_node2" />
-</launch>

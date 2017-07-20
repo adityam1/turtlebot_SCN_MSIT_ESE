@@ -23,7 +23,7 @@ namespace ros {
         if((fp_which = popen("/usr/bin/which rosrun", "r")) != NULL) {
             fgets(rosrun_path, 200, fp_which);
             pclose(fp_which);
-            
+
             rosrun_path[strlen(rosrun_path) -1] = '\0';
 
             if(0 == (pid = fork())) {
@@ -59,7 +59,7 @@ namespace ros {
     static void scnSetNodeState(bool state) {
         scnNodeInfo.nodeReconState = state;
     }
-    
+
     /*--------------------------------------------------------
      * scnGetNODEState : Will return the current state of the node
      * 
@@ -94,7 +94,7 @@ namespace ros {
      * Does not return
      * ------------------------------------------------------*/
     static bool killServiceCb(scn_library::kill::Request& req,
-                            scn_library::kill::Response& res) {
+            scn_library::kill::Response& res) {
         ROS_INFO("SCN requested to shut this node down..Shutting down");
         exit(EX_PROTOCOL);
     }
@@ -118,7 +118,7 @@ namespace ros {
      * Return
      * ------------------------------------------------------*/
     static bool enterServiceCb(scn_library::enterRecon::Request& req,
-                            scn_library::enterRecon::Response& res) {
+            scn_library::enterRecon::Response& res) {
         ROS_INFO("SCN: Entering Reconfiguration Mode");
         //FIXME: Need to add logic here
     }
@@ -138,7 +138,7 @@ namespace ros {
      * Return
      * ------------------------------------------------------*/
     static bool exitServiceCb(scn_library::exitRecon::Request& req,
-                            scn_library::exitRecon::Response& res) {
+            scn_library::exitRecon::Response& res) {
         ROS_INFO("SCN: Exit Reconfiguration Mode");
         //FIXME: Need to add logic here
     }
@@ -168,7 +168,7 @@ namespace ros {
             saveStateRoutine saveStateCb,
             reconModeRoutine reconModeCb
             ) {
-        
+
         bool isSCN = false;
         int retry = 0;
 
@@ -186,7 +186,7 @@ namespace ros {
         /* Check if SCN is present */
         ros::ServiceClient client = scnNodeInfo.scnNodeHandle->serviceClient<scn_library::presence>("presence");
         scn_library::presence srv;
-        
+
         while((!isSCN) && (retry < 3))
         {
             if(!client.call(srv))
@@ -214,11 +214,11 @@ namespace ros {
         /* Exit Recon Service */
         std::string exitServiceName = scnNodeInfo.name + "Exit";
         scnNodeInfo.exitService = scnNodeInfo.scnNodeHandle->advertiseService(exitServiceName, exitServiceCb);
-            
+
         /* Kill Recon Service */
         std::string killServiceName = scnNodeInfo.name + "Kill";
         scnNodeInfo.killService = scnNodeInfo.scnNodeHandle->advertiseService(killServiceName, killServiceCb);
-    
+
         /* Set state of node */
         scnSetNodeState(SCN_NORMAL_MODE);
 

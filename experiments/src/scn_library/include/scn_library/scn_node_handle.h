@@ -24,7 +24,7 @@ namespace ros {
 
             // update localSCNState through subscribing the SCN topic
             //void updateLocalSCNState();
-            
+
             /**
              * _nodeName - the name of the node
              * _depName - name of the topic, service, or action
@@ -99,7 +99,7 @@ namespace ros {
                     const SubscriberStatusCallback& disconnect_cb = SubscriberStatusCallback(), 
                     const VoidConstPtr& tracked_object = VoidConstPtr(), 
                     bool latch = false) {
-                
+
                 ENTER();
                 if (ros::scnGetNodeState()) {
                     // TODO, specify the behavior of node is in reconfigure or intermediate mode
@@ -117,7 +117,7 @@ namespace ros {
                     uint32_t queue_size,
                     void(*fp)(M), 
                     const TransportHints& transport_hints = TransportHints()) {
-                
+
                 ENTER();
                 if (ros::scnGetNodeState()) {
                     // TODO, specify the behavior of node is in reconfigure or intermediate mode
@@ -152,7 +152,7 @@ namespace ros {
                     const boost::function<void (const boost::shared_ptr<M const>&)>& callback, 
                     const VoidConstPtr& tracked_object = VoidConstPtr(), 
                     const TransportHints& transport_hints = TransportHints()) {
-            
+
                 ENTER();
                 if (ros::scnGetNodeState()) {
                     // TODO, specify the behavior of node is in reconfigure or intermediate mode
@@ -245,7 +245,7 @@ namespace ros {
                 ros::SCNServiceServer advertiseService(const std::string &node_name, const std::string &services_provided,
                         const boost::function<bool(MReq&, MRes&)>& callback, 
                         const ros::VoidConstPtr& tracked_object = VoidConstPtr()) {
-                    
+
                     ENTER();
                     registerDependenciesToSCN(node_name, services_provided, REGISTER, SERVICE, SERVER);
 
@@ -268,17 +268,6 @@ namespace ros {
                     LEAVE();
                     return scn_service_server;
                 }
-#if 0
-            ros::SCNServiceServer advertiseService(std::string node_name, std::string services_provided,
-                                ros::AdvertiseServiceOptions& ops) {
-            
-                    registerDependenciesToSCN(node_name, services_provided, REGISTER, SERVICE, SERVER);
-            
-                    //Call exiting advertiseService
-                    SCNServiceServer scn_service_server(ros::NodeHandle::advertiseService(ops));
-                    return scn_service_server;
-            }
-#endif
 
             // wrappers for ROS service client
             template<class MReq, class MRes>
@@ -307,32 +296,7 @@ namespace ros {
                     return scn_service_client;
                 }
 
-#if 0
-            ros::SCNServiceClient serviceClient(const std::string &node_name, const std::string &services_used,
-                    ros::ServiceClientOptions& ops) {
-
-                registerDependenciesToSCN(node_name, services_used, REGISTER, SERVICE, CLIENT);
-
-                //Call exiting serviceClient
-                SCNServiceClient scn_service_client(ros::NodeHandle::serviceClient(ops));
-                return scn_service_client;
-            }
-#endif
-
-#if 0       //Not needed. moved state to scn_core.cpp
-
-            // public method for one node to get its state, used by publisher and subscriber
-            int getLocalSCNState() {
-                ENTER();
-                if (this->inited) {
-                    ROS_ERROR("Node Handle is not inited!\n");
-                    return -1;
-                }
-                LEAVE();
-                return this->ros::scnGetNodeState();
-            }
-#endif
-        };
+    };
 }
 
 #endif
