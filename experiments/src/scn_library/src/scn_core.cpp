@@ -1,30 +1,16 @@
 #include <sysexits.h>
 #include <ros/ros.h>
 #include <ros/package.h>
-#include <scn_library/scn_utils.h>
+#include <scn_library/scn_core.h>
 #include <scn_library/kill.h>
 #include <scn_library/enterRecon.h>
 #include <scn_library/exitRecon.h>
 #include <scn_library/presence.h>
-#include <scn_library/scn_core.h>
 
 namespace ros {
 
-    /* SCN core global variables and structs */
-    typedef struct {
-
-        std::string &name;                  //Node name
-        saveStateRoutine saveStateCb;       //Callback to save state of the node
-        reconModeRoutine reconModeCb;       //Callback to be called when entering recon mode
-        ros::NodeHandle *scnNodeHandle;     //Node handle to communicate with SCN
-        bool nodeReconState;                //State of the node (noremal/recon)
-        ros::ServiceServer enterService;
-        ros::ServiceServer exitService;
-        ros::ServiceServer killService;
-    }scnNodeInfo_t;
-
-    std::string temp = "";
-    static scnNodeInfo_t scnNodeInfo = {temp, NULL, NULL, NULL, false};
+    std::string initString = "";
+    static scnNodeInfo_t scnNodeInfo = {initString, NULL, NULL, NULL, false, false};
 
     /* SCN core function definitions */
     static bool launchSCN() {
@@ -64,25 +50,37 @@ namespace ros {
     }
 
     /*--------------------------------------------------------
-     * scnSetState : Will set the state of the node
+     * scnSetNodeState : Will set the state of the node
      * 
      * Parameters 
      * state:   SCN_RECON_MODE/SCN_NORMAL_MODE
      *
      * ------------------------------------------------------*/
-    static void scnSetState(bool state) {
+    static void scnSetNodeState(bool state) {
         scnNodeInfo.nodeReconState = state;
     }
     
     /*--------------------------------------------------------
-     * scnGetState : Will return the current state of the node
+     * scnGetNODEState : Will return the current state of the node
      * 
      * Return
      * state:   SCN_RECON_MODE/SCN_NORMAL_MODE
      *
      * ------------------------------------------------------*/
-    uint8_t scnGetState() {
+    uint8_t scnGetNodeState() {
         return scnNodeInfo.nodeReconState;
+    }
+
+    /*--------------------------------------------------------
+     * scnGetCommNh : Will return the nodeHandle used for
+     *                communication with the SCN.
+     * 
+     * Return
+     * ros::NodeHandle
+     *
+     * ------------------------------------------------------*/
+    ros::NodeHandle* scnGetCommNh() {
+        return scnNodeInfo.scnNodeHandle;
     }
 
     /*--------------------------------------------------------
@@ -122,6 +120,7 @@ namespace ros {
     static bool enterServiceCb(scn_library::enterRecon::Request& req,
                             scn_library::enterRecon::Response& res) {
         ROS_INFO("SCN: Entering Reconfiguration Mode");
+        //FIXME: Need to add logic here
     }
 
     /*--------------------------------------------------------
@@ -141,6 +140,7 @@ namespace ros {
     static bool exitServiceCb(scn_library::exitRecon::Request& req,
                             scn_library::exitRecon::Response& res) {
         ROS_INFO("SCN: Exit Reconfiguration Mode");
+        //FIXME: Need to add logic here
     }
 
     /*--------------------------------------------------------
@@ -220,6 +220,9 @@ namespace ros {
         scnNodeInfo.killService = scnNodeInfo.scnNodeHandle->advertiseService(killServiceName, killServiceCb);
     
         /* Set state of node */
-        scnSetState(SCN_NORMAL_MODE);
+        scnSetNodeState(SCN_NORMAL_MODE);
+
+        /* Mark node initialization done */
+        scnNodeInfo.initStatus = true;
     }
 }

@@ -16,7 +16,8 @@ ros::SCNServiceClient::~SCNServiceClient() {
 // wrapper method for service client call with extra parameter - SCNNodeHandle to get the node state
 template<class MReq, class MRes> bool 
 ros::SCNServiceClient::call(SCNNodeHandle &nh,  MReq &req, MReq &res) {
-    int state = nh.getLocalSCNState();
+    //int state = nh.getLocalSCNState();
+    int state = ros::scnGetNodeState();
 
     if (state) {
         //FIXME
@@ -28,7 +29,8 @@ ros::SCNServiceClient::call(SCNNodeHandle &nh,  MReq &req, MReq &res) {
 
 template<class Service> bool 
 ros::SCNServiceClient::call(SCNNodeHandle &nh, Service& service) {
-    int state = nh.getLocalSCNState();
+    //int state = nh.getLocalSCNState();
+    int state = ros::scnGetNodeState();
 
     if (state) {
         //FIXME
@@ -40,7 +42,8 @@ ros::SCNServiceClient::call(SCNNodeHandle &nh, Service& service) {
 
 template<typename MReq, typename MRes> bool 
 ros::SCNServiceClient::call(SCNNodeHandle &nh, const MReq& req, MRes& resp, const std::string& service_md5sum) {
-    int state = nh.getLocalSCNState();
+    //int state = nh.getLocalSCNState();
+    int state = ros::scnGetNodeState();
 
     if (state) {
         //FIXME
