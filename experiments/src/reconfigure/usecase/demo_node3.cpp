@@ -22,14 +22,19 @@ std::string gCallbackService;
  */
 bool demoNode3ClientCallback(reconfigure::demoNodeService::Request &req, 
         reconfigure::demoNodeService::Response &res);
+void saveStateCb(void) {
+}
 
+void reconModeCb(void) {
+}
 /**
  * APIs
  */
 int main(int argc, char ** argv) {
     ENTER();
     std::string node_name = "demoNode3";
-    ros::init(argc, argv, node_name);
+    //ros::init(argc, argv, node_name);
+    ros::scnInit(argc, argv, node_name, 0, saveStateCb, reconModeCb);
     ros::SCNNodeHandle n;
 
     // service specified for this node in the reconfigure mode
