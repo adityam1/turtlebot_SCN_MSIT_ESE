@@ -11,7 +11,6 @@
 #include <scn_library/kill.h>
 #include <scn_library/presence.h>
 #include <reconfigure/userInterfaceService.h>
-#include <reconfigure/presence.h>
 #include <reconfigure/demoNodeService.h>
 #include <iostream>
 #include <vector>
@@ -201,10 +200,10 @@ bool unRegisterAll(
  *  result - OK/ERROR
  *
  *-----------------------------------------------------------------*/
-bool presenceCb(reconfigure::presence::Request &req,
-        reconfigure::presence::Response &res)
+bool presenceCb(scn_library::presence::Request &req,
+        scn_library::presence::Response &res)
 {
-    res.result = OK;
+    res.result =SCN_OK;
     return true;
 }
 
@@ -358,7 +357,8 @@ void systemControlSigintHandler(int sig) {
  * Starts the node specified by packageName and nodeName.
  * 
  *-----------------------------------------------------------------*/
-static bool launchNode(char *packageName, char *nodeName)  *fp_which;
+static bool launchNode(char *packageName, char *nodeName) {
+    FILE *fp_which;
     int error = 0;
     char rosrun_path[200] = {0};
     char *argv[4] = {0};

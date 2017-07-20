@@ -66,6 +66,8 @@ add_service_files(
   FILES
   systemControlRegisterService.srv
   kill.srv
+  enterRecon.srv
+  exitRecon.srv
   presence.srv
 )
 

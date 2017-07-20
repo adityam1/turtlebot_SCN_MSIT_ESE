@@ -172,6 +172,11 @@ add_dependencies(unit_test_dependency reconfigure_generate_messages_cpp ${catkin
 target_link_libraries(unit_test_dependency
   ${catkin_LIBRARIES}
 )
+add_executable(init_test unittest/init_test.cpp)
+add_dependencies(init_test reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library)
+target_link_libraries(init_test
+  ${catkin_LIBRARIES}
+)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
