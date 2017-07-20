@@ -4,31 +4,40 @@
 #include "scn_library/scn_utils.h"
 #include "scn_library/scn_node_handle.h"
 
+#if 0
+ros::SCNNodeHandle::SCNNodeHandle() : NodeHandle() {
+    /* Get Node handle to communicate with SCN */
+    n = ros::scnGetCommNh();
+    client = n->serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
+    inited = true;
+};
+#endif
+
 ros::SCNNodeHandle::SCNNodeHandle(const std::string& ns, const M_string& remappings) : NodeHandle(ns, remappings) {
 
-    client = n.serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
-    localSCNState = 0;
+    n = ros::scnGetCommNh();
+    client = n->serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
     inited = true;
 };
 
 ros::SCNNodeHandle::SCNNodeHandle(const SCNNodeHandle& rhs) : NodeHandle(rhs) {
     
-    client = n.serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
-    localSCNState = 0;
+    n = ros::scnGetCommNh();
+    client = n->serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
     inited = true;
 };
 
 ros::SCNNodeHandle::SCNNodeHandle(const SCNNodeHandle& parent, const std::string &ns) : NodeHandle(parent, ns) {
     
-    client = n.serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
-    localSCNState = 0;
+    n = ros::scnGetCommNh();
+    client = n->serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
     inited = true;
 };
 
 ros::SCNNodeHandle::SCNNodeHandle(const SCNNodeHandle& parent, const std::string &ns, const M_string &remappings) : NodeHandle(parent, ns, remappings) {
 
-    client = n.serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
-        localSCNState = 0;   
+    n = ros::scnGetCommNh();
+    client = n->serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
         inited = true;
     };
 
@@ -278,7 +287,7 @@ SCNNodeHandle::serviceClient(const std::string &node_name, const std::string &se
 	//Call exiting serviceClient
 	return ros::NodeHandle::serviceClient(ops);
 };
-
+#if 0
 /**
  * extra methods for handle communicating with SCN
  */
@@ -291,5 +300,5 @@ SCNNodeHandle::getLocalSCNState() {
     }
     return this->localSCNState;
 }
-
+#endif
 #endif

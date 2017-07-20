@@ -1,5 +1,6 @@
 #include "scn_library/scn_publisher.h"
 #include "scn_library/scn_node_handle.h"
+#include "scn_library/scn_core.h"
 
 ros::SCNPublisher::SCNPublisher() : Publisher() {
 
@@ -16,7 +17,8 @@ ros::SCNPublisher::~SCNPublisher() {
 // wrapper method for publish with extra parameter - SCNNodeHandle to get the node state
 template <typename M> void 
 ros::SCNPublisher::publish(SCNNodeHandle &nh, const boost::shared_ptr<M> &message) const {
-    int state = nh.getLocalSCNState();
+    //int state = nh.getLocalSCNState();
+    int state = ros::scnGetNodeState();
 
     if (state) {
         //FIXME
@@ -29,7 +31,8 @@ ros::SCNPublisher::publish(SCNNodeHandle &nh, const boost::shared_ptr<M> &messag
 
 template <typename M> void 
 ros::SCNPublisher::publish(SCNNodeHandle &nh, const M& message) const {
-    int state = nh.getLocalSCNState();
+    //int state = nh.getLocalSCNState();
+    int state = ros::scnGetNodeState();
 
     if (state) {
         //FIXME

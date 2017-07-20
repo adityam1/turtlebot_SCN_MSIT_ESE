@@ -24,6 +24,12 @@
 #define SCN_OK          (0)
 #define SCN_ERROR       (1)
 
+#define SCN_AUTH        (0x90)
+
+//State of a node
+#define SCN_NORMAL_MODE (0)
+#define SCN_RECON_MODE  (1)
+
 typedef enum {
     LOG_ERR,
     LOG_MSG,

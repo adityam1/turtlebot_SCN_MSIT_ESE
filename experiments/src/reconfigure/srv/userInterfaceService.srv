@@ -1,6 +1,6 @@
 string old_node
 string new_node
-
+string new_node_package
 ---
 
 uint8 OK = 0
