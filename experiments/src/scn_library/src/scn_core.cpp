@@ -30,7 +30,7 @@ namespace ros {
                 setpgid(0, 0);
                 argv[0] = rosrun_path;
                 argv[1] = (const char*)"reconfigure";
-                argv[2] = (const char*)"systemControlNode";
+                argv[2] = (const char*)"reconfigure_node";
                 argv[3] = NULL;
 
                 ROS_INFO("Attempting to start SCN");
