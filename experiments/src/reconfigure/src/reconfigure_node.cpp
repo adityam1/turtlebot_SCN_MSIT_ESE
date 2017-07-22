@@ -8,7 +8,7 @@
 #include <python2.7/Python.h>
 
 #include <scn_library/systemControlRegisterService.h>
-#include <scn_library/kill.h>
+#include <scn_library/scnNodeComm.h>
 #include <scn_library/presence.h>
 #include <reconfigure/userInterfaceService.h>
 #include <reconfigure/demoNodeService.h>
@@ -453,15 +453,16 @@ static void killNode(char *name) {
     /* Request the node to commit suicide */
     ros::NodeHandle n;
     std::string serviceName = (const char *)name;
-    serviceName += "Kill";
+    serviceName += "Comm";
     
     ROS_INFO("SCN: Attempting to kill %s\n", name);
 
-    ros::ServiceClient client = n.serviceClient<scn_library::kill>(serviceName);
+    ros::ServiceClient client = n.serviceClient<scn_library::scnNodeComm>(serviceName);
 
-    scn_library::kill srv;
+    scn_library::scnNodeComm srv;
     
     srv.request.auth = SCN_AUTH;
+    srv.request.command= SCN_KILL;
 
     /* We don't expect a service failure here */
     client.call(srv);

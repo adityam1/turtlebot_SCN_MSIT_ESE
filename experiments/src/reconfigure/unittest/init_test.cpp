@@ -2,12 +2,12 @@
 #include <scn_library/scn_core.h>
 
 
-
-void saveStateCb(void) {
+void saveStateCb(uint8_t reconType) {
 }
 
-void reconModeCb(void) {
+bool reconModeCb(uint8_t reconType, uint8_t command) {
 }
+
 
 int main(int argc, char** argv)
 {

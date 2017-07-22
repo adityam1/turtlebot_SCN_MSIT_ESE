@@ -24,10 +24,11 @@ bool demoNode2ClientCallback(reconfigure::demoNodeService::Request &req,
         reconfigure::demoNodeService::Response &res);
 bool demoNode2CallBack(reconfigure::demoNodeService::Request &req, 
         reconfigure::demoNodeService::Response &res);
-void saveStateCb(void) {
+
+void saveStateCb(uint8_t reconType) {
 }
 
-void reconModeCb(void) {
+bool reconModeCb(uint8_t reconType, uint8_t command) {
 }
 /**
  * APIs
