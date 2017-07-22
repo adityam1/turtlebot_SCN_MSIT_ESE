@@ -5,8 +5,9 @@
 
 namespace ros {
 
-    typedef void (*saveStateRoutine)(void);
-    typedef void (*reconModeRoutine)(void);
+    typedef void (*saveStateRoutine)(uint8_t reconType);
+    typedef bool (*reconModeRoutine)(uint8_t reconType, uint8_t command);
+
     /* SCN core global variables and structs */
     typedef struct {
 
@@ -16,9 +17,7 @@ namespace ros {
         ros::NodeHandle *scnNodeHandle;     //Node handle to communicate with SCN
         uint8_t nodeReconState;             //State of the node (noremal/recon)
         bool initStatus;                    //Specifies if node init has been called
-        ros::ServiceServer enterService;
-        ros::ServiceServer exitService;
-        ros::ServiceServer killService;
+        ros::ServiceServer nodeService;
     }scnNodeInfo_t;
 
     void scnInit(int & argc, 

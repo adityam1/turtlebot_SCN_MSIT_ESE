@@ -30,6 +30,11 @@
 #define SCN_NORMAL_MODE (0)
 #define SCN_RECON_MODE  (1)
 
+//SCN message type
+#define SCN_ENTER_RECON (10)
+#define SCN_EXIT_RECON  (11)
+#define SCN_KILL        (12)
+
 typedef enum {
     LOG_ERR,
     LOG_MSG,
