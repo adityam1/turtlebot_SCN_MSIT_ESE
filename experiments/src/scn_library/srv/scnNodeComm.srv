@@ -1,0 +1,6 @@
+uint8 command
+uint8 reconType
+uint8 auth
+
+---
+uint8 status

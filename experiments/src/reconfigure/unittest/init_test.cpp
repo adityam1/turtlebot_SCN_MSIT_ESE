@@ -3,9 +3,11 @@
 
 
 void saveStateCb(uint8_t reconType) {
+    ROS_INFO("saveStateCb %s", __FILE__);
 }
 
 bool reconModeCb(uint8_t reconType, uint8_t command) {
+    ROS_INFO("reconModeCb %s", __FILE__);
 }
 
 

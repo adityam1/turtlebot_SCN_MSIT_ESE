@@ -30,7 +30,7 @@
 #define SCN_NORMAL_MODE (0)
 #define SCN_RECON_MODE  (1)
 
-//SCN message type
+//SCN command type
 #define SCN_ENTER_RECON (10)
 #define SCN_EXIT_RECON  (11)
 #define SCN_KILL        (12)
