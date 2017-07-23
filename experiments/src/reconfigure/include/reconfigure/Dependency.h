@@ -144,6 +144,7 @@ class Dependency {
         void eraseIncomingServices(string &nodeName, string &serviceName);
         void eraseOutgoingTopics(string &nodeName, string &topiceName);
         void eraseIncomingTopics(string &nodeName, string &topicName);
+        void eraseAllDependency();
         /**
          * add dependency according to service/topic
          * used at service client and topic subscribed

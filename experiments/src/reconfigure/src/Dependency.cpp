@@ -355,6 +355,11 @@ Dependency::eraseIncomingTopics(string &nodeName, string &topicName) {
     eraseOrphanNode(node);
 }
 
+void
+Dependency::eraseAllDependency() {
+    list.clear();
+}
+
 vector<string>
 Dependency::getReconNodeList() {
     ENTER();
