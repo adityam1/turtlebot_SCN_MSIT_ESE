@@ -113,7 +113,7 @@ Node::addIncomingServices(string  &_servicesUsed) {
 }
 
 void 
-Node::addOutgogingTopics(string &_topicsPublished) {
+Node::addOutgoingTopics(string &_topicsPublished) {
     this->outgoingTopics.push_back(_topicsPublished);
 }
 
@@ -287,7 +287,7 @@ Dependency::addIncomingServices(string &nodeName, string &serviceName) {
 }
 
 void 
-Dependency::addOutgogingTopics(string &nodeName, string &topicName) {
+Dependency::addOutgoingTopics(string &nodeName, string &topicName) {
     Node *node;
     if ((node = getNodeWithName(nodeName)) == NULL) {
         node = new Node(nodeName);
@@ -295,7 +295,7 @@ Dependency::addOutgogingTopics(string &nodeName, string &topicName) {
     }
 
     // fill outgoingTopics
-    node->addOutgogingTopics(topicName);
+    node->addOutgoingTopics(topicName);
 }
 
 void
@@ -353,6 +353,11 @@ Dependency::eraseIncomingTopics(string &nodeName, string &topicName) {
     }
     node->eraseIncomingTopics(topicName);
     eraseOrphanNode(node);
+}
+
+void
+Dependency::eraseAllDependency() {
+    list.clear();
 }
 
 vector<string>
@@ -438,12 +443,10 @@ Dependency::getReconNodeList(string &nodeName) {
     resetVisited();
     /**
      * The algorithm for this part can be divided into two parts:
-     * 1. use BFS to traserse all the imcoming nodes of the node specified until reach a root(source) node, 
-     *    and then reverse the accessing order, so we can obtain all the paths from source to this node
-     * 2. use BFS starting from this node and traverse all the outgoing nodes and get all the paths from 
-     *    this node to all sink nodes
+     * 1. for service dependency: use BFS to traserse all the imcoming nodes of the node specified until reach a root(source) node and then reverse the accessing order, so we can obtain all the paths from source to this node
+     * 2. for topic dependency: use BFS starting from this node and traverse all the outgoing nodes and get all the paths
      */
-    // part 1. BFS and reverse
+    // part 1. BFS and reverse for all nodes that have service dependency related to root
     queue<Node*> queue;
     Node *node;
     root->setVisited(true);
@@ -462,7 +465,7 @@ Dependency::getReconNodeList(string &nodeName) {
            vector<Node *> tmpList = getNodeUsingService(service);
            for (int j = 0; j < tmpList.size(); j++) {
                Node *tmp = tmpList[j];
-               if (!tmp->getVisited()) {
+               if (tmp != NULL && !tmp->getVisited()) {
                    tmp->setVisited(true);
                    queue.push(tmp);
                }
@@ -472,7 +475,7 @@ Dependency::getReconNodeList(string &nodeName) {
     reverse(orderedList.begin(), orderedList.end());
     DBG("orderedList size:%ld", orderedList.size());
 
-    // part 2. BFS
+    // part 2. BFS and reverse for all unvisited nodes that have service dependency related to root
     queue.push(root);
     while (!queue.empty()) {
         node = queue.front();
@@ -480,14 +483,17 @@ Dependency::getReconNodeList(string &nodeName) {
             orderedList.push_back(node->getName());
         }
         queue.pop();
-        vector<string> &outgoingServices = node->getOutgoingServices();
-        int size = outgoingServices.size();
+        vector<string> &incomingTopics = node->getIncomingTopics();
+        int size = incomingTopics.size();
         for (int i = 0; i < size; i++) {
-            string service = outgoingServices[i];
-            Node *tmp = getNodeProvidingService(service);
-            if (tmp != NULL && !tmp->getVisited()) {
-                tmp->setVisited(true);
-                queue.push(tmp);
+            string topic = incomingTopics[i];
+            vector<Node *> tmpList = getNodeSubscribingTopic(topic);
+            for (int j = 0; j < tmpList.size(); j++) {
+                Node *tmp = tmpList[j];
+                if (tmp != NULL && !tmp->getVisited()) {
+                    tmp->setVisited(true);
+                    queue.push(tmp);
+                }
             }
         }
     }

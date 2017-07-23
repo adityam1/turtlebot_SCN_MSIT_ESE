@@ -73,20 +73,28 @@ bool registerService(
     std::string serviceName = req.depName;
 
     /* Check direction of service being registered */
-    if(SERVER == direction) {
-        /**
-         * Attention: for service server the dependency direction is from client to server
-         * so it's incomingServices for nodeName
-         */
-        ROS_INFO("add incoming for node:%s with service:%s", nodeName.c_str(), serviceName.c_str());;
-        gDependency->addIncomingServices(nodeName, serviceName);
-    } else if(CLIENT == direction) {
-        /**
-         * Attention: for servce client the dependency direction is from client to server
-         * so it's outgoingServices for nodeName
-         */
-        ROS_INFO("add outgoing for node:%s with service:%s", nodeName.c_str(), serviceName.c_str());;
-        gDependency->addOutgoingServices(nodeName, serviceName);
+    switch (direction) {
+        case SERVER:
+            /**
+             * Attention: for service server the dependency direction is from client to server
+             * so it's incomingServices for nodeName
+             */
+            ROS_INFO("add incoming service for node: %s with service: %s", 
+                    nodeName.c_str(), serviceName.c_str());
+            gDependency->addIncomingServices(nodeName, serviceName);
+            break;
+        case CLIENT:
+            /**
+             * Attention: for servce client the dependency direction is from client to server
+             * so it's outgoingServices for nodeName
+             */
+            ROS_INFO("add outgoing service for node: %s with service: %s", 
+                    nodeName.c_str(), serviceName.c_str());
+            gDependency->addOutgoingServices(nodeName, serviceName);
+            break;
+        default:
+            ROS_ERROR("Invalid direction specified!");
+            return false;
     }
     LEAVE();
     return true;
@@ -110,20 +118,28 @@ bool registerTopic(
     /* Take locks on the NodeTopics map #FIXME */
 
     /* Check direction of service being registered */
-    if(PUBLISH == direction) {
-        /**
-         * Attention: for topic server the dependency direction is from 
-         * subscriber to publisher, so it's incomingTopics for nodeName
-         */
-        ROS_INFO("add incoming for node:%s with topic:%s", nodeName.c_str(), topicName.c_str());;
-        gDependency->addIncomingTopics(nodeName, topicName);
-    } else if(SUBSCRIBE == direction) {
-        /**
-         * Attention: for topic server the dependency direction is from 
-         * subscriber to publisher, so it's outgoingTopics for nodeName
-         */
-        ROS_INFO("add outgoing for node:%s with topic:%s", nodeName.c_str(), topicName.c_str());;
-        gDependency->addOutgogingTopics(topicName, nodeName);
+    switch (direction) {
+        case PUBLISH:
+            /**
+             * Attention: for topic server the dependency direction is from 
+             * subscriber to publisher, so it's incomingTopics for nodeName
+             */
+            ROS_INFO("add incoming topic for node:%s with topic:%s", 
+                    nodeName.c_str(), topicName.c_str());
+            gDependency->addIncomingTopics(nodeName, topicName);
+            break;
+        case SUBSCRIBE:
+            /**
+             * Attention: for topic server the dependency direction is from 
+             * subscriber to publisher, so it's outgoingTopics for nodeName
+             */
+            ROS_INFO("add outgoing topic for node:%s with topic:%s", 
+                    nodeName.c_str(), topicName.c_str());
+            gDependency->addOutgoingTopics(nodeName, topicName);
+            break;
+        default:
+            ROS_ERROR("Invalid direction specified!");
+            return false;
     }       
     LEAVE();
     return true;
@@ -150,7 +166,24 @@ bool unRegisterService(
 {
     ENTER();
     uint8_t direction = req.direction;
-    std::string node_name = req.nodeName;
+    string nodeName = req.nodeName;
+
+    string serviceName = req.depName;
+    switch (direction) {
+        case SERVER:
+            ROS_INFO("erase incoming for node: %s with service: %s", 
+                    nodeName.c_str(), serviceName.c_str());
+            gDependency->eraseIncomingServices(nodeName, serviceName);
+            break;
+        case CLIENT:
+            ROS_INFO("erase outgoing service for node: %s with service: %s", 
+                    nodeName.c_str(), serviceName.c_str());
+            gDependency->eraseOutgoingServices(nodeName, serviceName);
+            break;
+        default:
+            ROS_ERROR("Invalid direction specified!");
+            return false;
+    }
 
     LEAVE();
     return true;
@@ -168,8 +201,24 @@ bool unRegisterTopic(
 {
     ENTER();
     uint8_t direction = req.direction;
-    std::string node_name = req.nodeName;
-    std::string topic_name = req.depName;
+    std::string nodeName = req.nodeName;
+    std::string topicName = req.depName;
+
+    switch(direction) {
+        case PUBLISH:
+            ROS_INFO("erase incoming topic for node:%s with topic:%s", 
+                    nodeName.c_str(), topicName.c_str());
+            gDependency->eraseIncomingTopics(nodeName, topicName);
+            break;
+        case SUBSCRIBE:
+            ROS_INFO("erase outgoing topic for node:%s with topic:%s", 
+                    nodeName.c_str(), topicName.c_str());
+            gDependency->eraseOutgoingServices(nodeName, topicName);
+            break;
+        default:
+            ROS_ERROR("Invalid direction specified!");
+            return false;
+    } 
 
     LEAVE();
     return true;
@@ -187,8 +236,10 @@ bool unRegisterAll(
 {
     ENTER();
     uint8_t direction = req.direction;
-    std::string node_name = req.nodeName;
-    std::string topic_name = req.depName;
+    string node_name = req.nodeName;
+    string topic_name = req.depName;
+
+    gDependency->eraseAllDependency();
 
     LEAVE();
     return true;
@@ -330,7 +381,6 @@ int main(int argc, char **argv)
      * This is for the other nodes to know that the SCN is present in 
      * the system */
     ros::ServiceServer presence = n.advertiseService("presence", presenceCb);
-
 
     ros::ServiceServer registerService = n.advertiseService("systemControlRegisterService", scnCoreCb);
     ros::ServiceServer userInterfaceService = n.advertiseService("userInterfaceService", userInterfaceServiceCallback);

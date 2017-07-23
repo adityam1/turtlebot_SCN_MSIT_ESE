@@ -49,7 +49,7 @@ class Node {
         // adders
         void addOutgoingServices(string &_serviceProvided);
         void addIncomingServices(string  &_servicesUsed);
-        void addOutgogingTopics(string &_topicsPublished);
+        void addOutgoingTopics(string &_topicsPublished);
         void addIncomingTopics(string &_topicsSubscribed);
         // erasers
         void eraseOutgoingServices(string &_serviceProvided);
@@ -132,7 +132,7 @@ class Dependency {
          */
         void addOutgoingServices(string &nodeName, string &serviceName);
         void addIncomingServices(string &nodeName, string &serviceName);
-        void addOutgogingTopics(string &nodeName, string &topicName);
+        void addOutgoingTopics(string &nodeName, string &topicName);
         void addIncomingTopics(string &nodeName, string &topicName);
         /**
          * erase dependency for the node specified
@@ -144,6 +144,7 @@ class Dependency {
         void eraseIncomingServices(string &nodeName, string &serviceName);
         void eraseOutgoingTopics(string &nodeName, string &topiceName);
         void eraseIncomingTopics(string &nodeName, string &topicName);
+        void eraseAllDependency();
         /**
          * add dependency according to service/topic
          * used at service client and topic subscribed
