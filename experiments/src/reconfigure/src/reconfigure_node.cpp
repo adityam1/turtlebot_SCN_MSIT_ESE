@@ -123,7 +123,7 @@ bool registerTopic(
          * subscriber to publisher, so it's outgoingTopics for nodeName
          */
         ROS_INFO("add outgoing for node:%s with topic:%s", nodeName.c_str(), topicName.c_str());;
-        gDependency->addOutgogingTopics(topicName, nodeName);
+        gDependency->addOutgoingTopics(topicName, nodeName);
     }       
     LEAVE();
     return true;
