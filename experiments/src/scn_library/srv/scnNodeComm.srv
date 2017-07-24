@@ -1,5 +1,9 @@
+#Command - Enter/Exit/Kill
 uint8 command
+
+#Recon Type - interface/node/parameter
 uint8 reconType
+
 uint8 auth
 
 ---
