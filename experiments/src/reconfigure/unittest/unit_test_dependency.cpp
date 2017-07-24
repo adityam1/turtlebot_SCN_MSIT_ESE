@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cassert>
 #include "reconfigure/Dependency.h"
 #include "scn_library/scn_utils.h"
 
@@ -6,7 +7,10 @@ using namespace std;
 
 static int log_level = LOG_DBG;
 
+bool isEqualVector(vector<string> &list1, vector<string> &list2);
 void printList(vector<string> &list);
+
+int add( int i, int j ) { return i+j; }
 
 int main(int argc, char** argv) {
     /**
@@ -60,12 +64,16 @@ int main(int argc, char** argv) {
     vector<string> reconfigureOrderedList1 = depency->getReconNodeList();
     cout << "reconfigure ordered list of all nodes is as follows for case 1:" << endl;
     printList(reconfigureOrderedList1);
+    vector<string> expectedOrderList1 = {"1", "2", "5", "3", "6", "4"};
+    assert(isEqualVector(reconfigureOrderedList1, expectedOrderList1));
 
     // reconfigure only one node: 6
     node = "6";
     vector<string> reconfigureOrderedList2 = depency->getReconNodeList(node);
     cout << "reconfigure ordered list of only one node 6 is as follows for case 1:" << endl;
     printList(reconfigureOrderedList2);
+    vector<string> expectedOrderList2 = {"1", "5","6"};
+    assert(isEqualVector(reconfigureOrderedList2, expectedOrderList2));
 
     /**
      * use case 2 - multiple source and one sink
@@ -91,12 +99,16 @@ int main(int argc, char** argv) {
     vector<string> reconfigureOrderedList3 = depency->getReconNodeList();
     cout << "reconfigure ordered list of all nodes is as follows for case 2:" << endl;
     printList(reconfigureOrderedList3);
+    vector<string> expectedOrderList3 = {"1", "7","2", "5", "8", "3", "6", "4"};
+    assert(isEqualVector(reconfigureOrderedList3, expectedOrderList3));
 
     // reconfigure only one node: 6
     node = "6";
     vector<string> reconfigureOrderedList4 = depency->getReconNodeList(node);
     cout << "reconfigure ordered list of only one node 6 is as follows for case 2" << endl;
     printList(reconfigureOrderedList4);
+    vector<string> expectedOrderList4 = {"7", "1","8", "5", "6"};
+    assert(isEqualVector(reconfigureOrderedList4, expectedOrderList4));
 
     /**
      * use case 3 - test remove node dependency
@@ -123,12 +135,16 @@ int main(int argc, char** argv) {
     vector<string> reconfigureOrderedList5 = depency->getReconNodeList();
     cout << "reconfigure ordered list of all nodes is as follows for case 3:" << endl;
     printList(reconfigureOrderedList5);
+    vector<string> expectedOrderList5 = {"1", "2","5", "3", "6", "4"};
+    assert(isEqualVector(reconfigureOrderedList5, expectedOrderList5));
 
     // reconfigure only one node: 6
     node = "6";
     vector<string> reconfigureOrderedList6 = depency->getReconNodeList(node);
     cout << "reconfigure ordered list of only one node 6 is as follows for case 3:" << endl;
     printList(reconfigureOrderedList6);
+    vector<string> expectedOrderList6 = {"1", "5", "6"};
+    assert(isEqualVector(reconfigureOrderedList6, expectedOrderList6));
 
     /**
      * use case 4 - single source, single sink with service and topic depency
@@ -158,6 +174,8 @@ int main(int argc, char** argv) {
     vector<string> reconfigureOrderedList7 = depency->getReconNodeList(node);
     cout << "reconfigure ordered list of only one node 6 is as follows for case 4:" << endl;
     printList(reconfigureOrderedList7);
+    vector<string> expectedOrderList7 = {"1", "5", "6", "2"};
+    assert(isEqualVector(reconfigureOrderedList7, expectedOrderList7));
 
     return 0;
 }
@@ -170,4 +188,19 @@ void printList(vector<string> &list) {
         cout << list[i];
     }
     cout << endl;
+}
+
+bool isEqualVector(vector<string> &list1, vector<string> &list2) {
+    int n1 = list1.size();
+    int n2 = list2.size();
+
+    if (n1 != n2) {
+        return false;
+    }
+    for (int i = 0; i < n1; i++) {
+        if (list1[i].compare(list2[i]) != 0) {
+            return false;
+        }
+    }
+    return true;
 }
