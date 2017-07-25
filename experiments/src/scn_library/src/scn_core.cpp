@@ -24,11 +24,13 @@ namespace ros {
 
             rosrun_path[strlen(rosrun_path) -1] = '\0';
 
+            std::string reconfigure = "reconfigure";
+            std::string reconfigure_node = "reconfigure_node";
             if(0 == (pid = fork())) {
                 setpgid(0, 0);
                 argv[0] = rosrun_path;
-                argv[1] = (const char*)"reconfigure";
-                argv[2] = (const char*)"reconfigure_node";
+                argv[1] = const_cast<char*>(reconfigure.c_str());
+                argv[2] = const_cast<char*>(reconfigure_node.c_str());
                 argv[3] = NULL;
 
                 ROS_INFO("Attempting to start SCN");
