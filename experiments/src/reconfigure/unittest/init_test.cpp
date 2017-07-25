@@ -2,12 +2,15 @@
 #include <scn_library/scn_core.h>
 
 
-
-void saveStateCb(void) {
+void saveStateCb(uint8_t reconType) {
+    ROS_INFO("saveStateCb %s", __FILE__);
 }
 
-void reconModeCb(void) {
+STATUS_T reconModeCb(uint8_t reconType, uint8_t command) {
+    ROS_INFO("reconModeCb %s", __FILE__);
+    return SCN_ST_OK;
 }
+
 
 int main(int argc, char** argv)
 {

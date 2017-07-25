@@ -22,10 +22,12 @@ std::string gCallbackService;
  */
 bool demoNode3ClientCallback(reconfigure::demoNodeService::Request &req, 
         reconfigure::demoNodeService::Response &res);
-void saveStateCb(void) {
+
+void saveStateCb(uint8_t reconType) {
 }
 
-void reconModeCb(void) {
+STATUS_T reconModeCb(uint8_t reconType, uint8_t command) {
+    return SCN_ST_OK;
 }
 /**
  * APIs

@@ -30,6 +30,25 @@
 #define SCN_NORMAL_MODE (0)
 #define SCN_RECON_MODE  (1)
 
+//SCN command type
+#define SCN_ENTER_RECON (10)
+#define SCN_EXIT_RECON  (11)
+#define SCN_KILL        (12)
+
+//SCN reconType type
+#define SCN_PARAMETER_RECON    (13)
+#define SCN_INTER_RECON        (14)
+#define SCN_NODE_RECON         (15)
+
+#define SCN_COMM    "Comm"
+#define SCN_SERVICE "Service"
+#define SCN_TOPIC   "Topic"
+
+typedef enum {
+    SCN_ST_OK = 0,
+    SCN_ST_ERROR
+}STATUS_T;
+
 typedef enum {
     LOG_ERR,
     LOG_MSG,

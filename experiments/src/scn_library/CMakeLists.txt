@@ -65,9 +65,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_service_files(
   FILES
   systemControlRegisterService.srv
-  kill.srv
-  enterRecon.srv
-  exitRecon.srv
+  scnNodeComm.srv
   presence.srv
 )
 

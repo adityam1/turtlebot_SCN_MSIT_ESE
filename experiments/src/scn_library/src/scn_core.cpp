@@ -2,10 +2,8 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 #include <scn_library/scn_core.h>
-#include <scn_library/kill.h>
-#include <scn_library/enterRecon.h>
-#include <scn_library/exitRecon.h>
 #include <scn_library/presence.h>
+#include <scn_library/scnNodeComm.h>
 
 namespace ros {
 
@@ -93,8 +91,8 @@ namespace ros {
      * Return
      * Does not return
      * ------------------------------------------------------*/
-    static bool killServiceCb(scn_library::kill::Request& req,
-            scn_library::kill::Response& res) {
+    static STATUS_T killServiceCb(scn_library::scnNodeComm::Request& req,
+            scn_library::scnNodeComm::Response& res) {
         ROS_INFO("SCN requested to shut this node down..Shutting down");
         exit(EX_PROTOCOL);
     }
@@ -117,10 +115,32 @@ namespace ros {
      *
      * Return
      * ------------------------------------------------------*/
-    static bool enterServiceCb(scn_library::enterRecon::Request& req,
-            scn_library::enterRecon::Response& res) {
+    static STATUS_T enterServiceCb(scn_library::scnNodeComm::Request& req,
+            scn_library::scnNodeComm::Response& res) {
+
+        STATUS_T status = SCN_ST_OK;
         ROS_INFO("SCN: Entering Reconfiguration Mode");
-        //FIXME: Need to add logic here
+        
+        /* Save all important state of the node */
+        if(NULL != scnNodeInfo.saveStateCb) {
+            scnNodeInfo.saveStateCb(req.reconType);
+        }
+        
+        /* Allow user to perform necessary operations to enter 
+         * reconfiguration mode */
+        if(NULL != scnNodeInfo.reconModeCb) {
+            status = scnNodeInfo.reconModeCb(req.reconType, SCN_ENTER_RECON);
+        }
+
+        /* Mark node to be in reconfiguration mode */
+        if(SCN_ST_OK == status) {
+            scnNodeInfo.nodeReconState = SCN_RECON_MODE;
+            res.status = SCN_OK;
+            return SCN_ST_OK;
+        } else {
+            res.status = SCN_ERROR;
+            return SCN_ST_ERROR;
+        }
     }
 
     /*--------------------------------------------------------
@@ -137,10 +157,64 @@ namespace ros {
      *
      * Return
      * ------------------------------------------------------*/
-    static bool exitServiceCb(scn_library::exitRecon::Request& req,
-            scn_library::exitRecon::Response& res) {
+    static STATUS_T exitServiceCb(scn_library::scnNodeComm::Request& req,
+            scn_library::scnNodeComm::Response& res) {
+
+        STATUS_T status = SCN_ST_OK;
         ROS_INFO("SCN: Exit Reconfiguration Mode");
-        //FIXME: Need to add logic here
+        
+        /* Allow user to perform necessary operations to exit 
+         * reconfiguration mode */
+        if(NULL != scnNodeInfo.reconModeCb) {
+            status = scnNodeInfo.reconModeCb(req.reconType, SCN_EXIT_RECON);
+        }
+
+        /* Mark node to be in reconfiguration mode */
+        if(SCN_ST_OK == status) {
+            scnNodeInfo.nodeReconState = SCN_NORMAL_MODE;
+            res.status = SCN_OK;
+            return SCN_ST_OK;
+        } else {
+            res.status = SCN_ERROR;
+            return SCN_ST_ERROR;
+        }
+    }
+
+    /*--------------------------------------------------------
+     * nodeServiceCb : This function is called when the SCN 
+     *                 sends a message to the node.
+     *
+     * Return
+     * ------------------------------------------------------*/
+    static bool nodeServiceCb(scn_library::scnNodeComm::Request& req,
+            scn_library::scnNodeComm::Response& res) {
+        STATUS_T status = SCN_ST_ERROR;
+
+        ROS_INFO("SCN: Received a message from SCN");
+
+        if(SCN_AUTH != req.auth) {
+            ROS_ERROR("SCN: Received invalid message. Will not \
+                    process this");
+            return SCN_ERROR;
+        }
+
+        switch(req.command) {
+            case SCN_ENTER_RECON: status = enterServiceCb(req, res);
+                        break;
+            case SCN_EXIT_RECON: status = exitServiceCb(req, res);
+                        break;
+            case SCN_KILL: status = killServiceCb(req, res);
+                        break;
+            default: 
+                ROS_ERROR("SCN: Received invalid message. Will not \
+                        process this");
+                return SCN_ERROR;
+        }
+        if(SCN_ST_OK == status) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /*--------------------------------------------------------
@@ -184,7 +258,8 @@ namespace ros {
         scnNodeInfo.scnNodeHandle = new ros::NodeHandle;
 
         /* Check if SCN is present */
-        ros::ServiceClient client = scnNodeInfo.scnNodeHandle->serviceClient<scn_library::presence>("presence");
+        ros::ServiceClient client = 
+            scnNodeInfo.scnNodeHandle->serviceClient<scn_library::presence>("presence");
         scn_library::presence srv;
 
         while((!isSCN) && (retry < 3))
@@ -204,9 +279,11 @@ namespace ros {
         }
         if(3 == retry)
         {
-            ROS_ERROR("SCN not present in the System. Continuing without SCN");
+            ROS_ERROR("SCN not present in the System. \
+                    Continuing without SCN");
         }
 
+#if 0
         /* Enter Recon Service */
         std::string enterServiceName = scnNodeInfo.name + "Enter";
         scnNodeInfo.enterService = (scnNodeInfo.scnNodeHandle)->advertiseService(enterServiceName, enterServiceCb);
@@ -218,6 +295,9 @@ namespace ros {
         /* Kill Recon Service */
         std::string killServiceName = scnNodeInfo.name + "Kill";
         scnNodeInfo.killService = scnNodeInfo.scnNodeHandle->advertiseService(killServiceName, killServiceCb);
+#endif 
+        std::string nodeServiceName = scnNodeInfo.name + SCN_COMM;
+        scnNodeInfo.nodeService = (scnNodeInfo.scnNodeHandle)->advertiseService(nodeServiceName, nodeServiceCb);
 
         /* Set state of node */
         scnSetNodeState(SCN_NORMAL_MODE);
