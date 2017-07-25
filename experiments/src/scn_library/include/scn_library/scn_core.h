@@ -6,7 +6,7 @@
 namespace ros {
 
     typedef void (*saveStateRoutine)(uint8_t reconType);
-    typedef bool (*reconModeRoutine)(uint8_t reconType, uint8_t command);
+    typedef STATUS_T (*reconModeRoutine)(uint8_t reconType, uint8_t command);
 
     /* SCN core global variables and structs */
     typedef struct {

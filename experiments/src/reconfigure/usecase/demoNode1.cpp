@@ -28,7 +28,8 @@ bool demoNode1CallBack(reconfigure::demoNodeService::Request &req,
 void saveStateCb(uint8_t reconType) {
 }
 
-bool reconModeCb(uint8_t reconType, uint8_t command) {
+STATUS_T reconModeCb(uint8_t reconType, uint8_t command) {
+    return SCN_ST_OK;
 }
 /**
  * APIs

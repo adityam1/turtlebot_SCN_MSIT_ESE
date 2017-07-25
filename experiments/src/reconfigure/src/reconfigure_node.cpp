@@ -346,13 +346,15 @@ bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &re
     vector<string> orderedList = gDependency->getReconNodeList(old_node);
     for (int j = 0; j < orderedList.size(); j++) {
         ros::NodeHandle n;
-        std::string serviceName = orderedList[j] + "Service";
+        std::string serviceName = orderedList[j] + SCN_COMM;
         ROS_INFO("node name: %s, reconfigure service name: %s\n", orderedList[j].c_str(), serviceName.c_str());
-        ros::ServiceClient client = n.serviceClient<reconfigure::demoNodeService>(serviceName);
-        reconfigure::demoNodeService srv;
-        srv.request.callback_service = serviceName;
+        ros::ServiceClient client = n.serviceClient<scn_library::scnNodeComm>(serviceName);
+        scn_library::scnNodeComm srv;
+        srv.request.command = SCN_ENTER_RECON;
+        srv.request.reconType = SCN_NODE_RECON;
+        srv.request.auth = SCN_AUTH;
         if (client.call(srv)) {
-            std::string res = srv.response.result == 0 ? "OK" : "ERROR";
+            std::string res = srv.response.status == 0 ? "OK" : "ERROR";
             ROS_INFO("result: %s\n", res.c_str());
         } else {
             ROS_ERROR("Failed to call demoNodeService");
@@ -362,8 +364,10 @@ bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &re
     // TODO add topics reconfigure
 
     // kill the dependecies of old node and launch the dependency of new node
-    //launchNode((char *)"python /home/turtlebot/ese_team_project/yunpengx/experiments/src/reconfigure/src/with_launch_file.py");
+    killNode((char *)old_node.c_str());
+
     launchNode((char *)new_node_package.c_str(), (char *)new_node.c_str());
+
     res.result = 0;
     LEAVE();
     return true;

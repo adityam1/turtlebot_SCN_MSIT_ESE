@@ -91,7 +91,7 @@ namespace ros {
      * Return
      * Does not return
      * ------------------------------------------------------*/
-    static bool killServiceCb(scn_library::scnNodeComm::Request& req,
+    static STATUS_T killServiceCb(scn_library::scnNodeComm::Request& req,
             scn_library::scnNodeComm::Response& res) {
         ROS_INFO("SCN requested to shut this node down..Shutting down");
         exit(EX_PROTOCOL);
@@ -115,10 +115,10 @@ namespace ros {
      *
      * Return
      * ------------------------------------------------------*/
-    static bool enterServiceCb(scn_library::scnNodeComm::Request& req,
+    static STATUS_T enterServiceCb(scn_library::scnNodeComm::Request& req,
             scn_library::scnNodeComm::Response& res) {
 
-        bool status = SCN_OK;
+        STATUS_T status = SCN_ST_OK;
         ROS_INFO("SCN: Entering Reconfiguration Mode");
         
         /* Save all important state of the node */
@@ -133,13 +133,13 @@ namespace ros {
         }
 
         /* Mark node to be in reconfiguration mode */
-        if(!status) {
+        if(SCN_ST_OK == status) {
             scnNodeInfo.nodeReconState = SCN_RECON_MODE;
             res.status = SCN_OK;
-            return SCN_OK;
+            return SCN_ST_OK;
         } else {
             res.status = SCN_ERROR;
-            return SCN_ERROR;
+            return SCN_ST_ERROR;
         }
     }
 
@@ -157,10 +157,10 @@ namespace ros {
      *
      * Return
      * ------------------------------------------------------*/
-    static bool exitServiceCb(scn_library::scnNodeComm::Request& req,
+    static STATUS_T exitServiceCb(scn_library::scnNodeComm::Request& req,
             scn_library::scnNodeComm::Response& res) {
 
-        bool status = SCN_OK;
+        STATUS_T status = SCN_ST_OK;
         ROS_INFO("SCN: Exit Reconfiguration Mode");
         
         /* Allow user to perform necessary operations to exit 
@@ -170,13 +170,13 @@ namespace ros {
         }
 
         /* Mark node to be in reconfiguration mode */
-        if(!status) {
+        if(SCN_ST_OK == status) {
             scnNodeInfo.nodeReconState = SCN_NORMAL_MODE;
             res.status = SCN_OK;
-            return SCN_OK;
+            return SCN_ST_OK;
         } else {
             res.status = SCN_ERROR;
-            return SCN_ERROR;
+            return SCN_ST_ERROR;
         }
     }
 
@@ -188,7 +188,7 @@ namespace ros {
      * ------------------------------------------------------*/
     static bool nodeServiceCb(scn_library::scnNodeComm::Request& req,
             scn_library::scnNodeComm::Response& res) {
-        bool status = SCN_ERROR;
+        STATUS_T status = SCN_ST_ERROR;
 
         ROS_INFO("SCN: Received a message from SCN");
 
@@ -210,7 +210,11 @@ namespace ros {
                         process this");
                 return SCN_ERROR;
         }
-        return status;
+        if(SCN_ST_OK == status) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /*--------------------------------------------------------
@@ -292,7 +296,7 @@ namespace ros {
         std::string killServiceName = scnNodeInfo.name + "Kill";
         scnNodeInfo.killService = scnNodeInfo.scnNodeHandle->advertiseService(killServiceName, killServiceCb);
 #endif 
-        std::string nodeServiceName = scnNodeInfo.name + "Comm";
+        std::string nodeServiceName = scnNodeInfo.name + SCN_COMM;
         scnNodeInfo.nodeService = (scnNodeInfo.scnNodeHandle)->advertiseService(nodeServiceName, nodeServiceCb);
 
         /* Set state of node */
