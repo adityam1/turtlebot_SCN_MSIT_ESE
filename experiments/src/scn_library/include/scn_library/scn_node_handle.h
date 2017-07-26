@@ -2,12 +2,12 @@
 #define __SCN_NODE_HANDLE_H__
 
 #include "ros/node_handle.h"
-#include <scn_library/systemControlRegisterService.h>
 #include "scn_library/scn_core.h"
 #include "scn_library/scn_publisher.h"
 #include "scn_library/scn_subscriber.h"
 #include "scn_library/scn_service_client.h"
 #include "scn_library/scn_service_server.h"
+#include <scn_library/systemControlRegisterService.h>
 
 static int log_level = LOG_DBG;
 

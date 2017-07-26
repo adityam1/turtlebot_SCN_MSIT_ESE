@@ -2,12 +2,9 @@
 #define __SCN_SERVICE_CLIENT_H__
 
 #include "ros/service_client.h"
-//#include <scn_library/scn_core.h>
+#include "scn_library/scn_core.h"
 
 namespace ros {
-    // forward declaration
-    class SCNNodeHandle;
-
     class ROSCPP_DECL SCNServiceClient : public ServiceClient {
         public:
             SCNServiceClient();
@@ -16,7 +13,6 @@ namespace ros {
 
             // wrapper method for service client call with extra parameter - SCNNodeHandle to get the node state
             template<class MReq, class MRes> bool call(MReq &req, MReq &res) {
-                //int state = nh.getLocalSCNState();
                 int state = ros::scnGetNodeState();
 
                 if (state) {
@@ -28,7 +24,6 @@ namespace ros {
             }
 
             template<class Service> bool call(Service& service) {
-                //int state = nh.getLocalSCNState();
                 int state = ros::scnGetNodeState();
 
                 if (state) {
@@ -40,7 +35,6 @@ namespace ros {
             }
 
             template<typename MReq, typename MRes> bool call(const MReq& req, MRes& resp, const std::string& service_md5sum) {
-                //int state = nh.getLocalSCNState();
                 int state = ros::scnGetNodeState();
 
                 if (state) {

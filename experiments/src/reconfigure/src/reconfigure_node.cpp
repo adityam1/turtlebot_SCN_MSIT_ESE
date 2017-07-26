@@ -383,7 +383,7 @@ bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &re
             ROS_INFO("result: %s\n", res.c_str());
         } else {
             ROS_ERROR("Failed to call demoNodeService for node %s", orderedList[j].c_str());
-            //return -1;
+            return false;
         }
     }
 

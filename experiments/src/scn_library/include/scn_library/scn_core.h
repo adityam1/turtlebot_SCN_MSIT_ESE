@@ -1,7 +1,9 @@
-#ifndef __SCN_CORE_H
-#define __SCN_CORE_H
+#ifndef __SCN_CORE_H__
+#define __SCN_CORE_H__
 
 #include <scn_library/scn_utils.h>
+#include "ros/service_server.h"
+#include "ros/node_handle.h"
 
 namespace ros {
 
@@ -18,7 +20,7 @@ namespace ros {
         uint8_t nodeReconState;             //State of the node (noremal/recon)
         bool initStatus;                    //Specifies if node init has been called
         ros::ServiceServer nodeService;
-    }scnNodeInfo_t;
+    } scnNodeInfo_t;
 
     void scnInit(int & argc, 
             char **argv, 

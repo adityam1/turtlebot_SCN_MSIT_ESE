@@ -2,11 +2,9 @@
 #define _SCN_PUBLISHER_H_
 
 #include "ros/publisher.h"
+#include "scn_library/scn_core.h"
 
 namespace ros {
-    // forward declaration
-    class SCNNodeHandle;
-    
     class ROSCPP_DECL SCNPublisher : public Publisher {
         public:
             SCNPublisher();
@@ -15,8 +13,7 @@ namespace ros {
 
             // wrapper method for publish with extra parameter - SCNNodeHandle to get the node state
             template <typename M> void publish(const boost::shared_ptr<M> &message) const {
-                int state = 0;
-                //int state = ros::scnGetNodeState();
+                int state = ros::scnGetNodeState();
 
                 if (state) {
                     //FIXME
@@ -27,8 +24,7 @@ namespace ros {
                 return;
             }
             template <typename M> void publish(const M& message) const {
-                int state = 0;
-                //int state = ros::scnGetNodeState();
+                int state = ros::scnGetNodeState();
 
                 if (state) {
                     //FIXME
