@@ -149,13 +149,47 @@ add_dependencies(${catkin_EXPORTED_TARGETS})
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/reconfigure_node.cpp)
 add_executable(${PROJECT_NAME}_node src/reconfigure_node.cpp src/Dependency.cpp)
-add_executable(demoNode1 usecase/demoNode1.cpp)
-add_executable(demoNode2 usecase/demoNode2.cpp)
-add_executable(demoNode3 usecase/demoNode3.cpp)
+add_executable(demoNode1 usecase/1/demoNode1.cpp)
+add_executable(demoNode2 usecase/1/demoNode2.cpp)
+add_executable(demoNode3 usecase/1/demoNode3.cpp)
+add_executable(demoNode4 usecase/2/demoNode4.cpp)
+add_executable(demoNode5 usecase/2/demoNode5.cpp)
+add_executable(demoNode6 usecase/2/demoNode6.cpp)
+add_executable(demoNode7 usecase/2/demoNode7.cpp)
+add_executable(demoNode8 usecase/2/demoNode8.cpp)
+add_executable(demoNode9 usecase/3/demoNode9.cpp)
+add_executable(demoNode10 usecase/3/demoNode10.cpp)
+add_executable(demoNode11 usecase/3/demoNode11.cpp)
+add_executable(demoNode12 usecase/3/demoNode12.cpp)
+add_executable(demoNode13 usecase/3/demoNode13.cpp)
+add_executable(demoNode14 usecase/3/demoNode14.cpp)
+add_executable(demoNode15 usecase/3/demoNode15.cpp)
+add_executable(demoNode16 usecase/3/demoNode16.cpp)
+add_executable(demoNode17 usecase/3/demoNode17.cpp)
+add_executable(demoNode18 usecase/4/demoNode18.cpp)
+add_executable(demoNode19 usecase/4/demoNode19.cpp)
+add_executable(demoNode20 usecase/4/demoNode20.cpp)
 
 add_dependencies(demoNode1 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library)
 add_dependencies(demoNode2 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library)
-add_dependencies(demoNode3 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library) 
+add_dependencies(demoNode3 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library)
+add_dependencies(demoNode4 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library) 
+add_dependencies(demoNode5 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library) 
+add_dependencies(demoNode6 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library) 
+add_dependencies(demoNode7 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library) 
+add_dependencies(demoNode8 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library)
+add_dependencies(demoNode9 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library)
+add_dependencies(demoNode10 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library)
+add_dependencies(demoNode11 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library)
+add_dependencies(demoNode12 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library) 
+add_dependencies(demoNode13 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library) 
+add_dependencies(demoNode14 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library) 
+add_dependencies(demoNode15 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library) 
+add_dependencies(demoNode16 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library)
+add_dependencies(demoNode17 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library)
+add_dependencies(demoNode18 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library) 
+add_dependencies(demoNode19 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library)
+add_dependencies(demoNode20 reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library)       
 add_dependencies(${PROJECT_NAME}_node ${catkin_EXPORTED_TARGETS} scn_library)
 
 ## Specify libraries to link a library or executable target against
@@ -172,7 +206,57 @@ target_link_libraries(demoNode2
 target_link_libraries(demoNode3
   ${catkin_LIBRARIES}
 )
-
+target_link_libraries(demoNode4
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(demoNode5
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(demoNode6
+  ${catkin_LIBRARIES}
+  )
+target_link_libraries(demoNode7
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(demoNode8
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(demoNode9 
+${catkin_LIBRARIES}
+)
+target_link_libraries(demoNode10
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(demoNode11
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(demoNode12
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(demoNode13
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(demoNode14
+  ${catkin_LIBRARIES}
+  )
+target_link_libraries(demoNode15
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(demoNode16
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(demoNode17
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(demoNode18
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(demoNode19
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(demoNode20
+  ${catkin_LIBRARIES}
+)
 # add unit test
 add_executable(unit_test_dependency unittest/unit_test_dependency.cpp src/Dependency.cpp)
 add_dependencies(unit_test_dependency reconfigure_generate_messages_cpp ${catkin_EXPORTED_TARGETS} scn_library)
