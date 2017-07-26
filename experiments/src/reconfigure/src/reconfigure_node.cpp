@@ -5,7 +5,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <python2.7/Python.h>
 
 #include <scn_library/systemControlRegisterService.h>
 #include <scn_library/scnNodeComm.h>
@@ -334,7 +333,7 @@ bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &re
         reconfigure::userInterfaceService::Response &res) 
 {
     ENTER();
-   std::string old_node = req.old_node;
+    std::string old_node = req.old_node;
     std::string new_node = req.new_node;
     std::string new_node_package = req.new_node_package;
 
@@ -358,14 +357,12 @@ bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &re
             ROS_INFO("result: %s\n", res.c_str());
         } else {
             ROS_ERROR("Failed to call demoNodeService");
-            return -1;
+            return false;
         }
     }
-    // TODO add topics reconfigure
 
     // kill the dependecies of old node and launch the dependency of new node
     killNode((char *)old_node.c_str());
-
     launchNode((char *)new_node_package.c_str(), (char *)new_node.c_str());
 
     //Delay for node to be ready
@@ -395,30 +392,6 @@ bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &re
     return true;
 }
 
-int main(int argc, char **argv) 
-{
-    ENTER();
-    ros::init(argc, argv, "systemControlNode", ros::init_options::NoSigintHandler);
-    //ros::init(argc, argv, "systemControlNode");
-    ros::NodeHandle n;
-    gDependency = new Dependency();
-
-    /* Create the presence service 
-     * This is for the other nodes to know that the SCN is present in 
-     * the system */
-    ros::ServiceServer presence = n.advertiseService("presence", presenceCb);
-
-    ros::ServiceServer registerService = n.advertiseService("systemControlRegisterService", scnCoreCb);
-    ros::ServiceServer userInterfaceService = n.advertiseService("userInterfaceService", userInterfaceServiceCallback);
-
-    // override the default ros sigint handler
-    signal(SIGINT, systemControlSigintHandler);
-
-    ros::spin();
-    LEAVE();
-    return 0;
-}
-
 void systemControlSigintHandler(int sig) {
     // TODO
     // do some custom action
@@ -443,7 +416,7 @@ static bool launchNode(char *packageName, char *nodeName) {
     if((fp_which = popen("/usr/bin/which rosrun", "r")) != NULL) {
         fgets(rosrun_path, 200, fp_which);
         pclose(fp_which);
-        
+
         rosrun_path[strlen(rosrun_path) -1] = '\0';
 
         if(0 == (pid = fork())) {
@@ -480,16 +453,40 @@ static void killNode(char *name) {
     ros::NodeHandle n;
     std::string serviceName = (const char *)name;
     serviceName += "Comm";
-    
+
     ROS_INFO("SCN: Attempting to kill %s\n", name);
 
     ros::ServiceClient client = n.serviceClient<scn_library::scnNodeComm>(serviceName);
 
     scn_library::scnNodeComm srv;
-    
+
     srv.request.auth = SCN_AUTH;
     srv.request.command= SCN_KILL;
 
     /* We don't expect a service failure here */
     client.call(srv);
+}
+
+int main(int argc, char **argv) 
+{
+    ENTER();
+    ros::init(argc, argv, "systemControlNode", ros::init_options::NoSigintHandler);
+    //ros::init(argc, argv, "systemControlNode");
+    ros::NodeHandle n;
+    gDependency = new Dependency();
+
+    /* Create the presence service 
+     * This is for the other nodes to know that the SCN is present in 
+     * the system */
+    ros::ServiceServer presence = n.advertiseService("presence", presenceCb);
+
+    ros::ServiceServer registerService = n.advertiseService("systemControlRegisterService", scnCoreCb);
+    ros::ServiceServer userInterfaceService = n.advertiseService("userInterfaceService", userInterfaceServiceCallback);
+
+    // override the default ros sigint handler
+    signal(SIGINT, systemControlSigintHandler);
+
+    ros::spin();
+    LEAVE();
+    return 0;
 }

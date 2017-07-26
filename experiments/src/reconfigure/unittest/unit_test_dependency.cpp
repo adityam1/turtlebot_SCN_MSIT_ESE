@@ -177,6 +177,60 @@ int main(int argc, char** argv) {
     vector<string> expectedOrderList7 = {"1", "5", "6", "2"};
     assert(isEqualVector(reconfigureOrderedList7, expectedOrderList7));
 
+    Dependency *topicDependency = new Dependency();
+    /**
+     * topic dependency
+     * use case 5 - single source, single sink
+     *      1
+     *     / \
+     *    2   5
+     *   /    /
+     *  3    6
+     *  \   /
+     *    4
+     */
+    node = "4";
+    topicPublishing = "4_topic";
+    topicDependency->addIncomingTopics(node, topicPublishing);
+
+    node = "3";
+    topicSubscribing = "4_topic";
+    topicDependency->addOutgoingTopics(node, topicSubscribing);
+    topicPublishing = "3_topic";
+    topicDependency->addIncomingTopics(node, topicPublishing);
+
+    node = "6";
+    topicSubscribing = "4_topic";
+    topicDependency->addOutgoingTopics(node, topicSubscribing);
+    topicPublishing = "6_topic";
+    topicDependency->addIncomingTopics(node, topicPublishing);
+
+    node = "2";
+    topicSubscribing = "3_topic";
+    topicDependency->addOutgoingTopics(node, topicSubscribing);
+    topicPublishing = "2_topic";
+    topicDependency->addIncomingTopics(node, topicPublishing);
+
+    node = "5";
+    topicSubscribing = "6_topic";
+    topicDependency->addOutgoingTopics(node, topicSubscribing);
+    topicSubscribing = "5_topic";
+    topicDependency->addIncomingTopics(node, topicPublishing);
+
+    node = "1";
+    topicSubscribing = "2_topic";
+    topicDependency->addOutgoingTopics(node, topicSubscribing);
+    topicPublishing = "5_topic";
+    topicDependency->addIncomingTopics(node, topicPublishing);
+
+    // reconfigure only one node: 6
+    node = "6";
+    vector<string> reconfigureOrderedList8 = topicDependency->getReconNodeList(node);
+    cout << "reconfigure ordered list of only one node 6 is as follows for case 5:" << endl;
+    printList(reconfigureOrderedList8);
+    vector<string> expectedOrderList8 = {"8", "5", "1"};
+    assert(isEqualVector(reconfigureOrderedList8, expectedOrderList8));
+
     return 0;
 }
 
