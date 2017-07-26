@@ -368,6 +368,28 @@ bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &re
 
     launchNode((char *)new_node_package.c_str(), (char *)new_node.c_str());
 
+    //Delay for node to be ready
+    ros::Duration(3).sleep();
+
+    // exit reconfiguration mode for each node in the reverse order
+    for (int j = ((orderedList.size())- 1); j >= 0; j--) {
+        ros::NodeHandle n;
+        std::string serviceName = orderedList[j] + SCN_COMM;
+        ROS_INFO("node name: %s, reconfigure service name: %s\n", orderedList[j].c_str(), serviceName.c_str());
+        ros::ServiceClient client = n.serviceClient<scn_library::scnNodeComm>(serviceName);
+        scn_library::scnNodeComm srv;
+        srv.request.command = SCN_EXIT_RECON;
+        srv.request.reconType = SCN_NODE_RECON;
+        srv.request.auth = SCN_AUTH;
+        if (client.call(srv)) {
+            std::string res = srv.response.status == 0 ? "OK" : "ERROR";
+            ROS_INFO("result: %s\n", res.c_str());
+        } else {
+            ROS_ERROR("Failed to call demoNodeService for node %s", orderedList[j].c_str());
+            //return -1;
+        }
+    }
+
     res.result = 0;
     LEAVE();
     return true;
