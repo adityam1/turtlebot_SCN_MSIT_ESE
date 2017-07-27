@@ -5,3 +5,7 @@ rosservice call /systemControlRegisterService '{node_name : demoNodeClient1, cal
 
 # roservice call command to test userInterfaceService, this can be used to invoke the noderithm switch
 rosservice call /userInterfaceService '{old_node: demoNode1, new_node: demoNode2, new_node_package: reconfigure}'
+
+# roservice call command to test userInterfaceService, this can be used to invoke the noderithm switch
+rosservice call /frameworkInfoService '{queryType: 0}'
+rosservice call /frameworkInfoService '{queryType: 1}'

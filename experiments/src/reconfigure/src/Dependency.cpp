@@ -154,6 +154,66 @@ Node::eraseIncomingTopics(string &_topicsSubscribed) {
     }
 }
 
+void 
+Node::traverseOutgoingServices() {
+    INFO("outgoingServices:\n");
+    for (int i = 0; i < outgoingServices.size(); i++) {
+        if (i == 0) {
+            INFO("%s", outgoingServices[i].c_str());
+        } else {
+            INFO("\t%s", outgoingServices[i].c_str());
+        }
+    }
+    if (outgoingServices.size() != 0) {
+        INFO("\n");
+    }
+}
+
+void 
+Node::traverseIncomingServices() {
+    INFO("IncomingServices:\n");
+    for (int i = 0; i < incomingServices.size(); i++) {
+        if (i == 0) {
+            INFO("%s", incomingServices[i].c_str());
+        } else {
+            INFO("\t%s", incomingServices[i].c_str());
+        }
+    }
+    if (incomingServices.size() != 0) {
+        INFO("\n");   
+    }
+}
+
+void 
+Node::traverseOutgoingTopics() {
+    INFO("outgoingTopics:\n");
+    for (int i = 0; i < outgoingTopics.size(); i++) {
+        if (i == 0) {
+            INFO("%s", outgoingTopics[i].c_str());
+        } else {
+            INFO("\t%s", outgoingTopics[i].c_str());
+        }
+    }
+    if (outgoingTopics.size() != 0) {
+        INFO("\n");
+    }
+}
+
+void 
+Node::traverseIncomingTopics() {
+    INFO("IncomingTopics:\n");
+    for (int i = 0; i < incomingTopics.size(); i++) {
+        if (i == 0) {
+            INFO("%s", incomingTopics[i].c_str());
+        } else {
+            INFO("\t%s", incomingTopics[i].c_str());
+        }
+    }
+    if (incomingTopics.size() != 0) {
+        INFO("\n");   
+    }
+}
+
 /**
  * APIs for Dependency class
  */
@@ -518,11 +578,11 @@ Dependency::eraseOrphanNode(Node *node) {
 
 vector<string> 
 Dependency::getAllNodes() {
-    vector<string> orderedList; 
+    vector<string> nodeList; 
     for (int i = 0; i < list.size(); i++) {
-        orderedList.push_back(list[i]->getName());
+        nodeList.push_back(list[i]->getName());
     }
-    return orderedList;
+    return nodeList;;
 }
 
 void 

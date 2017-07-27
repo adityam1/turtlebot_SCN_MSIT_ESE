@@ -1,0 +1,13 @@
+# query type
+# display all the node registered within the framework
+uint8 NODE = 0
+# display all the dependency within the framework
+uint8 DEPENDENCY = 1
+
+uint8 queryType
+
+---
+
+uint8 OK = 0
+uint8 ERROR = 1
+uint8 result

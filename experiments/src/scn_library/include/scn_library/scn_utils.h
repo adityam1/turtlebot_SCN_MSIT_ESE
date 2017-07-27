@@ -40,6 +40,10 @@
 #define SCN_INTER_RECON        (14)
 #define SCN_NODE_RECON         (15)
 
+// query framework info type
+#define SCN_QUERY_NODE         (0)
+#define SCN_QUERY_DEPENDENCY   (1)
+
 #define SCN_COMM    "Comm"
 #define SCN_SERVICE "Service"
 #define SCN_TOPIC   "Topic"
@@ -56,12 +60,25 @@ typedef enum {
     LOG_DBG,
 } LOG_T;
 
+#define KRED  "\x1B[31m"
+#define KGRN  "\x1B[32m"
+#define KYEL  "\x1B[33m"
+#define RESET "\x1B[0m"
+
 #define log_printf(log, fmt, ...) \
     do {    \
         if (log <= log_level) {   \
             printf(fmt, ##__VA_ARGS__); \
         }   \
     } while (0)
+
+#define log_printf_red(log, fmt, ...) \
+    do {    \
+        if (log <= log_level) {   \
+            printf("\x1B[31m" fmt, ##__VA_ARGS__ "\x1B[0m"); \
+        }   \
+    } while (0)
+
 
 #define log_prinf_verbose(log, fmt, ...)    \
     do {    \
@@ -78,6 +95,9 @@ typedef enum {
 
 #define INFO(fmt, ...)  \
     log_printf(LOG_INFO, fmt, ##__VA_ARGS__)
+
+#define INFO_RED(fmt, ...) \
+    log_printf_red(LOG_INFO, fmt, ##__VA_ARGS__)
 
 #define ENTER() \
     DBG("enter")

@@ -69,6 +69,7 @@ add_service_files(
   FILES
   demoNodeService.srv
   userInterfaceService.srv
+  frameworkInfoService.srv
 )
 
 ## Generate actions in the 'action' folder

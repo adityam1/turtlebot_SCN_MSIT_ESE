@@ -9,13 +9,13 @@
 #include <scn_library/systemControlRegisterService.h>
 #include <scn_library/scnNodeComm.h>
 #include <scn_library/presence.h>
+#include <scn_library/scn_utils.h>
 #include <reconfigure/userInterfaceService.h>
 #include <reconfigure/demoNodeService.h>
+#include <reconfigure/frameworkInfoService.h>
+#include "reconfigure/Dependency.h"
 #include <iostream>
 #include <vector>
-
-#include <scn_library/scn_utils.h>
-#include "reconfigure/Dependency.h"
 
 using namespace std;
 
@@ -38,6 +38,8 @@ bool scnCoreCb(scn_library::systemControlRegisterService::Request &req,
         scn_library::systemControlRegisterService::Response &res); 
 bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &req,
         reconfigure::userInterfaceService::Response &res);
+bool frameworkInfoServiceCallback(reconfigure::frameworkInfoService::Request &req,
+        reconfigure::frameworkInfoService::Response &res);
 
 
 /*------------------------------------------------------------------
@@ -392,6 +394,56 @@ bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &re
     return true;
 }
 
+bool frameworkInfoServiceCallback(reconfigure::frameworkInfoService::Request &req,
+        reconfigure::frameworkInfoService::Response &res) {
+
+    ENTER();
+    uint8_t request = req.queryType;
+    switch (request) {
+        case SCN_QUERY_NODE:
+            {
+                vector<string> nodes = gDependency->getAllNodes();
+                INFO_RED("Node within the framework:\n");
+                for (int i = 0; i < nodes.size(); i++) {
+                    if (i == 0) {
+                        INFO("%s", nodes[i].c_str());
+                    } else {
+                        INFO("\t%s", nodes[i].c_str());
+                    }
+                }
+                INFO("\n");
+                break;
+            }
+
+        case SCN_QUERY_DEPENDENCY:
+            {
+                vector<string> nodes = gDependency->getAllNodes();
+                INFO_RED("Dependency within the framework:\n");
+                for (int i = 0; i < nodes.size(); i++) {
+                    INFO("Node: %s\n", nodes[i].c_str());
+                    Node *node = gDependency->getNodeWithName(nodes[i]);
+                    if (node == NULL) {
+                        ROS_ERROR("Invalid node name!");
+                        continue;
+                    }
+                    node->traverseOutgoingServices();
+                    node->traverseIncomingServices();
+                    node->traverseOutgoingTopics();
+                    node->traverseIncomingTopics();
+                }
+                INFO("\n");
+                break;
+            }
+
+        default:
+            ROS_ERROR("Invalid query parameter specified!");
+            return false;
+    }
+
+    LEAVE();
+    return true;
+}
+
 void systemControlSigintHandler(int sig) {
     // TODO
     // do some custom action
@@ -482,6 +534,7 @@ int main(int argc, char **argv)
 
     ros::ServiceServer registerService = n.advertiseService("systemControlRegisterService", scnCoreCb);
     ros::ServiceServer userInterfaceService = n.advertiseService("userInterfaceService", userInterfaceServiceCallback);
+    ros::ServiceServer frameworkInfoService = n.advertiseService("frameworkInfoService", frameworkInfoServiceCallback);
 
     // override the default ros sigint handler
     signal(SIGINT, systemControlSigintHandler);

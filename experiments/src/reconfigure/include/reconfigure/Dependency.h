@@ -89,10 +89,6 @@ class Dependency {
          */
         void resetVisited();
         /**
-         * get all nodes with name
-         */
-        vector<string> getAllNodes();
-        /**
          * return the root node list (root node means the one that has no incoming services)
          */
         void getRootNodeList(vector<Node*> &rootList);
@@ -164,6 +160,9 @@ class Dependency {
          * return: vector of node name
          */
         vector<string> getReconNodeList(string &nodeName);
-
+        /**
+         * get all nodes with name
+         */
+        vector<string> getAllNodes();
 };
 #endif //__DEPENDENCY_H__
