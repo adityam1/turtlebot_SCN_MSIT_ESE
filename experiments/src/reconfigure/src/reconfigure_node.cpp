@@ -74,7 +74,8 @@ bool registerService(
     std::string serviceName = req.depName;
 
     /* Check direction of service being registered */
-    switch (direction) {
+    switch (direction) 
+    {
         case SERVER:
             /**
              * Attention: for service server the dependency direction is from client to server
@@ -119,7 +120,8 @@ bool registerTopic(
     /* Take locks on the NodeTopics map #FIXME */
 
     /* Check direction of service being registered */
-    switch (direction) {
+    switch (direction) 
+    {
         case PUBLISH:
             /**
              * Attention: for topic server the dependency direction is from 
@@ -169,7 +171,8 @@ bool unRegisterService(
     string nodeName = req.nodeName;
 
     string serviceName = req.depName;
-    switch (direction) {
+    switch (direction) 
+    {
         case SERVER:
             ROS_INFO("erase incoming for node: %s with service: %s", 
                     nodeName.c_str(), serviceName.c_str());
@@ -204,7 +207,8 @@ bool unRegisterTopic(
     std::string nodeName = req.nodeName;
     std::string topicName = req.depName;
 
-    switch(direction) {
+    switch(direction) 
+    {
         case PUBLISH:
             ROS_INFO("erase incoming topic for node:%s with topic:%s", 
                     nodeName.c_str(), topicName.c_str());
@@ -297,7 +301,9 @@ bool scnCoreCb(scn_library::systemControlRegisterService::Request &req,
                 status = SCN_ERROR;
                 break;
         }
-    } else if(UNREGISTER == request) {
+    } 
+    else if(UNREGISTER == request) 
+    {
         switch(reg_dep_type)
         {
             case SERVICE:
@@ -322,10 +328,143 @@ bool scnCoreCb(scn_library::systemControlRegisterService::Request &req,
     return status;
 }
 
+STATUS_T exitReconMode(int size, vector<string> &orderedList) 
+{
+    STATUS_T status = SCN_ST_OK;
+
+    for (int j = size; j >= 0; j--) 
+    {
+        ros::NodeHandle n;
+        std::string serviceName = orderedList[j] + SCN_COMM;
+
+        ROS_INFO("node name: %s, reconfigure service name: %s\n", orderedList[j].c_str(), serviceName.c_str());
+        
+        ros::ServiceClient client = n.serviceClient<scn_library::scnNodeComm>(serviceName);
+        
+        scn_library::scnNodeComm srv;
+        srv.request.command = SCN_EXIT_RECON;
+        srv.request.reconType = SCN_NODE_RECON;
+        srv.request.auth = SCN_AUTH;
+        
+        if (client.call(srv)) 
+        {
+            if(SCN_ST_OK != srv.response.status) 
+            {
+                ROS_ERROR("Unable to put %s into Normal Mode", orderedList[j].c_str());
+                status = SCN_EXIT_RECON_FAIL;
+            }
+        } 
+        else 
+        {
+            ROS_ERROR("Unable to put %s into Normal Mode", orderedList[j].c_str());
+            status = SCN_EXIT_RECON_FAIL;
+        }
+    }
+    return status;
+}
+
+
+STATUS_T enterReconMode(vector<string> &orderedList)
+{
+    bool rollback = false;
+    int j = 0;
+    STATUS_T result = SCN_ST_OK;
+
+    for (j = 0; j < orderedList.size(); j++) 
+    {
+        ros::NodeHandle n;
+        std::string serviceName = orderedList[j] + SCN_COMM;
+
+        ROS_INFO("node name: %s, reconfigure service name: %s\n", orderedList[j].c_str(), serviceName.c_str());
+        
+        ros::ServiceClient client = n.serviceClient<scn_library::scnNodeComm>(serviceName);
+        
+        scn_library::scnNodeComm srv;
+        srv.request.command = SCN_ENTER_RECON;
+        srv.request.reconType = SCN_NODE_RECON;
+        srv.request.auth = SCN_AUTH;
+        
+        if (client.call(srv)) 
+        {
+            if(SCN_ERROR == srv.response.status) 
+            {
+                result = SCN_ENTER_RECON_FAIL;
+                ROS_ERROR("Unable to put %s in normal mode\n", orderedList[j].c_str());
+                rollback = true;
+                break;
+            }
+        } 
+        else 
+        {
+            result = SCN_ENTER_RECON_FAIL;
+            ROS_ERROR("Unable to put %s in normal mode\n", orderedList[j].c_str());
+            rollback = true;
+            break;
+        }
+    }
+
+    if(rollback) 
+    {
+        /* Put all nodes into Normal mode
+         * FIXME: Need more error codes to tell the user that not
+         * all nodes are in normal mode. 
+         */
+        if(SCN_ST_OK != exitReconMode((j - 1), orderedList)) 
+        {
+            /* Need to change the status such that upper layer knows
+             * that the failure occured while ROLLING BACK 
+             */
+            result = SCN_ROLLBACK_FAIL;
+        }
+        return result;
+    }
+}
+
+void doNodeRecon(reconfigure::userInterfaceService::Request &req,
+        reconfigure::userInterfaceService::Response &res) 
+{
+    bool rollback = false;
+    int j = 0;
+    std::string oldNode = req.oldNode;
+    std::string newNode = req.newNode;
+    std::string newNodePackage = req.newNodePackage;
+
+    ROS_INFO("request oldNode: %s", oldNode.c_str());
+    ROS_INFO("request newNode: %s", newNode.c_str());
+    ROS_INFO("request newNodePackage: %s", newNodePackage.c_str());
+
+    // here we only reconfigure one node, the old node specified
+    vector<string> orderedList = gDependency->getReconNodeList(oldNode);
+
+    if(enterReconMode(orderedList))
+    {
+        // Could not put every node into reconfiguration mode
+        return;
+    }
+
+    // kill the dependecies of old node and launch the dependency of new node
+    killNode((char *)oldNode.c_str());
+
+    // for the killed node, explicitly remove dependency from the framework
+    gDependency->removeNode(oldNode);
+
+    //Start the new node
+    launchNode((char *)newNodePackage.c_str(), (char *)newNode.c_str());
+
+    /** IMPORTANT! need to explicitly erase killed node from orderedList
+     * since we have removed the old node from the dependency and add launched to the dependency
+     * so here, we don't need to put the old node to exist recon state
+     */
+    orderedList.erase(remove(orderedList.begin(), orderedList.end(), oldNode), orderedList.end());
+
+    // exit reconfiguration mode for each node in the reverse order
+    res.result = exitReconMode((orderedList.size()- 1), orderedList);
+}
+
 /**
  * Request format
- * string old_node - the name of the old node
- * string new_node - the name of the new node
+ * string oldNode - the name of the old node
+ * string newNode - the name of the new node
  * Response format
  * uint8 result - the result of the service call
  */
@@ -333,75 +472,34 @@ bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &re
         reconfigure::userInterfaceService::Response &res) 
 {
     ENTER();
-    std::string old_node = req.old_node;
-    std::string new_node = req.new_node;
-    std::string new_node_package = req.new_node_package;
+    uint8_t reconType = req.reconType;
 
-    ROS_INFO("request old_node: %s", old_node.c_str());
-    ROS_INFO("request new_node: %s", new_node.c_str());
-    ROS_INFO("request new_node_package: %s", new_node_package.c_str());
-
-    // here we only reconfigure one node, the old node specified
-    vector<string> orderedList = gDependency->getReconNodeList(old_node);
-    for (int j = 0; j < orderedList.size(); j++) {
-        ros::NodeHandle n;
-        std::string serviceName = orderedList[j] + SCN_COMM;
-        ROS_INFO("node name: %s, reconfigure service name: %s\n", orderedList[j].c_str(), serviceName.c_str());
-        ros::ServiceClient client = n.serviceClient<scn_library::scnNodeComm>(serviceName);
-        scn_library::scnNodeComm srv;
-        srv.request.command = SCN_ENTER_RECON;
-        srv.request.reconType = SCN_NODE_RECON;
-        srv.request.auth = SCN_AUTH;
-        if (client.call(srv)) {
-            std::string res = srv.response.status == 0 ? "OK" : "ERROR";
-            ROS_INFO("result: %s\n", res.c_str());
-        } else {
-            ROS_ERROR("Failed to call demoNodeService");
+    switch(reconType) 
+    {
+        case SCN_PARAMETER_RECON:
+            break;
+        case SCN_INTER_RECON:
+            break;
+        case SCN_NODE_RECON:
+            doNodeRecon(req, res);
+            break;
+        default:
+            ROS_ERROR("SCN: Reconfiguration Type not supported");
             return false;
-        }
     }
 
-    // kill the dependecies of old node and launch the dependency of new node
-    killNode((char *)old_node.c_str());
-    // for the killed node, explicitly remove dependency from the framework
-    gDependency->removeNode(old_node);
-    launchNode((char *)new_node_package.c_str(), (char *)new_node.c_str());
-
-    /** IMPORTANT! need to explicitly erase killed node from orderedList
-     * since we have removed the old node from the dependency and add launched to the dependency
-     * so here, we don't need to put the old node to exist recon state
-     */
-    orderedList.erase(remove(orderedList.begin(), orderedList.end(), old_node), orderedList.end());
-    // exit reconfiguration mode for each node in the reverse order
-    for (int j = ((orderedList.size())- 1); j >= 0; j--) {
-        ros::NodeHandle n;
-        std::string serviceName = orderedList[j] + SCN_COMM;
-        ROS_INFO("node name: %s, reconfigure service name: %s\n", orderedList[j].c_str(), serviceName.c_str());
-        ros::ServiceClient client = n.serviceClient<scn_library::scnNodeComm>(serviceName);
-        scn_library::scnNodeComm srv;
-        srv.request.command = SCN_EXIT_RECON;
-        srv.request.reconType = SCN_NODE_RECON;
-        srv.request.auth = SCN_AUTH;
-        if (client.call(srv)) {
-            std::string res = srv.response.status == 0 ? "OK" : "ERROR";
-            ROS_INFO("result: %s\n", res.c_str());
-        } else {
-            ROS_ERROR("Failed to call demoNodeService for node %s", orderedList[j].c_str());
-            return false;
-        }
-    }
-
-    res.result = 0;
     LEAVE();
     return true;
 }
 
 bool frameworkInfoServiceCallback(reconfigure::frameworkInfoService::Request &req,
-        reconfigure::frameworkInfoService::Response &res) {
+        reconfigure::frameworkInfoService::Response &res) 
+{
 
     ENTER();
     uint8_t request = req.queryType;
-    switch (request) {
+    switch (request) 
+    {
         case SCN_QUERY_NODE:
             {
                 vector<string> nodes = gDependency->getAllNodes();
@@ -446,7 +544,8 @@ bool frameworkInfoServiceCallback(reconfigure::frameworkInfoService::Request &re
     return true;
 }
 
-void systemControlSigintHandler(int sig) {
+void systemControlSigintHandler(int sig) 
+{
     // TODO
     // do some custom action
     // For example, publish a stop message to some other nodes.
@@ -460,20 +559,23 @@ void systemControlSigintHandler(int sig) {
  * Starts the node specified by packageName and nodeName.
  * 
  *-----------------------------------------------------------------*/
-static bool launchNode(char *packageName, char *nodeName) {
+static bool launchNode(char *packageName, char *nodeName) 
+{
     FILE *fp_which;
     int error = 0;
     char rosrun_path[200] = {0};
     char *argv[4] = {0};
     pid_t pid;
 
-    if((fp_which = popen("/usr/bin/which rosrun", "r")) != NULL) {
+    if((fp_which = popen("/usr/bin/which rosrun", "r")) != NULL) 
+    {
         fgets(rosrun_path, 200, fp_which);
         pclose(fp_which);
 
         rosrun_path[strlen(rosrun_path) -1] = '\0';
 
-        if(0 == (pid = fork())) {
+        if(0 == (pid = fork())) 
+        {
             setpgid(0, 0);
             argv[0] = rosrun_path;
             argv[1] = packageName;
@@ -501,7 +603,8 @@ static bool launchNode(char *packageName, char *nodeName) {
  * Kills the node specified by name.
  * 
  *-----------------------------------------------------------------*/
-static void killNode(char *name) {
+static void killNode(char *name) 
+{
 
     /* Request the node to commit suicide */
     ros::NodeHandle n;
