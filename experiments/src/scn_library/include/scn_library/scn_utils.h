@@ -20,6 +20,8 @@
 #define SUBSCRIBE       (8)
 #define ALL             (9)
 
+#define SCN_UNSPECIFIED (10)
+
 //response type
 #define SCN_OK          (0)
 #define SCN_ERROR       (1)

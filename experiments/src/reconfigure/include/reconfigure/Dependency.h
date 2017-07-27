@@ -119,6 +119,7 @@ class Dependency {
         // add node to the dependency
         void addNode(Node *_node);
         void removeNode(Node *_node);
+        void removeNode(string nodeName);
 
         /**
          * add dependency for the node specified

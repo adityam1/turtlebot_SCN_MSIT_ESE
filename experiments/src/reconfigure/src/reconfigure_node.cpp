@@ -157,7 +157,6 @@ bool registerTopic(
  * Registers the service with the SCN i.e. records the dependency 
  * for a service for the respective node.
  *
- * #FIXME: Need a check?
  * It is expected that a service client can only be registered after
  * the server has registered the service.
  *-----------------------------------------------------------------*/
@@ -227,20 +226,18 @@ bool unRegisterTopic(
 
 /*------------------------------------------------------------------
  * unRegisterAll
- * Registers the topic with the SCN i.e. records the dependency 
- * for a topic for the respective node.
+ * unRegisters all info of the specified node  with the SCN
  *
  *-----------------------------------------------------------------*/
-bool unRegisterAll(
+bool unRegisterNode(
         scn_library::systemControlRegisterService::Request &req, 
         scn_library::systemControlRegisterService::Response &res) 
 {
     ENTER();
-    uint8_t direction = req.direction;
     string node_name = req.nodeName;
-    string topic_name = req.depName;
 
-    gDependency->eraseAllDependency();
+    ROS_INFO("erase all dependency for node:%s", node_name.c_str());
+    gDependency->removeNode(node_name);
 
     LEAVE();
     return true;
@@ -313,7 +310,8 @@ bool scnCoreCb(scn_library::systemControlRegisterService::Request &req,
                 status = unRegisterTopic(req, res);
                 break;
             case ALL:
-                status = unRegisterAll(req, res);
+                status = unRegisterNode(req, res);
+                break;
             default: 
                 ROS_ERROR("SCN: Unknown dependency type\n");
                 status = SCN_ERROR;
@@ -365,11 +363,15 @@ bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &re
 
     // kill the dependecies of old node and launch the dependency of new node
     killNode((char *)old_node.c_str());
+    // for the killed node, explicitly remove dependency from the framework
+    gDependency->removeNode(old_node);
     launchNode((char *)new_node_package.c_str(), (char *)new_node.c_str());
 
-    //Delay for node to be ready
-    ros::Duration(3).sleep();
-
+    /** IMPORTANT! need to explicitly erase killed node from orderedList
+     * since we have removed the old node from the dependency and add launched to the dependency
+     * so here, we don't need to put the old node to exist recon state
+     */
+    orderedList.erase(remove(orderedList.begin(), orderedList.end(), old_node), orderedList.end());
     // exit reconfiguration mode for each node in the reverse order
     for (int j = ((orderedList.size())- 1); j >= 0; j--) {
         ros::NodeHandle n;

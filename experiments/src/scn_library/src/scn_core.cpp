@@ -201,12 +201,15 @@ namespace ros {
         }
 
         switch(req.command) {
-            case SCN_ENTER_RECON: status = enterServiceCb(req, res);
-                        break;
-            case SCN_EXIT_RECON: status = exitServiceCb(req, res);
-                        break;
-            case SCN_KILL: status = killServiceCb(req, res);
-                        break;
+            case SCN_ENTER_RECON: 
+                status = enterServiceCb(req, res);
+                break;
+            case SCN_EXIT_RECON: 
+                status = exitServiceCb(req, res);
+                break;
+            case SCN_KILL: 
+                status = killServiceCb(req, res);
+                break;
             default: 
                 ROS_ERROR("SCN: Received invalid message. Will not \
                         process this");

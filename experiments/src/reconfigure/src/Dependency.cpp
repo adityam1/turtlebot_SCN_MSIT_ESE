@@ -156,13 +156,9 @@ Node::eraseIncomingTopics(string &_topicsSubscribed) {
 
 void 
 Node::traverseOutgoingServices() {
-    INFO("outgoingServices:\n");
+    INFO("Services used:\n");
     for (int i = 0; i < outgoingServices.size(); i++) {
-        if (i == 0) {
-            INFO("%s", outgoingServices[i].c_str());
-        } else {
-            INFO("\t%s", outgoingServices[i].c_str());
-        }
+        INFO("\t%s", outgoingServices[i].c_str());
     }
     if (outgoingServices.size() != 0) {
         INFO("\n");
@@ -171,13 +167,9 @@ Node::traverseOutgoingServices() {
 
 void 
 Node::traverseIncomingServices() {
-    INFO("IncomingServices:\n");
+    INFO("Services provided:\n");
     for (int i = 0; i < incomingServices.size(); i++) {
-        if (i == 0) {
-            INFO("%s", incomingServices[i].c_str());
-        } else {
-            INFO("\t%s", incomingServices[i].c_str());
-        }
+        INFO("\t%s", incomingServices[i].c_str());
     }
     if (incomingServices.size() != 0) {
         INFO("\n");   
@@ -186,13 +178,9 @@ Node::traverseIncomingServices() {
 
 void 
 Node::traverseOutgoingTopics() {
-    INFO("outgoingTopics:\n");
+    INFO("Topics published:\n");
     for (int i = 0; i < outgoingTopics.size(); i++) {
-        if (i == 0) {
-            INFO("%s", outgoingTopics[i].c_str());
-        } else {
-            INFO("\t%s", outgoingTopics[i].c_str());
-        }
+        INFO("\t%s", outgoingTopics[i].c_str());
     }
     if (outgoingTopics.size() != 0) {
         INFO("\n");
@@ -201,13 +189,9 @@ Node::traverseOutgoingTopics() {
 
 void 
 Node::traverseIncomingTopics() {
-    INFO("IncomingTopics:\n");
+    INFO("Topics subscribed:\n");
     for (int i = 0; i < incomingTopics.size(); i++) {
-        if (i == 0) {
-            INFO("%s", incomingTopics[i].c_str());
-        } else {
-            INFO("\t%s", incomingTopics[i].c_str());
-        }
+        INFO("\t%s", incomingTopics[i].c_str());
     }
     if (incomingTopics.size() != 0) {
         INFO("\n");   
@@ -316,6 +300,14 @@ Dependency::removeNode(Node *_node) {
    if (pos != list.end()) {
        list.erase(pos);
    }
+}
+
+void 
+Dependency::removeNode(string nodeName) {
+    Node *node = getNodeWithName(nodeName);
+    if (node != NULL) {
+        removeNode(node);
+    }
 }
 
 
