@@ -145,10 +145,8 @@ namespace ros {
         /* Mark node to be in reconfiguration mode */
         if(SCN_ST_OK == status) {
             scnNodeInfo.nodeReconState = SCN_RECON_MODE;
-            res.status = SCN_OK;
             return SCN_ST_OK;
         } else {
-            res.status = SCN_ERROR;
             return SCN_ST_ERROR;
         }
     }
@@ -182,10 +180,8 @@ namespace ros {
         /* Mark node to be in reconfiguration mode */
         if(SCN_ST_OK == status) {
             scnNodeInfo.nodeReconState = SCN_NORMAL_MODE;
-            res.status = SCN_OK;
             return SCN_ST_OK;
         } else {
-            res.status = SCN_ERROR;
             return SCN_ST_ERROR;
         }
     }

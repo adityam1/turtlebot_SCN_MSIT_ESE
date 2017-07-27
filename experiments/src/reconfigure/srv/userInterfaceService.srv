@@ -1,6 +1,10 @@
-string old_node
-string new_node
-string new_node_package
+#Type of Reconfiguration - interface/parameter/node
+uint8 reconType
+
+#For node reconfiguration
+string oldNode
+string newNode
+string newNodePackage
 ---
 
 uint8 OK = 0
