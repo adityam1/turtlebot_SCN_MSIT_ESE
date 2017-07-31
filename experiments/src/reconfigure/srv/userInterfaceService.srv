@@ -5,6 +5,15 @@ uint8 reconType
 string oldNode
 string newNode
 string newNodePackage
+
+#For Parameter reconfiguration
+uint8   paramType
+string  paramName
+bool    boolValue
+string  stringValue
+int32  intValue
+float64  doubleValue
+
 ---
 
 uint8 OK = 0

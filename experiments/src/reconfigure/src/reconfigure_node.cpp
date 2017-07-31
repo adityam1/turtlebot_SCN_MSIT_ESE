@@ -420,11 +420,54 @@ STATUS_T enterReconMode(vector<string> &orderedList)
     }
 }
 
+void doParamRecon(reconfigure::userInterfaceService::Request &req,
+        reconfigure::userInterfaceService::Response &res)
+{
+    bool rollback = false;
+
+    std::string param = req.paramName;
+    uint8_t paramType = req.paramType;
+    
+    switch(paramType) 
+    {
+        case BOOL:
+            {
+                bool value = req.boolValue;
+                ros::param::set(param, value);
+            }
+            break;
+        case STRING:
+            {
+                std::string value = req.stringValue;
+                ros::param::set(param, value);
+            }
+            break;
+        case INT:
+            {
+                int32_t value = req.intValue;
+                ros::param::set(param, value);
+            }
+            break;
+        case DOUBLE:
+            {
+                double value = req.intValue;
+                ros::param::set(param, value);
+            }
+            break;
+        default: ROS_ERROR("Not handling this data type yet");
+                 res.result = SCN_TYPE_NOT_SUPPORTED;
+                 return;
+    }
+    res.result = SCN_ST_OK;
+    return;
+}
+
 void doNodeRecon(reconfigure::userInterfaceService::Request &req,
         reconfigure::userInterfaceService::Response &res) 
 {
     bool rollback = false;
     int j = 0;
+    STATUS_T result;
     std::string oldNode = req.oldNode;
     std::string newNode = req.newNode;
     std::string newNodePackage = req.newNodePackage;
@@ -436,9 +479,10 @@ void doNodeRecon(reconfigure::userInterfaceService::Request &req,
     // here we only reconfigure one node, the old node specified
     vector<string> orderedList = gDependency->getReconNodeList(oldNode);
 
-    if(enterReconMode(orderedList))
+    if(result = enterReconMode(orderedList))
     {
         // Could not put every node into reconfiguration mode
+        res.result = result;
         return;
     }
 
@@ -477,6 +521,7 @@ bool userInterfaceServiceCallback(reconfigure::userInterfaceService::Request &re
     switch(reconType) 
     {
         case SCN_PARAMETER_RECON:
+            doParamRecon(req, res);
             break;
         case SCN_INTER_RECON:
             break;

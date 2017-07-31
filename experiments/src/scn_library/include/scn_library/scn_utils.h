@@ -37,10 +37,12 @@
 #define SCN_EXIT_RECON  (11)
 #define SCN_KILL        (12)
 
+#if 0
 //SCN reconType type
 #define SCN_PARAMETER_RECON    (13)
 #define SCN_INTER_RECON        (14)
 #define SCN_NODE_RECON         (15)
+#endif
 
 // query framework info type
 #define SCN_QUERY_NODE         (0)
@@ -53,11 +55,25 @@
 #define SCN_TOPIC   "Topic"
 
 typedef enum {
+    SCN_PARAMETER_RECON,
+    SCN_INTER_RECON,
+    SCN_NODE_RECON
+} RECONTYPE_T;
+
+typedef enum {
+    BOOL,
+    STRING,
+    INT,
+    DOUBLE
+}PARAMTYPE_T;
+
+typedef enum {
     SCN_ST_OK = 0,
     SCN_ST_ERROR,
     SCN_ENTER_RECON_FAIL,
     SCN_EXIT_RECON_FAIL,
-    SCN_ROLLBACK_FAIL
+    SCN_ROLLBACK_FAIL,
+    SCN_TYPE_NOT_SUPPORTED
 }STATUS_T;
 
 typedef enum {
