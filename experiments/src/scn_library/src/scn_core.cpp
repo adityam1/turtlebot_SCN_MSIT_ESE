@@ -1,14 +1,22 @@
 #include <sysexits.h>
+#include <pthread.h>
 #include <ros/ros.h>
 #include <ros/package.h>
 #include <scn_library/scn_core.h>
 #include <scn_library/presence.h>
 #include <scn_library/scnNodeComm.h>
+#include <scn_library/scn_utils.h>
+
+static int log_level = LOG_INFO;
 
 namespace ros {
 
     std::string initString = "";
     static scnNodeInfo_t scnNodeInfo = {initString, NULL, NULL, NULL, false, false};
+    typedef struct vargStruct_S {
+        scn_library::scnNodeComm::Request req;
+        scn_library::scnNodeComm::Response res;
+    } vargStruct_T;
 
     /* SCN core function definitions */
     static bool launchSCN() {
@@ -122,12 +130,12 @@ namespace ros {
 
         STATUS_T status = SCN_ST_OK;
         ROS_INFO("SCN: Entering Reconfiguration Mode");
-        
+
         /* Save all important state of the node */
         if(NULL != scnNodeInfo.saveStateCb) {
             scnNodeInfo.saveStateCb(req.reconType);
         }
-        
+
         /* Allow user to perform necessary operations to enter 
          * reconfiguration mode */
         if(NULL != scnNodeInfo.reconModeCb) {
@@ -164,7 +172,7 @@ namespace ros {
 
         STATUS_T status = SCN_ST_OK;
         ROS_INFO("SCN: Exit Reconfiguration Mode");
-        
+
         /* Allow user to perform necessary operations to exit 
          * reconfiguration mode */
         if(NULL != scnNodeInfo.reconModeCb) {
@@ -182,6 +190,31 @@ namespace ros {
         }
     }
 
+    /**
+     * pthread used to call the 
+     */
+    void *thread(void *varguments) {
+        STATUS_T status = SCN_ST_ERROR;
+        vargStruct_T *vargps = (vargStruct_T*)(varguments);
+
+        switch(vargps->req.command) {
+            case SCN_ENTER_RECON: 
+                status = enterServiceCb(vargps->req, vargps->res);
+                break;
+            case SCN_EXIT_RECON: 
+                status = exitServiceCb(vargps->req, vargps->res);
+                break;
+            case SCN_KILL: 
+                status = killServiceCb(vargps->req, vargps->res);
+                break;
+            default: 
+                ROS_ERROR("SCN: Received invalid message. Will not \
+                        process this");
+                status = SCN_ST_ERROR;
+        }
+        return status == SCN_ST_ERROR ? (void*)-1 : (void*)0;
+    }
+
     /*--------------------------------------------------------
      * nodeServiceCb : This function is called when the SCN 
      *                 sends a message to the node.
@@ -190,7 +223,12 @@ namespace ros {
      * ------------------------------------------------------*/
     static bool nodeServiceCb(scn_library::scnNodeComm::Request& req,
             scn_library::scnNodeComm::Response& res) {
-        STATUS_T status = SCN_ST_ERROR;
+        ENTER();
+
+        pthread_t tid;
+        struct timespec ts;
+        int s;
+        void *retvalp;
 
         ROS_INFO("SCN: Received a message from SCN");
 
@@ -200,26 +238,34 @@ namespace ros {
             return SCN_ERROR;
         }
 
-        switch(req.command) {
-            case SCN_ENTER_RECON: 
-                status = enterServiceCb(req, res);
-                break;
-            case SCN_EXIT_RECON: 
-                status = exitServiceCb(req, res);
-                break;
-            case SCN_KILL: 
-                status = killServiceCb(req, res);
-                break;
-            default: 
-                ROS_ERROR("SCN: Received invalid message. Will not \
-                        process this");
-                return SCN_ERROR;
-        }
-        if(SCN_ST_OK == status) {
-            return true;
-        } else {
+        vargStruct_T args;
+        args.req = req;
+        args.res = res;
+        pthread_create(&tid, NULL, thread, (void *)(&args));
+
+        /* Handle get current time error */
+        if (clock_gettime(CLOCK_REALTIME, &ts) == -1) {
+            ROS_ERROR("Unable to get the current time!");
             return false;
         }
+        ts.tv_sec += SCN_COMM_WAIT_TIME;
+
+        // try to join the pthread specified with tid, if exceeds the time specified, then return error
+        s = pthread_timedjoin_np(tid, &retvalp, &ts);
+        /* Handle timeout error */
+        if (s != 0) {
+            ROS_ERROR("Common Service Call time out!");
+            return false;
+        } else {
+            if ((intptr_t)retvalp == 0) {
+                ROS_INFO("common service call succeed!");
+                return true;
+            } else {
+                ROS_INFO("common service call failed!");
+                return false;
+            } 
+        }
+        LEAVE();
     }
 
     /*--------------------------------------------------------
@@ -288,19 +334,6 @@ namespace ros {
                     Continuing without SCN");
         }
 
-#if 0
-        /* Enter Recon Service */
-        std::string enterServiceName = scnNodeInfo.name + "Enter";
-        scnNodeInfo.enterService = (scnNodeInfo.scnNodeHandle)->advertiseService(enterServiceName, enterServiceCb);
-
-        /* Exit Recon Service */
-        std::string exitServiceName = scnNodeInfo.name + "Exit";
-        scnNodeInfo.exitService = scnNodeInfo.scnNodeHandle->advertiseService(exitServiceName, exitServiceCb);
-
-        /* Kill Recon Service */
-        std::string killServiceName = scnNodeInfo.name + "Kill";
-        scnNodeInfo.killService = scnNodeInfo.scnNodeHandle->advertiseService(killServiceName, killServiceCb);
-#endif 
         std::string nodeServiceName = scnNodeInfo.name + SCN_COMM;
         scnNodeInfo.nodeService = (scnNodeInfo.scnNodeHandle)->advertiseService(nodeServiceName, nodeServiceCb);
 

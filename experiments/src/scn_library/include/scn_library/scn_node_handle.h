@@ -9,7 +9,7 @@
 #include "scn_library/scn_service_server.h"
 #include <scn_library/systemControlRegisterService.h>
 
-static int log_level = LOG_DBG;
+static int log_level = LOG_INFO;
 
 namespace ros {
     class SCNNodeHandle : public NodeHandle {

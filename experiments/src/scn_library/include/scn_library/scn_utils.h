@@ -46,6 +46,8 @@
 #define SCN_QUERY_NODE         (0)
 #define SCN_QUERY_DEPENDENCY   (1)
 
+#define SCN_COMM_WAIT_TIME      (5)
+
 #define SCN_COMM    "Comm"
 #define SCN_SERVICE "Service"
 #define SCN_TOPIC   "Topic"
