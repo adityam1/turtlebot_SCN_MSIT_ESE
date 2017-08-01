@@ -19,7 +19,7 @@
 
 using namespace std;
 
-static int log_level = LOG_DBG;
+static int log_level = LOG_INFO;
 /**
  * global definitions
  */

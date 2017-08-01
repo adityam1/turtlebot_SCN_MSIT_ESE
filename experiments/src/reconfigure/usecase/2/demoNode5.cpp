@@ -30,7 +30,6 @@ bool demoNode5ClientCallback(reconfigure::demoNodeService::Request &req,
 bool demoNode5CallBack(reconfigure::demoNodeService::Request &req,
         reconfigure::demoNodeService::Response &res);
 
-
 void unregisterDependencyToSCN() {
     ros::NodeHandle n;
     ros::ServiceClient client = n.serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
@@ -121,8 +120,8 @@ int main(int argc, char ** argv) {
     reconfigure::demoNodeService srv;
 	srv.request.callback_service = gNodeName;
 
-	while(ros::ok())
-	{
+    while(ros::ok())
+    {
         if (g_request_shutdown) break;
         if (testClient.call(srv)) {
             if(srv.response.result == 0)
@@ -134,10 +133,10 @@ int main(int argc, char ** argv) {
                 ROS_INFO("Called demoNode4TestService error");
             }
         } else {
-		 ROS_ERROR("Failed to call demoNode4TestService");
-	 }
-	 ros::spinOnce();
-	 ros::Duration(1).sleep();
+            ROS_ERROR("Failed to call demoNode4TestService");
+        }
+        ros::spinOnce();
+        ros::Duration(1).sleep();
 	}
 
     LEAVE();

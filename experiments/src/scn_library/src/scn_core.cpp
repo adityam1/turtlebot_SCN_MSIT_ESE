@@ -122,12 +122,12 @@ namespace ros {
 
         STATUS_T status = SCN_ST_OK;
         ROS_INFO("SCN: Entering Reconfiguration Mode");
-        
+
         /* Save all important state of the node */
         if(NULL != scnNodeInfo.saveStateCb) {
             scnNodeInfo.saveStateCb(req.reconType);
         }
-        
+
         /* Allow user to perform necessary operations to enter 
          * reconfiguration mode */
         if(NULL != scnNodeInfo.reconModeCb) {
@@ -164,7 +164,7 @@ namespace ros {
 
         STATUS_T status = SCN_ST_OK;
         ROS_INFO("SCN: Exit Reconfiguration Mode");
-        
+
         /* Allow user to perform necessary operations to exit 
          * reconfiguration mode */
         if(NULL != scnNodeInfo.reconModeCb) {

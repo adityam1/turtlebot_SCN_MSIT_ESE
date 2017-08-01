@@ -1,5 +1,7 @@
 #include <ros/ros.h>
 #include <string>
+#include <signal.h>
+#include <ros/xmlrpc_manager.h>
 
 #include <reconfigure/demoNodeService.h>
 #include <scn_library/systemControlRegisterService.h>
@@ -15,18 +17,81 @@
 /**
  * global definitions
  */
-std::string gCallbackService;
+// Signal-safe flag for whether shutdown is requested
+static sig_atomic_t volatile g_request_shutdown = 0;
+std::string gNodeName;
 
 /**
  * declaration
  */
-bool demoNode14ClientCallback(reconfigure::demoNodeService::Request &req,
+bool demoNode12ClientCallback(reconfigure::demoNodeService::Request &req,
         reconfigure::demoNodeService::Response &res);
+bool demoNode12CallBack(reconfigure::demoNodeService::Request &req,
+        reconfigure::demoNodeService::Response &res);
+
+void unregisterDependencyToSCN() {
+    ros::NodeHandle n;
+    ros::ServiceClient client = n.serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
+
+    scn_library::systemControlRegisterService srv;
+    srv.request.nodeName = gNodeName;
+    srv.request.depName = SCN_UNSPECIFIED;
+    srv.request.requestType = UNREGISTER;
+    srv.request.dependency = ALL;
+    srv.request.direction = SCN_UNSPECIFIED;
+
+    if (client.call(srv)) {
+        std::string res;
+        if (srv.response.result == srv.response.OK) {
+            res = "OK";
+        } else {
+            res = "ERROR";
+        }
+        ROS_INFO("result: %s\n", res.c_str());
+    } else {
+        ROS_ERROR("Failed to call systemControlRegisterService");
+    }
+}
+
+// Replacement SIGINT handler
+void demoNodeSigIntHandler(int sig) {
+    ENTER();
+
+    unregisterDependencyToSCN();
+    g_request_shutdown = 1;
+    LEAVE();
+}
+
+// Replacement "shutdown" XMLRPC callback
+void shutdownCallback(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) {
+    ENTER();
+    
+    int num_params = 0;
+    if (params.getType() == XmlRpc::XmlRpcValue::TypeArray)
+        num_params = params.size();
+    if (num_params > 1)
+    {
+        std::string reason = params[1];
+        ROS_WARN("Shutdown request received. Reason: [%s]", reason.c_str());
+        unregisterDependencyToSCN();
+        g_request_shutdown = 1; // Set flag
+    }
+
+    result = ros::xmlrpc::responseInt(1, "", 0);
+    LEAVE();
+}
 
 void saveStateCb(uint8_t reconType) {
 }
 
 STATUS_T reconModeCb(uint8_t reconType, uint8_t command) {
+    ROS_INFO("Enter recon mode callback!\n");
+
+    //TODO
+    ROS_INFO("Currently, nothing to do in safe mode, will specify later!\n");
+
+    ROS_INFO("Leave recon mode callback!\n");
+   
     return SCN_ST_OK;
 }
 /**
@@ -34,56 +99,55 @@ STATUS_T reconModeCb(uint8_t reconType, uint8_t command) {
  */
 int main(int argc, char ** argv) {
     ENTER();
-    std::string node_name = "demoNode14";
-    //ros::init(argc, argv, node_name);
-    ros::scnInit(argc, argv, node_name, 0, saveStateCb, reconModeCb);
+    gNodeName = "demoNode14";
+    // Override SIGINT handler
+    ros::scnInit(argc, argv, gNodeName, ros::init_options::NoSigintHandler, saveStateCb, reconModeCb);
+    signal(SIGINT, demoNodeSigIntHandler);
+    // Override XMLRPC shutdown
+    ros::XMLRPCManager::instance()->unbind("shutdown");
+    ros::XMLRPCManager::instance()->bind("shutdown", shutdownCallback);
     ros::SCNNodeHandle n;
-
-    // service specified for this node in the reconfigure mode
-    gCallbackService = node_name + "Service";
-    // FIXME, currently register the scn callback service of the node using the node name
-    // to identify this is a special service
-    ros::SCNServiceServer service = n.advertiseService(node_name, gCallbackService, demoNode14ClientCallback);
 
     // service called of demo node 12
     std::string testServiceClient14A = "demoNode12TestService";
-    ros::SCNServiceClient testClientA = n.serviceClient<reconfigure::demoNodeService>(node_name, testServiceClient14A);
+    ros::SCNServiceClient testClientA = n.serviceClient<reconfigure::demoNodeService>(gNodeName, testServiceClient14A);
 
     // service called of demo node 16
     std::string testServiceClient14B = "demoNode16TestService";
-    ros::SCNServiceClient testClientB = n.serviceClient<reconfigure::demoNodeService>(node_name, testServiceClient14B);
+    ros::SCNServiceClient testClientB = n.serviceClient<reconfigure::demoNodeService>(gNodeName, testServiceClient14B);
 
     reconfigure::demoNodeService srv;
-    srv.request.callback_service = node_name;
+    srv.request.callback_service = gNodeName;
 
     reconfigure::demoNodeService srv2;
-    srv2.request.callback_service = node_name;
+    srv2.request.callback_service = gNodeName;
 
     while(ros::ok())
     {
+        if (g_request_shutdown) break;
         if (testClientA.call(srv)) {
-        	if(srv.response.result == 0)
-        	{
-        		ROS_INFO("Called demoNode12TestService");
-        	}
-        	else
-        	{
-        		ROS_INFO("Called demoNode12TestService error");
-        	}
+            if(srv.response.result == 0)
+            {
+                ROS_INFO("Called demoNode12TestService");
+            }
+            else
+            {
+                ROS_INFO("Called demoNode12TestService error");
+            }
 
         } else {
             ROS_ERROR("Failed to call demoNode12TestService");
         }
 
         if (testClientB.call(srv2)) {
-        	if(srv2.response.result == 0)
-        	{
-        		ROS_INFO("Called demoNode16TestService");
-        	}
-        	else
-        	{
-        		ROS_INFO("Called demoNode16TestService error");
-        	}
+            if(srv2.response.result == 0)
+            {
+                ROS_INFO("Called demoNode16TestService");
+            }
+            else
+            {
+                ROS_INFO("Called demoNode16TestService error");
+            }
 
         } else {
             ROS_ERROR("Failed to call demoNode16TestService");
@@ -95,26 +159,4 @@ int main(int argc, char ** argv) {
 
     LEAVE();
     return 0;
-}
-
-/**
- * callback function that specifies the behaviors of the node in the reconfigure mode
- */
-bool demoNode14ClientCallback(reconfigure::demoNodeService::Request &req, reconfigure::demoNodeService::Response &res) {
-    ENTER();
-    std::string service = req.callback_service;
-    if (service.compare(gCallbackService) != 0) {
-        ROS_ERROR("Invalid callback service is raised!");
-        return false;
-    }
-    // TODO
-    // specify the behavior for this node
-    ROS_INFO("Demo Node 14 Enter safe mode!\n");
-
-    ROS_INFO("Currently, nothing to do in safe mode, will specify later!\n");
-
-    //ROS_INFO("Leave safe mode!\n");
-
-    LEAVE();
-    return true;
 }
