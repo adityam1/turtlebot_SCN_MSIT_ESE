@@ -85,6 +85,7 @@ namespace base_local_planner {
       std::string name,
       tf::TransformListener* tf,
       costmap_2d::Costmap2DROS* costmap_ros){
+      ROS_INFO("PLANNER: TrajectoryPlanner");
     if (! isInitialized()) {
 
       ros::NodeHandle private_nh("~/" + name);

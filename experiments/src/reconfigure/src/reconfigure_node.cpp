@@ -434,24 +434,28 @@ void doParamRecon(reconfigure::userInterfaceService::Request &req,
             {
                 bool value = req.boolValue;
                 ros::param::set(param, value);
+                ROS_INFO("SCN: Setting parameter %s, to %d", param.c_str(), value);
             }
             break;
         case STRING:
             {
                 std::string value = req.stringValue;
                 ros::param::set(param, value);
+                ROS_INFO("SCN: Setting parameter %s, to %s", param.c_str(), value.c_str());
             }
             break;
         case INT:
             {
                 int32_t value = req.intValue;
                 ros::param::set(param, value);
+                ROS_INFO("SCN: Setting parameter %s, to %d", param.c_str(), value);
             }
             break;
         case DOUBLE:
             {
-                double value = req.intValue;
+                double value = req.doubleValue;
                 ros::param::set(param, value);
+                ROS_INFO("SCN: Setting parameter %s, to %f", param.c_str(), value);
             }
             break;
         default: ROS_ERROR("Not handling this data type yet");
