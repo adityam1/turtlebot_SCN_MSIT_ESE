@@ -2,6 +2,9 @@
 uint8 reconType
 
 #For node reconfiguration
+
+#preserveState - set to "true" when need to load state in the new node
+bool preserveState
 string oldNode
 string newNode
 string newNodePackage

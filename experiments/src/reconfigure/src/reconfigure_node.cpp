@@ -31,7 +31,7 @@ Dependency *gDependency;
  * declaration
  */
 void systemControlSigintHandler(int sig);
-static bool launchNode(char* packageName, char *nodeName);
+static bool launchNode(char* packageName, char *nodeName, bool preserveState);
 static void killNode(char* name);
 
 bool scnCoreCb(scn_library::systemControlRegisterService::Request &req,
@@ -472,6 +472,8 @@ void doNodeRecon(reconfigure::userInterfaceService::Request &req,
     bool rollback = false;
     int j = 0;
     STATUS_T result;
+
+    bool preserveState = req.preserveState;
     std::string oldNode = req.oldNode;
     std::string newNode = req.newNode;
     std::string newNodePackage = req.newNodePackage;
@@ -479,6 +481,7 @@ void doNodeRecon(reconfigure::userInterfaceService::Request &req,
     ROS_INFO("request oldNode: %s", oldNode.c_str());
     ROS_INFO("request newNode: %s", newNode.c_str());
     ROS_INFO("request newNodePackage: %s", newNodePackage.c_str());
+    ROS_INFO("Preserve State: %d", (int)preserveState);
 
     // here we only reconfigure one node, the old node specified
     vector<string> orderedList = gDependency->getReconNodeList(oldNode);
@@ -497,7 +500,7 @@ void doNodeRecon(reconfigure::userInterfaceService::Request &req,
     gDependency->removeNode(oldNode);
 
     //Start the new node
-    launchNode((char *)newNodePackage.c_str(), (char *)newNode.c_str());
+    launchNode((char *)newNodePackage.c_str(), (char *)newNode.c_str(), preserveState);
 
     /** IMPORTANT! need to explicitly erase killed node from orderedList
      * since we have removed the old node from the dependency and add launched to the dependency
@@ -608,12 +611,12 @@ void systemControlSigintHandler(int sig)
  * Starts the node specified by packageName and nodeName.
  * 
  *-----------------------------------------------------------------*/
-static bool launchNode(char *packageName, char *nodeName) 
+static bool launchNode(char *packageName, char *nodeName, bool preserveState) 
 {
     FILE *fp_which;
     int error = 0;
     char rosrun_path[200] = {0};
-    char *argv[4] = {0};
+    char *argv[5] = {0};
     pid_t pid;
 
     if((fp_which = popen("/usr/bin/which rosrun", "r")) != NULL) 
@@ -626,10 +629,13 @@ static bool launchNode(char *packageName, char *nodeName)
         if(0 == (pid = fork())) 
         {
             setpgid(0, 0);
+            char stateVariable[2];
+            sprintf(stateVariable, "%d", (int)stateVariable);
             argv[0] = rosrun_path;
             argv[1] = packageName;
             argv[2] = nodeName;
-            argv[3] = NULL;
+            argv[3] = stateVariable;
+            argv[4] = NULL;
 
             ROS_INFO("Attempting to start node %s", nodeName);
 
