@@ -95,6 +95,9 @@ STATUS_T reconModeCb(uint8_t reconType, uint8_t command) {
     ROS_INFO("Leave recon mode callback!\n");
     return SCN_ST_OK;
 }
+void loadStateCb() {                                                                                                                                                                                                                  
+    ROS_INFO("saveStateCb %s", __FILE__);
+}
 /**
  * APIs
  */
@@ -103,7 +106,7 @@ int main(int argc, char ** argv) {
     
     gNodeName = "demoNode2";
     // Override SIGINT handler
-    ros::scnInit(argc, argv, gNodeName, ros::init_options::NoSigintHandler, saveStateCb, reconModeCb);
+    ros::scnInit(argc, argv, gNodeName, ros::init_options::NoSigintHandler, saveStateCb, reconModeCb, loadStateCb);
     signal(SIGINT, demoNodeSigIntHandler);
 
     // Override XMLRPC shutdown

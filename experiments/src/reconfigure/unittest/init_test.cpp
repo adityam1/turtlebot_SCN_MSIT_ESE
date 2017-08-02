@@ -11,10 +11,14 @@ STATUS_T reconModeCb(uint8_t reconType, uint8_t command) {
     return SCN_ST_OK;
 }
 
+void loadStateCb() {
+    ROS_INFO("loadStateCb %s", __FILE__);
+}
+
 
 int main(int argc, char** argv)
 {
-    ros::scnInit(argc, argv, "init_test", 0, saveStateCb, reconModeCb);
+    ros::scnInit(argc, argv, "init_test", 0, saveStateCb, reconModeCb, loadStateCb);
     ros::NodeHandle nh_;
 
   ros::spin();

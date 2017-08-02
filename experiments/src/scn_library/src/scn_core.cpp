@@ -287,7 +287,8 @@ namespace ros {
             const std::string & name, 
             uint32_t options,
             saveStateRoutine saveStateCb,
-            reconModeRoutine reconModeCb
+            reconModeRoutine reconModeCb,
+            loadStateRoutine loadStateCb
             ) {
 
         bool isSCN = false;
@@ -300,6 +301,7 @@ namespace ros {
         scnNodeInfo.name = name;
         scnNodeInfo.saveStateCb = saveStateCb;
         scnNodeInfo.reconModeCb = reconModeCb;
+        scnNodeInfo.loadStateCb = loadStateCb;
 
         /* Create Nodehandle for SCN */
         scnNodeInfo.scnNodeHandle = new ros::NodeHandle;
@@ -335,6 +337,16 @@ namespace ros {
 
         /* Set state of node */
         scnSetNodeState(SCN_NORMAL_MODE);
+
+        //if()
+        //if(true == (bool)) 
+        ROS_INFO("Argc = %d\n", argc);
+        {
+            /* Need to load state from disk */
+            if(NULL != scnNodeInfo.loadStateCb) {
+                scnNodeInfo.loadStateCb();
+            }
+        }
 
         /* Mark node initialization done */
         scnNodeInfo.initStatus = true;
