@@ -112,6 +112,113 @@ namespace ros {
             }
 
             // wrapper of subscribe accept extra parameter - node_name, and return SCNSubscriber
+            template<class M, class T> SCNSubscriber subscribe(const std::string &node_name, const std::string& topic, uint32_t queue_size, void(T::*fp)(M), T* obj, const TransportHints& transport_hints = TransportHints()) {
+
+                ENTER();
+                if (ros::scnGetNodeState()) {
+                    ROS_ERROR("subscribe failed because of invalid local SCN state: %d\n", ros::scnGetNodeState());
+                }
+                registerDependenciesToSCN(node_name, topic, REGISTER, TOPIC, SUBSCRIBE);
+                SCNSubscriber scn_subscriber(ros::NodeHandle::subscribe<M, T>(topic, queue_size, fp, obj, transport_hints));
+                LEAVE();
+                return scn_subscriber;
+            }
+
+            template<class M, class T> SCNSubscriber subscribe(const std::string &node_name, const std::string& topic, uint32_t queue_size, void(T::*fp)(M) const, T* obj, 
+                    const TransportHints& transport_hints = TransportHints()) {
+
+                ENTER();
+                if (ros::scnGetNodeState()) {
+                    ROS_ERROR("subscribe failed because of invalid local SCN state: %d\n", ros::scnGetNodeState());
+                }
+                registerDependenciesToSCN(node_name, topic, REGISTER, TOPIC, SUBSCRIBE);
+                SCNSubscriber scn_subscriber(ros::NodeHandle::subscribe<M, T>(topic, queue_size, fp, obj, transport_hints));
+                LEAVE();
+                return scn_subscriber;
+            }
+
+            template<class M, class T> SCNSubscriber subscribe(const std::string &node_name, const std::string& topic, uint32_t queue_size, 
+                    void(T::*fp)(const boost::shared_ptr<M const>&), T* obj, 
+                    const TransportHints& transport_hints = TransportHints()) {
+                
+                ENTER();
+                if (ros::scnGetNodeState()) {
+                    ROS_ERROR("subscribe failed because of invalid local SCN state: %d\n", ros::scnGetNodeState());
+                }
+                registerDependenciesToSCN(node_name, topic, REGISTER, TOPIC, SUBSCRIBE);
+                SCNSubscriber scn_subscriber(ros::NodeHandle::subscribe<M, T>(topic, queue_size, fp, obj, transport_hints));
+                LEAVE();
+                return scn_subscriber;
+            } 
+
+            template<class M, class T> SCNSubscriber subscribe(const std::string &node_name, const std::string& topic, uint32_t queue_size, 
+                    void(T::*fp)(const boost::shared_ptr<M const>&) const, T* obj, 
+                    const TransportHints& transport_hints = TransportHints()) {
+
+                ENTER();
+                if (ros::scnGetNodeState()) {
+                    ROS_ERROR("subscribe failed because of invalid local SCN state: %d\n", ros::scnGetNodeState());
+                }
+                registerDependenciesToSCN(node_name, topic, REGISTER, TOPIC, SUBSCRIBE);
+                SCNSubscriber scn_subscriber(ros::NodeHandle::subscribe<M, T>(topic, queue_size, fp, obj, transport_hints));
+                LEAVE();
+                return scn_subscriber;
+            }
+
+            template<class M, class T> SCNSubscriber subscribe(const std::string &node_name, const std::string& topic, uint32_t queue_size, void(T::*fp)(M), 
+                    const boost::shared_ptr<T>& obj, const TransportHints& transport_hints = TransportHints()) {
+
+                ENTER();
+                if (ros::scnGetNodeState()) {
+                    ROS_ERROR("subscribe failed because of invalid local SCN state: %d\n", ros::scnGetNodeState());
+                }
+                registerDependenciesToSCN(node_name, topic, REGISTER, TOPIC, SUBSCRIBE);
+                SCNSubscriber scn_subscriber(ros::NodeHandle::subscribe<M, T>(topic, queue_size, fp, obj, transport_hints));
+                LEAVE();
+                return scn_subscriber;
+            }
+
+            template<class M, class T> SCNSubscriber subscribe(const std::string &node_name, const std::string& topic, uint32_t queue_size, void(T::*fp)(M) const, 
+                    const boost::shared_ptr<T>& obj, const TransportHints& transport_hints = TransportHints()) {
+
+                ENTER();
+                if (ros::scnGetNodeState()) {
+                    ROS_ERROR("subscribe failed because of invalid local SCN state: %d\n", ros::scnGetNodeState());
+                }
+                registerDependenciesToSCN(node_name, topic, REGISTER, TOPIC, SUBSCRIBE);
+                SCNSubscriber scn_subscriber(ros::NodeHandle::subscribe<M, T>(topic, queue_size, fp, obj, transport_hints));
+                LEAVE();
+                return scn_subscriber;
+            }
+
+            template<class M, class T> SCNSubscriber subscribe(const std::string &node_name, const std::string& topic, uint32_t queue_size, 
+                    void(T::*fp)(const boost::shared_ptr<M const>&), 
+                    const boost::shared_ptr<T>& obj, const TransportHints& transport_hints = TransportHints()) {
+
+                ENTER();
+                if (ros::scnGetNodeState()) {
+                    ROS_ERROR("subscribe failed because of invalid local SCN state: %d\n", ros::scnGetNodeState());
+                }
+                registerDependenciesToSCN(node_name, topic, REGISTER, TOPIC, SUBSCRIBE);
+                SCNSubscriber scn_subscriber(ros::NodeHandle::subscribe<M, T>(topic, queue_size, fp, obj, transport_hints));
+                LEAVE();
+                return scn_subscriber;           
+            }
+
+            template<class M, class T> SCNSubscriber subscribe(const std::string &node_name, const std::string& topic, uint32_t queue_size, 
+                    void(T::*fp)(const boost::shared_ptr<M const>&) const, 
+                    const boost::shared_ptr<T>& obj, const TransportHints& transport_hints = TransportHints()) {
+
+                ENTER();
+                if (ros::scnGetNodeState()) {
+                    ROS_ERROR("subscribe failed because of invalid local SCN state: %d\n", ros::scnGetNodeState());
+                }
+                registerDependenciesToSCN(node_name, topic, REGISTER, TOPIC, SUBSCRIBE);
+                SCNSubscriber scn_subscriber(ros::NodeHandle::subscribe<M, T>(topic, queue_size, fp, obj, transport_hints));
+                LEAVE();
+                return scn_subscriber;           
+            }
+
             template<class M> SCNSubscriber subscribe(const std::string &node_name,
                     const std::string &topic_subscribe,
                     uint32_t queue_size,
