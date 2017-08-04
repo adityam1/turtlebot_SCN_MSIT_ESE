@@ -630,7 +630,7 @@ static bool launchNode(char *packageName, char *nodeName, bool preserveState)
         {
             setpgid(0, 0);
             char stateVariable[2];
-            sprintf(stateVariable, "%d", (int)stateVariable);
+            sprintf(stateVariable, "%d", (int)preserveState);
             argv[0] = rosrun_path;
             argv[1] = packageName;
             argv[2] = nodeName;

@@ -12,7 +12,7 @@ namespace ros {
             ~SCNServiceClient();
 
             // wrapper method for service client call with extra parameter - SCNNodeHandle to get the node state
-            template<class MReq, class MRes> bool call(MReq &req, MReq &res) {
+            template<class MReq, class MRes> bool call(MReq &req, MRes &res) {
                 int state = ros::scnGetNodeState();
 
                 if (state) {
