@@ -35,6 +35,7 @@ namespace ros {
 
     uint8_t scnGetNodeState();
     ros::NodeHandle* scnGetCommNh();
+    std::string scnGetNodeName();
 }
 
 #endif

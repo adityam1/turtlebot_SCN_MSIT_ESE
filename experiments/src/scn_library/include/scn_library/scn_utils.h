@@ -61,10 +61,10 @@ typedef enum {
 } RECONTYPE_T;
 
 typedef enum {
-    BOOL,
-    STRING,
-    INT,
-    DOUBLE
+    BOOL_VAL,
+    STRING_VAL,
+    INT_VAL,
+    DOUBLE_VAL
 }PARAMTYPE_T;
 
 typedef enum {

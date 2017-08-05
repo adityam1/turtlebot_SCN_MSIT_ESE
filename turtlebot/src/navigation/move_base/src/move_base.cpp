@@ -45,6 +45,9 @@
 
 namespace move_base {
 
+    static bool reconModeWait = false;
+    static MoveBase *myPointer;
+
   MoveBase::MoveBase(tf::TransformListener& tf) :
     tf_(tf),
     as_(NULL),
@@ -57,8 +60,13 @@ namespace move_base {
 
     as_ = new MoveBaseActionServer(ros::NodeHandle(), "move_base", boost::bind(&MoveBase::executeCb, this, _1), false);
 
-    ros::NodeHandle private_nh("~");
-    ros::NodeHandle nh;
+    myPointer = this; 
+
+    //ros::NodeHandle private_nh("~");
+    ros::SCNNodeHandle private_nh("~");
+    //ros::NodeHandle nh;
+    ros::SCNNodeHandle nh;
+    nh.registerTfSCN("move_base", SUBSCRIBE);
 
     recovery_trigger_ = PLANNING_R;
 
@@ -86,17 +94,19 @@ namespace move_base {
     planner_thread_ = new boost::thread(boost::bind(&MoveBase::planThread, this));
 
     //for comanding the base
-    vel_pub_ = nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
-    current_goal_pub_ = private_nh.advertise<geometry_msgs::PoseStamped>("current_goal", 0 );
+    vel_pub_ = nh.advertise<geometry_msgs::Twist>("move_base", "cmd_vel", 1);
+    current_goal_pub_ = private_nh.advertise<geometry_msgs::PoseStamped>("move_base", "current_goal", 0 );
 
-    ros::NodeHandle action_nh("move_base");
-    action_goal_pub_ = action_nh.advertise<move_base_msgs::MoveBaseActionGoal>("goal", 1);
+    //ros::NodeHandle action_nh("move_base");
+    ros::SCNNodeHandle action_nh("move_base");
+    action_goal_pub_ = action_nh.advertise<move_base_msgs::MoveBaseActionGoal>("move_base", "goal", 1);
 
     //we'll provide a mechanism for some people to send goals as PoseStamped messages over a topic
     //they won't get any useful information back about its status, but this is useful for tools
     //like nav_view and rviz
-    ros::NodeHandle simple_nh("move_base_simple");
-    goal_sub_ = simple_nh.subscribe<geometry_msgs::PoseStamped>("goal", 1, boost::bind(&MoveBase::goalCB, this, _1));
+    //ros::NodeHandle simple_nh("move_base_simple");
+    ros::SCNNodeHandle simple_nh("move_base_simple");
+    goal_sub_ = simple_nh.subscribe<geometry_msgs::PoseStamped>("move_base", "goal", 1, boost::bind(&MoveBase::goalCB, this, _1));
 
     //we'll assume the radius of the robot to be consistent with what's specified for the costmaps
     private_nh.param("local_costmap/inscribed_radius", inscribed_radius_, 0.325);
@@ -170,10 +180,10 @@ namespace move_base {
     controller_costmap_ros_->start();
 
     //advertise a service for getting a plan
-    make_plan_srv_ = private_nh.advertiseService("make_plan", &MoveBase::planService, this);
+    make_plan_srv_ = private_nh.advertiseService("move_base", "make_plan", &MoveBase::planService, this);
 
     //advertise a service for clearing the costmaps
-    clear_costmaps_srv_ = private_nh.advertiseService("clear_costmaps", &MoveBase::clearCostmapsService, this);
+    clear_costmaps_srv_ = private_nh.advertiseService("move_base", "clear_costmaps", &MoveBase::clearCostmapsService, this);
 
     //if we shutdown our costmaps when we're deactivated... we'll do that now
     if(shutdown_costmaps_){
@@ -481,6 +491,8 @@ namespace move_base {
 
   MoveBase::~MoveBase(){
     recovery_behaviors_.clear();
+    ros::SCNNodeHandle nh;
+    nh.unRegisterTfSCN("move_base", SUBSCRIBE);
 
     delete dsrv_;
 
@@ -718,6 +730,12 @@ namespace move_base {
     ros::NodeHandle n;
     while(n.ok())
     {
+      while(reconModeWait){
+          publishZeroVelocity();                 
+          ros::Rate r(10);
+          ros::spinOnce();
+          r.sleep();
+        }
       if(c_freq_change_)
       {
         ROS_INFO("Setting controller frequency to %.2f", controller_frequency_);
@@ -726,6 +744,7 @@ namespace move_base {
       }
 
       if(as_->isPreemptRequested()){
+        
         if(as_->isNewGoalAvailable()){
           //if we're active and a new goal is available, we'll accept it, but we won't shut anything down
           move_base_msgs::MoveBaseGoal new_goal = *as_->acceptNewGoal();
@@ -1180,5 +1199,41 @@ namespace move_base {
       planner_costmap_ros_->stop();
       controller_costmap_ros_->stop();
     }
+  }
+
+
+  /* SCN stuff */
+  void saveStateCb(uint8_t reconType) {
+    //FIXME: Need to add code here. Will do this once basic implementation works
+  }
+
+  STATUS_T reconModeCb(uint8_t reconType, uint8_t command) {
+    STATUS_T status = SCN_ST_OK;
+      if(SCN_NODE_RECON == reconType) {
+          switch (command) {
+              case SCN_ENTER_RECON: 
+                  /* Set the action server to pause and write velocity of the bot as 0 */
+                  reconModeWait = true;
+//                  myPointer->as_->setPreempted();
+                  ROS_WARN("Received enter reconfiguration request from SCN. Pausing the system");
+                  status = SCN_ST_OK;
+                  break;
+              case SCN_EXIT_RECON:
+                  /* Let go off the pause */
+                  reconModeWait = false;
+                  ROS_WARN("Received exit reconfiguration request from SCN. Entering normal mode");
+                  status = SCN_ST_OK;
+                  break;
+              default: 
+                  ROS_WARN("Received unknown request");
+                  status = SCN_ST_ERROR;
+          }
+          return status;
+      }
+  
+  }
+  void loadStateCb() {
+    //FIXME: Need to add code here. Will do this once basic implementation works
+    
   }
 };
