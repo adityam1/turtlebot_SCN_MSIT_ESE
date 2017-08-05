@@ -12,7 +12,7 @@ static int log_level = LOG_INFO;
 namespace ros {
 
     std::string initString = "";
-    static scnNodeInfo_t scnNodeInfo = {initString, NULL, NULL, NULL, false, false};
+    static scnNodeInfo_t scnNodeInfo = {initString, NULL, NULL, NULL, NULL, false, false};
     typedef struct vargStruct_S {
         scn_library::scnNodeComm::Request req;
         scn_library::scnNodeComm::Response res;
@@ -69,6 +69,16 @@ namespace ros {
     }
 
     /*--------------------------------------------------------
+     * scnGetNodeName : Will return the name of the node
+     * 
+     * Return
+     *
+     * ------------------------------------------------------*/
+    std::string scnGetNodeName() {
+        return scnNodeInfo.name;
+    }
+    
+    /*--------------------------------------------------------
      * scnGetNODEState : Will return the current state of the node
      * 
      * Return
@@ -103,7 +113,7 @@ namespace ros {
      * ------------------------------------------------------*/
     static STATUS_T killServiceCb(scn_library::scnNodeComm::Request& req,
             scn_library::scnNodeComm::Response& res) {
-        ROS_INFO("SCN requested to shut this node down..Shutting down");
+        ROS_WARN("SCN requested to shut this node down..Shutting down");
         exit(EX_PROTOCOL);
     }
 
@@ -293,6 +303,7 @@ namespace ros {
 
         bool isSCN = false;
         int retry = 0;
+        int opt;
 
         /* Initialize the node with ROS */
         ros::init(argc, argv, name, options);
@@ -338,13 +349,20 @@ namespace ros {
         /* Set state of node */
         scnSetNodeState(SCN_NORMAL_MODE);
 
-        //if()
-        //if(true == (bool)) 
-        ROS_INFO("Argc = %d\n", argc);
-        {
-            /* Need to load state from disk */
-            if(NULL != scnNodeInfo.loadStateCb) {
-                scnNodeInfo.loadStateCb();
+        /* Do we need to load state from disk? */
+        while((opt = getopt(argc, argv, "s")) != -1){
+            switch(opt)
+            {
+                case 's': 
+                    {
+                        /* Need to load state from disk */
+                        if(NULL != scnNodeInfo.loadStateCb) {
+                            scnNodeInfo.loadStateCb();
+                        }
+                    }
+                    break;
+                default:
+                    break;
             }
         }
 

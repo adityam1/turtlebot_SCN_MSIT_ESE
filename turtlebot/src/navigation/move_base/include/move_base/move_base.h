@@ -58,6 +58,14 @@
 
 #include <dynamic_reconfigure/server.h>
 #include "move_base/MoveBaseConfig.h"
+#include <scn_library/systemControlRegisterService.h>
+#include <scn_library/scn_utils.h>
+#include <scn_library/scn_core.h>
+#include <scn_library/scn_node_handle.h>
+#include <scn_library/scn_service_client.h>
+#include <scn_library/scn_service_server.h>
+#include <scn_library/scn_publisher.h>
+#include <scn_library/scn_subscriber.h>
 
 namespace move_base {
   //typedefs to help us out with the action server so that we don't hace to type so much
@@ -230,6 +238,11 @@ namespace move_base {
       bool setup_, p_freq_change_, c_freq_change_;
       bool new_global_plan_;
   };
+
+  void saveStateCb(uint8_t reconType);
+  STATUS_T reconModeCb(uint8_t reconType, uint8_t command);
+  void loadStateCb(); 
+ 
 };
 #endif
 

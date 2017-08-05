@@ -271,6 +271,21 @@ namespace ros {
                 return scn_subscriber;
             }
 
+            SCNSubscriber subscribe(const std::string &node_name, SubscribeOptions &ops) {
+
+                ENTER();
+                if (ros::scnGetNodeState()) {
+                    // TODO, specify the behavior of node is in reconfigure or intermediate mode
+                    ROS_ERROR("subscribe failed because of invalid local SCN state: %d\n", ros::scnGetNodeState());
+                }
+                registerDependenciesToSCN(node_name, ops.topic, REGISTER, TOPIC, SUBSCRIBE);
+                //Subscriber scn_subscriber = new NodeHandle::subscriber(ops);
+                NodeHandle::subscribe(ops);
+                LEAVE();
+                //return ros::SCNSubscriber::SCNsubscriber();
+                return NodeHandle::subscribe(ops);
+            }         
+            
             // wrappers for ROS service server
             template<class T, class MReq, class MRes>
                 ros::SCNServiceServer advertiseService(const std::string &node_name, const std::string &services_provided,
@@ -403,6 +418,50 @@ namespace ros {
                     return scn_service_client;
                 }
 
+             void registerTfSCN(const std::string &node_name,  uint8_t direction) {
+                 if (ros::scnGetNodeState()) {
+                    // TODO, specify the behavior of node is in reconfigure or intermediate mode
+                    ROS_ERROR("advertise failed because of invalid local SCN state: %d\n", ros::scnGetNodeState());
+                }
+                if(direction == PUBLISH)
+                    registerDependenciesToSCN(node_name, "/tf", REGISTER, TOPIC, PUBLISH);
+                else if (direction == SUBSCRIBE)
+                    registerDependenciesToSCN(node_name, "/tf", REGISTER, TOPIC, SUBSCRIBE);
+             }
+
+             void registerOdomSCN(const std::string &node_name,  uint8_t direction) {
+                 if (ros::scnGetNodeState()) {
+                    // TODO, specify the behavior of node is in reconfigure or intermediate mode
+                    ROS_ERROR("advertise failed because of invalid local SCN state: %d\n", ros::scnGetNodeState());
+                }
+                if(direction == PUBLISH)
+                    registerDependenciesToSCN(node_name, "/odom", REGISTER, TOPIC, PUBLISH);
+                else if (direction == SUBSCRIBE)
+                    registerDependenciesToSCN(node_name, "/odom", REGISTER, TOPIC, SUBSCRIBE);
+             }
+
+             void unRegisterTfSCN(const std::string &node_name,  uint8_t direction) {
+                 if (ros::scnGetNodeState()) {
+                    // TODO, specify the behavior of node is in reconfigure or intermediate mode
+                    ROS_ERROR("advertise failed because of invalid local SCN state: %d\n", ros::scnGetNodeState());
+                }
+                if(direction == PUBLISH)
+                    registerDependenciesToSCN(node_name, "/tf", UNREGISTER, TOPIC, PUBLISH);
+                else if (direction == SUBSCRIBE)
+                    registerDependenciesToSCN(node_name, "/tf", UNREGISTER, TOPIC, SUBSCRIBE);
+             }
+
+             void unRegisterOdomSCN(const std::string &node_name,  uint8_t direction) {
+                 if (ros::scnGetNodeState()) {
+                    // TODO, specify the behavior of node is in reconfigure or intermediate mode
+                    ROS_ERROR("advertise failed because of invalid local SCN state: %d\n", ros::scnGetNodeState());
+                }
+                if(direction == PUBLISH)
+                    registerDependenciesToSCN(node_name, "/odom", UNREGISTER, TOPIC, PUBLISH);
+                else if (direction == SUBSCRIBE)
+                    registerDependenciesToSCN(node_name, "/odom", UNREGISTER, TOPIC, SUBSCRIBE);
+             }
+                         
     };
 }
 

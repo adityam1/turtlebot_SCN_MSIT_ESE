@@ -19,7 +19,7 @@
 
 using namespace std;
 
-static int log_level = LOG_INFO;
+static int log_level = LOG_DBG;
 /**
  * global definitions
  */
@@ -430,28 +430,28 @@ void doParamRecon(reconfigure::userInterfaceService::Request &req,
     
     switch(paramType) 
     {
-        case BOOL:
+        case BOOL_VAL:
             {
                 bool value = req.boolValue;
                 ros::param::set(param, value);
                 ROS_INFO("SCN: Setting parameter %s, to %d", param.c_str(), value);
             }
             break;
-        case STRING:
+        case STRING_VAL:
             {
                 std::string value = req.stringValue;
                 ros::param::set(param, value);
                 ROS_INFO("SCN: Setting parameter %s, to %s", param.c_str(), value.c_str());
             }
             break;
-        case INT:
+        case INT_VAL:
             {
                 int32_t value = req.intValue;
                 ros::param::set(param, value);
                 ROS_INFO("SCN: Setting parameter %s, to %d", param.c_str(), value);
             }
             break;
-        case DOUBLE:
+        case DOUBLE_VAL:
             {
                 double value = req.doubleValue;
                 ros::param::set(param, value);
@@ -499,6 +499,7 @@ void doNodeRecon(reconfigure::userInterfaceService::Request &req,
     // for the killed node, explicitly remove dependency from the framework
     gDependency->removeNode(oldNode);
 
+    ros::Duration(1).sleep();
     //Start the new node
     launchNode((char *)newNodePackage.c_str(), (char *)newNode.c_str(), preserveState);
 
@@ -630,12 +631,16 @@ static bool launchNode(char *packageName, char *nodeName, bool preserveState)
         {
             setpgid(0, 0);
             char stateVariable[2];
-            sprintf(stateVariable, "%d", (int)preserveState);
+            if(preserveState) {
+                sprintf(stateVariable, "-s");
+                argv[3] = stateVariable;
+                argv[4] = NULL;
+            } else {
+                argv[3] = NULL;
+            }
             argv[0] = rosrun_path;
             argv[1] = packageName;
             argv[2] = nodeName;
-            argv[3] = stateVariable;
-            argv[4] = NULL;
 
             ROS_INFO("Attempting to start node %s", nodeName);
 

@@ -30,6 +30,16 @@
 
 // Signal handling
 #include <signal.h>
+#include <ros/xmlrpc_manager.h>
+
+#include <scn_library/systemControlRegisterService.h>
+#include <scn_library/scn_utils.h>
+#include <scn_library/scn_core.h>
+#include <scn_library/scn_node_handle.h>
+#include <scn_library/scn_service_client.h>
+#include <scn_library/scn_service_server.h>
+#include <scn_library/scn_publisher.h>
+#include <scn_library/scn_subscriber.h>
 
 #include "map/map.h"
 #include "pf/pf.h"
@@ -229,7 +239,8 @@ class AmclNode
     //basically defines how long a map->odom transform is good for
     ros::Duration transform_tolerance_;
 
-    ros::NodeHandle nh_;
+    //ros::NodeHandle nh_;
+    ros::SCNNodeHandle nh_;
     ros::NodeHandle private_nh_;
     ros::Publisher pose_pub_;
     ros::Publisher particlecloud_pub_;
@@ -275,30 +286,97 @@ std::vector<std::pair<int,int> > AmclNode::free_space_indices;
 
 boost::shared_ptr<AmclNode> amcl_node_ptr;
 
-void sigintHandler(int sig)
-{
-  // Save latest pose as we're shutting down.
-  amcl_node_ptr->savePoseToServer();
-  ros::shutdown();
+void unregisterDependencyToSCN() {
+    ros::NodeHandle n;
+    ros::ServiceClient client = n.serviceClient<scn_library::systemControlRegisterService>("systemControlRegisterService");
+
+    scn_library::systemControlRegisterService srv;
+    srv.request.nodeName = "amcl";
+    srv.request.depName = SCN_UNSPECIFIED;
+    srv.request.requestType = UNREGISTER;
+    srv.request.dependency = ALL;
+    srv.request.direction = SCN_UNSPECIFIED;
+
+    if (client.call(srv)) {
+        std::string res;
+        if (srv.response.result == srv.response.OK) {
+            res = "OK";
+        } else {
+            res = "ERROR";
+        }
+        ROS_INFO("result: %s\n", res.c_str());
+    } else {
+        ROS_ERROR("Failed to call systemControlRegisterService");
+    }
+}
+
+// Replacement SIGINT handler
+void demoNodeSigIntHandler(int sig) {
+    ENTER();
+
+    unregisterDependencyToSCN();
+    //g_request_shutdown = 1;
+    // Save latest pose as we're shutting down.
+    amcl_node_ptr->savePoseToServer();
+    ros::shutdown();
+    LEAVE();
+}
+
+// Replacement "shutdown" XMLRPC callback
+void shutdownCallback(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result) {
+    ENTER();
+
+    int num_params = 0;
+    if (params.getType() == XmlRpc::XmlRpcValue::TypeArray)
+        num_params = params.size();
+    if (num_params > 1)
+    {
+        std::string reason = params[1];
+        ROS_WARN("Shutdown request received. Reason: [%s]", reason.c_str());
+        unregisterDependencyToSCN();
+        //g_request_shutdown = 1; // Set flag
+    }
+
+    result = ros::xmlrpc::responseInt(1, "", 0);
+    LEAVE();
+}
+
+void saveStateCb(uint8_t reconType) {
+}
+
+STATUS_T reconModeCb(uint8_t reconType, uint8_t command) {
+    ROS_INFO("Enter AMCL recon mode callback!\n");
+
+    return SCN_ST_OK;
+}
+
+void loadStateCb() {
+
+    ROS_INFO("saveStateCb %s", __FILE__);
 }
 
 int
 main(int argc, char** argv)
 {
-  ros::init(argc, argv, "amcl");
-  ros::NodeHandle nh;
-
+  //ros::init(argc, argv, "amcl");
+    ros::scnInit(argc, argv, "amcl", ros::init_options::NoSigintHandler, saveStateCb, reconModeCb, loadStateCb);
+  ros::SCNNodeHandle nh;
   // Override default sigint handler
-  signal(SIGINT, sigintHandler);
+  signal(SIGINT, demoNodeSigIntHandler);
+
+  //signal(SIGINT, sigintHandler);
 
   ROS_ERROR("Aditya >>>>>>>>>>>>>>>>>>>>>>>>>>>>>: This is what is running");
+  
   // Make our node available to sigintHandler
   amcl_node_ptr.reset(new AmclNode());
 
   if (argc == 1)
   {
     // run using ROS input
+      ROS_ERROR("Aditya >>>>>>>>>>>>>>>>>>>>>>>>>>>>>: Spinning");
     ros::spin();
+      ROS_ERROR("Aditya >>>>>>>>>>>>>>>>>>>>>>>>>>>>>: I SHOULD NEVER BE CALLED");
   }
   else if ((argc == 3) && (std::string(argv[1]) == "--run-from-bag"))
   {
@@ -418,15 +496,17 @@ AmclNode::AmclNode() :
 
   cloud_pub_interval.fromSec(1.0);
   tfb_ = new tf::TransformBroadcaster();
+  nh_.registerTfSCN("amcl", PUBLISH);
   tf_ = new TransformListenerWrapper();
+  nh_.registerTfSCN("amcl", SUBSCRIBE);
 
-  pose_pub_ = nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>("amcl_pose", 2, true);
-  particlecloud_pub_ = nh_.advertise<geometry_msgs::PoseArray>("particlecloud", 2, true);
-  global_loc_srv_ = nh_.advertiseService("global_localization", 
+  pose_pub_ = nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>("amcl", "amcl_pose", 2, true);
+  particlecloud_pub_ = nh_.advertise<geometry_msgs::PoseArray>("amcl", "particlecloud", 2, true);
+  global_loc_srv_ = nh_.advertiseService("amcl", "global_localization", 
 					 &AmclNode::globalLocalizationCallback,
                                          this);
-  nomotion_update_srv_= nh_.advertiseService("request_nomotion_update", &AmclNode::nomotionUpdateCallback, this);
-  set_map_srv_= nh_.advertiseService("set_map", &AmclNode::setMapCallback, this);
+  nomotion_update_srv_= nh_.advertiseService("amcl", "request_nomotion_update", &AmclNode::nomotionUpdateCallback, this);
+  set_map_srv_= nh_.advertiseService("amcl", "set_map", &AmclNode::setMapCallback, this);
 
   laser_scan_sub_ = new message_filters::Subscriber<sensor_msgs::LaserScan>(nh_, scan_topic_, 100);
   laser_scan_filter_ = 
@@ -436,10 +516,10 @@ AmclNode::AmclNode() :
                                                         100);
   laser_scan_filter_->registerCallback(boost::bind(&AmclNode::laserReceived,
                                                    this, _1));
-  initial_pose_sub_ = nh_.subscribe("initialpose", 2, &AmclNode::initialPoseReceived, this);
+  initial_pose_sub_ = nh_.subscribe("amcl", "initialpose", 2, &AmclNode::initialPoseReceived, this);
 
   if(use_map_topic_) {
-    map_sub_ = nh_.subscribe("map", 1, &AmclNode::mapReceived, this);
+    map_sub_ = nh_.subscribe("amcl","map", 1, &AmclNode::mapReceived, this);
     ROS_INFO("Subscribed to map topic.");
   } else {
     requestMap();
@@ -597,12 +677,13 @@ void AmclNode::reconfigureCB(AMCLConfig &config, uint32_t level)
   laser_scan_filter_->registerCallback(boost::bind(&AmclNode::laserReceived,
                                                    this, _1));
 
-  initial_pose_sub_ = nh_.subscribe("initialpose", 2, &AmclNode::initialPoseReceived, this);
+  initial_pose_sub_ = nh_.subscribe("amcl","initialpose", 2, &AmclNode::initialPoseReceived, this);
 }
 
 
 void AmclNode::runFromBag(const std::string &in_bag_fn)
 {
+    ROS_ERROR("AMCL_NODE: Run from Bag......!!!!");
   rosbag::Bag bag;
   bag.open(in_bag_fn, rosbag::bagmode::Read);
   std::vector<std::string> topics;
@@ -611,8 +692,8 @@ void AmclNode::runFromBag(const std::string &in_bag_fn)
   topics.push_back(scan_topic_name);
   rosbag::View view(bag, rosbag::TopicQuery(topics));
 
-  ros::Publisher laser_pub = nh_.advertise<sensor_msgs::LaserScan>(scan_topic_name, 100);
-  ros::Publisher tf_pub = nh_.advertise<tf2_msgs::TFMessage>("/tf", 100);
+  ros::Publisher laser_pub = nh_.advertise<sensor_msgs::LaserScan>("amcl", scan_topic_name, 100);
+  ros::Publisher tf_pub = nh_.advertise<tf2_msgs::TFMessage>("amcl", "/tf", 100);
 
   // Sleep for a second to let all subscribers connect
   ros::WallDuration(1.0).sleep();
@@ -773,7 +854,10 @@ AmclNode::requestMap()
   nav_msgs::GetMap::Request  req;
   nav_msgs::GetMap::Response resp;
   ROS_INFO("Requesting the map...");
-  while(!ros::service::call("static_map", req, resp))
+  ros::SCNNodeHandle n;
+  ros::SCNServiceClient testClient = n.serviceClient<nav_msgs::GetMap>("amcl", "static_map");
+
+  while(!testClient.call<nav_msgs::GetMap::Request, nav_msgs::GetMap::Response>(req, resp))
   {
     ROS_WARN("Request for map failed; trying again...");
     ros::Duration d(0.5);

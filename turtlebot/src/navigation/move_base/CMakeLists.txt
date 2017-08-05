@@ -12,6 +12,7 @@ find_package(catkin REQUIRED
         move_base_msgs
         nav_core
         tf
+        scn_library
 )
 find_package(Eigen REQUIRED)
 add_definitions(${EIGEN_DEFINITIONS})
@@ -41,8 +42,8 @@ target_link_libraries(move_base
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
     )
-add_dependencies(move_base move_base_gencfg)
-add_dependencies(move_base geometry_msgs_gencpp)
+add_dependencies(move_base move_base_gencfg reconfigure_generate_messages_cpp scn_library)
+add_dependencies(move_base geometry_msgs_gencpp reconfigure_generate_messages_cpp scn_library)
 
 add_executable(move_base_node
   src/move_base_node.cpp

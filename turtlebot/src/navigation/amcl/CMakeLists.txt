@@ -8,6 +8,9 @@ find_package(catkin REQUIRED
             tf
             dynamic_reconfigure
             nav_msgs
+            std_msgs
+    		message_generation
+    		scn_library
         )
 
 find_package(Boost REQUIRED)
@@ -54,7 +57,7 @@ target_link_libraries(amcl_sensors amcl_map amcl_pf)
 
 add_executable(amcl
                        src/amcl_node.cpp)
-add_dependencies(amcl amcl_gencfg)
+add_dependencies(amcl amcl_gencfg reconfigure_generate_messages_cpp scn_library)
 
 target_link_libraries(amcl
     amcl_sensors amcl_map amcl_pf
