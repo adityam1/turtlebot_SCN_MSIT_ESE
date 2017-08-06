@@ -10,6 +10,8 @@
 #include <scn_library/scnNodeComm.h>
 #include <scn_library/presence.h>
 #include <scn_library/scn_utils.h>
+#include <scn_library/scn_core.h>
+#include <scn_library/debug_msg.h>
 #include <reconfigure/userInterfaceService.h>
 #include <reconfigure/demoNodeService.h>
 #include <reconfigure/frameworkInfoService.h>
@@ -26,6 +28,10 @@ static int log_level = LOG_DBG;
 extern char **environ;
 // global dependency used by reconfigure node
 Dependency *gDependency;
+
+std::string initString = "reconfigure";
+static ros::scnNodeInfo_t scnNodeInfo = {initString, NULL, NULL, NULL, NULL, false, false};
+static ros::Publisher debug_pub;
 
 /**
  * declaration
@@ -64,14 +70,9 @@ bool registerService(
     ENTER();
     uint8_t direction = req.direction;
     std::string nodeName = req.nodeName;
-
-    /* #FIXME: Callback service is not needed as the name of 
-     * the service provided by the respective node (for the SCN to
-     * communicate with it) will be the same as the name of the node
-     * This use the name of the node for the service call at time of 
-     * reconfiguration communication.
-     */
     std::string serviceName = req.depName;
+    char info[200];
+    scn_library::debug_msg debug;
 
     /* Check direction of service being registered */
     switch (direction) 
@@ -81,8 +82,10 @@ bool registerService(
              * Attention: for service server the dependency direction is from client to server
              * so it's incomingServices for nodeName
              */
-            ROS_INFO("add incoming service for node: %s with service: %s", 
-                    nodeName.c_str(), serviceName.c_str());
+            sprintf(info, "Adding incoming service for node: %s with service: %s", nodeName.c_str(), serviceName.c_str());
+            ROS_INFO("%s", info); 
+            debug.info = info;
+            debug_pub.publish(debug);
             gDependency->addIncomingServices(nodeName, serviceName);
             break;
         case CLIENT:
@@ -90,8 +93,11 @@ bool registerService(
              * Attention: for servce client the dependency direction is from client to server
              * so it's outgoingServices for nodeName
              */
-            ROS_INFO("add outgoing service for node: %s with service: %s", 
+            sprintf(info, "Adding outgoing service for node: %s with service: %s", 
                     nodeName.c_str(), serviceName.c_str());
+            ROS_INFO("%s", info); 
+            debug.info = info;
+            debug_pub.publish(debug);
             gDependency->addOutgoingServices(nodeName, serviceName);
             break;
         default:
@@ -116,8 +122,8 @@ bool registerTopic(
     uint8_t direction = req.direction;
     std::string nodeName = req.nodeName;
     std::string topicName = req.depName;
-
-    /* Take locks on the NodeTopics map #FIXME */
+    char info[200];
+    scn_library::debug_msg debug;
 
     /* Check direction of service being registered */
     switch (direction) 
@@ -127,8 +133,11 @@ bool registerTopic(
              * Attention: for topic server the dependency direction is from 
              * subscriber to publisher, so it's incomingTopics for nodeName
              */
-            ROS_INFO("add incoming topic for node:%s with topic:%s", 
+            sprintf(info, "add incoming topic for node:%s with topic:%s", 
                     nodeName.c_str(), topicName.c_str());
+            ROS_INFO("%s", info); 
+            debug.info = info;
+            debug_pub.publish(debug);
             gDependency->addIncomingTopics(nodeName, topicName);
             break;
         case SUBSCRIBE:
@@ -136,8 +145,11 @@ bool registerTopic(
              * Attention: for topic server the dependency direction is from 
              * subscriber to publisher, so it's outgoingTopics for nodeName
              */
-            ROS_INFO("add outgoing topic for node:%s with topic:%s", 
+            sprintf(info, "add outgoing topic for node:%s with topic:%s", 
                     nodeName.c_str(), topicName.c_str());
+            ROS_INFO("%s", info); 
+            debug.info = info;
+            debug_pub.publish(debug);
             gDependency->addOutgoingTopics(nodeName, topicName);
             break;
         default:
@@ -168,19 +180,27 @@ bool unRegisterService(
 {
     ENTER();
     uint8_t direction = req.direction;
+    char info[200];
+    scn_library::debug_msg debug;
     string nodeName = req.nodeName;
 
     string serviceName = req.depName;
     switch (direction) 
     {
         case SERVER:
-            ROS_INFO("erase incoming for node: %s with service: %s", 
+            sprintf(info, "erase incoming for node: %s with service: %s", 
                     nodeName.c_str(), serviceName.c_str());
+            ROS_INFO("%s", info); 
+            debug.info = info;
+            debug_pub.publish(debug);
             gDependency->eraseIncomingServices(nodeName, serviceName);
             break;
         case CLIENT:
-            ROS_INFO("erase outgoing service for node: %s with service: %s", 
+            sprintf(info, "erase outgoing service for node: %s with service: %s", 
                     nodeName.c_str(), serviceName.c_str());
+            ROS_INFO("%s", info); 
+            debug.info = info;
+            debug_pub.publish(debug);
             gDependency->eraseOutgoingServices(nodeName, serviceName);
             break;
         default:
@@ -206,9 +226,16 @@ bool unRegisterTopic(
     uint8_t direction = req.direction;
     std::string nodeName = req.nodeName;
     std::string topicName = req.depName;
+    char info[200];
+    scn_library::debug_msg debug;
 
-    switch(direction) 
-    {
+    sprintf(info, "erase incoming topic for node:%s with topic:%s", 
+            nodeName.c_str(), topicName.c_str());
+    ROS_INFO("%s", info); 
+    debug.info = info;
+    debug_pub.publish(debug);
+
+    switch(direction) {
         case PUBLISH:
             ROS_INFO("erase incoming topic for node:%s with topic:%s", 
                     nodeName.c_str(), topicName.c_str());
@@ -238,9 +265,14 @@ bool unRegisterNode(
         scn_library::systemControlRegisterService::Response &res) 
 {
     ENTER();
+    char info[200];
+    scn_library::debug_msg debug;
     string node_name = req.nodeName;
 
-    ROS_INFO("erase all dependency for node:%s", node_name.c_str());
+    sprintf(info, "erase all dependency for node:%s", node_name.c_str());
+    ROS_INFO("%s", info); 
+    debug.info = info;
+    debug_pub.publish(debug);
     gDependency->removeNode(node_name);
 
     LEAVE();
@@ -619,6 +651,13 @@ static bool launchNode(char *packageName, char *nodeName, bool preserveState)
     char rosrun_path[200] = {0};
     char *argv[5] = {0};
     pid_t pid;
+    char info[200];
+    scn_library::debug_msg debug;
+
+    sprintf(info, "SCN: Launching Node: %s\n", nodeName);
+    ROS_INFO("%s", info); 
+    debug.info = info;
+    debug_pub.publish(debug);
 
     if((fp_which = popen("/usr/bin/which rosrun", "r")) != NULL) 
     {
@@ -647,7 +686,12 @@ static bool launchNode(char *packageName, char *nodeName, bool preserveState)
             error = execve(argv[0], argv, environ);
             if(error) {
                 ROS_ERROR("Unable to start node");
-                return SCN_ERROR;
+                sprintf(info, "SCN: Unable to start node %s\n", nodeName);
+                ROS_INFO("%s", info); 
+                debug.info = info;
+                debug_pub.publish(debug);
+                exit(-1);
+                //return SCN_ERROR;
             }
         }
         return SCN_OK;
@@ -668,10 +712,15 @@ static void killNode(char *name)
 
     /* Request the node to commit suicide */
     ros::NodeHandle n;
+    char info[200];
+    scn_library::debug_msg debug;
     std::string serviceName = (const char *)name;
     serviceName += "Comm";
 
-    ROS_INFO("SCN: Attempting to kill %s\n", name);
+    sprintf(info, "SCN: Attempting to kill %s\n", name);
+    ROS_INFO("%s", info); 
+    debug.info = info;
+    debug_pub.publish(debug);
 
     ros::ServiceClient client = n.serviceClient<scn_library::scnNodeComm>(serviceName);
 
@@ -689,17 +738,19 @@ int main(int argc, char **argv)
     ENTER();
     ros::init(argc, argv, "systemControlNode", ros::init_options::NoSigintHandler);
     //ros::init(argc, argv, "systemControlNode");
-    ros::NodeHandle n;
+    //ros::NodeHandle n;
+    scnNodeInfo.scnNodeHandle = new ros::NodeHandle;
     gDependency = new Dependency();
 
     /* Create the presence service 
      * This is for the other nodes to know that the SCN is present in 
      * the system */
-    ros::ServiceServer presence = n.advertiseService("presence", presenceCb);
+    ros::ServiceServer presence = scnNodeInfo.scnNodeHandle->advertiseService("presence", presenceCb);
+    debug_pub = scnNodeInfo.scnNodeHandle->advertise<scn_library::debug_msg>("scnDebug", 1000); 
 
-    ros::ServiceServer registerService = n.advertiseService("systemControlRegisterService", scnCoreCb);
-    ros::ServiceServer userInterfaceService = n.advertiseService("userInterfaceService", userInterfaceServiceCallback);
-    ros::ServiceServer frameworkInfoService = n.advertiseService("frameworkInfoService", frameworkInfoServiceCallback);
+    ros::ServiceServer registerService = scnNodeInfo.scnNodeHandle->advertiseService("systemControlRegisterService", scnCoreCb);
+    ros::ServiceServer userInterfaceService = scnNodeInfo.scnNodeHandle->advertiseService("userInterfaceService", userInterfaceServiceCallback);
+    ros::ServiceServer frameworkInfoService = scnNodeInfo.scnNodeHandle->advertiseService("frameworkInfoService", frameworkInfoServiceCallback);
 
     // override the default ros sigint handler
     signal(SIGINT, systemControlSigintHandler);
