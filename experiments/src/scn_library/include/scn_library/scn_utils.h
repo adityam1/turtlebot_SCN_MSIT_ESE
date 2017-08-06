@@ -70,6 +70,7 @@ typedef enum {
 typedef enum {
     SCN_ST_OK = 0,
     SCN_ST_ERROR,
+    SCN_LAUNCH_FAIL,
     SCN_ENTER_RECON_FAIL,
     SCN_EXIT_RECON_FAIL,
     SCN_ROLLBACK_FAIL,

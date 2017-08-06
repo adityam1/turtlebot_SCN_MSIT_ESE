@@ -29,6 +29,9 @@ extern char **environ;
 // global dependency used by reconfigure node
 Dependency *gDependency;
 
+static bool launchFailed = false;
+static int pidToCheck = 0;
+
 std::string initString = "reconfigure";
 static ros::scnNodeInfo_t scnNodeInfo = {initString, NULL, NULL, NULL, NULL, false, false};
 static ros::Publisher debug_pub;
@@ -36,7 +39,9 @@ static ros::Publisher debug_pub;
 /**
  * declaration
  */
-void systemControlSigintHandler(int sig);
+static void systemControlSigintHandler(int sig);
+static void sigHandler(int signum, siginfo_t *sigInfo, ucontext_t *sigContext);
+
 static bool launchNode(char* packageName, char *nodeName, bool preserveState);
 static void killNode(char* name);
 
@@ -59,7 +64,6 @@ bool frameworkInfoServiceCallback(reconfigure::frameworkInfoService::Request &re
  * Registers the service with the SCN i.e. records the dependency 
  * for a service for the respective node.
  *
- * #FIXME: Need a check?
  * It is expected that a service client can only be registered after
  * the server has registered the service.
  *-----------------------------------------------------------------*/
@@ -437,10 +441,7 @@ STATUS_T enterReconMode(vector<string> &orderedList)
 
     if(rollback) 
     {
-        /* Put all nodes into Normal mode
-         * FIXME: Need more error codes to tell the user that not
-         * all nodes are in normal mode. 
-         */
+        /* Put all nodes into Normal mode */
         if(SCN_ST_OK != exitReconMode((j - 1), orderedList)) 
         {
             /* Need to change the status such that upper layer knows
@@ -501,12 +502,12 @@ void doParamRecon(reconfigure::userInterfaceService::Request &req,
 void doNodeRecon(reconfigure::userInterfaceService::Request &req,
         reconfigure::userInterfaceService::Response &res) 
 {
-    bool rollback = false;
-    int j = 0;
+    int j = 0, retry = 0;
     STATUS_T result;
 
     bool preserveState = req.preserveState;
     std::string oldNode = req.oldNode;
+    std::string oldNodePackage = req.oldNodePackage;
     std::string newNode = req.newNode;
     std::string newNodePackage = req.newNodePackage;
 
@@ -532,12 +533,34 @@ void doNodeRecon(reconfigure::userInterfaceService::Request &req,
     gDependency->removeNode(oldNode);
 
     ros::Duration(1).sleep();
+    
     //Start the new node
-    launchNode((char *)newNodePackage.c_str(), (char *)newNode.c_str(), preserveState);
+    while (retry < 3)
+    {
+        if(SCN_ERROR == launchNode((char *)newNodePackage.c_str(), (char *)newNode.c_str(), preserveState)) 
+        {
+            /* Failed */
+            retry++;
+        } 
+        else
+        {
+            break;
+        }
+    }
 
+    if (3 == retry)
+    {
+        /* Restart the old node */
+        res.result = SCN_LAUNCH_FAIL;
+        launchNode((char *)oldNodePackage.c_str(), (char *)oldNode.c_str(), true);
+        orderedList.erase(remove(orderedList.begin(), orderedList.end(), oldNode), orderedList.end());
+        exitReconMode((orderedList.size()- 1), orderedList);
+        return;
+    }
+    
     /** IMPORTANT! need to explicitly erase killed node from orderedList
      * since we have removed the old node from the dependency and add launched to the dependency
-     * so here, we don't need to put the old node to exist recon state
+     * so here, we don't need to put the old node to exit recon state
      */
     orderedList.erase(remove(orderedList.begin(), orderedList.end(), oldNode), orderedList.end());
 
@@ -629,16 +652,28 @@ bool frameworkInfoServiceCallback(reconfigure::frameworkInfoService::Request &re
     return true;
 }
 
-void systemControlSigintHandler(int sig) 
+static void systemControlSigintHandler(int sig) 
 {
-    // TODO
-    // do some custom action
-    // For example, publish a stop message to some other nodes.
-
-    // default sigint handler: call shutdown()
+    char info[200];
+    scn_library::debug_msg debug;
+    sprintf(info, "SCN: Shutting Down System Control Node: SIGINT\n");
+    ROS_INFO("%s", info); 
+    debug.info = info;
+    debug_pub.publish(debug);
+    
     ros::shutdown();
 }
 
+/*------------------------------------------------------------------
+ * sigHandler - to check if launch was successful
+ * 
+ *-----------------------------------------------------------------*/
+static void sigHandler(int signum, siginfo_t *sigInfo, void *sigContext) 
+{
+    if(sigInfo->si_pid == pidToCheck) {
+        launchFailed = true;
+    }
+}
 /*------------------------------------------------------------------
  * launchNode
  * Starts the node specified by packageName and nodeName.
@@ -668,6 +703,7 @@ static bool launchNode(char *packageName, char *nodeName, bool preserveState)
 
         if(0 == (pid = fork())) 
         {
+            pid_t parentPid = getppid();
             setpgid(0, 0);
             char stateVariable[2];
             if(preserveState) {
@@ -690,13 +726,27 @@ static bool launchNode(char *packageName, char *nodeName, bool preserveState)
                 ROS_INFO("%s", info); 
                 debug.info = info;
                 debug_pub.publish(debug);
+                kill(parentPid, SIGUSR1);
                 exit(-1);
                 //return SCN_ERROR;
             }
+        } 
+        else 
+        {
+            /* Parent Process */
+            pidToCheck = pid;
+            launchFailed = false;
+            ros::Duration(1).sleep();
+
+            if(launchFailed) 
+            {
+                return SCN_ERROR;
+            }
+            return SCN_OK;
         }
-        return SCN_OK;
     }
-    else {
+    else 
+    {
         ROS_ERROR("Unable to launch node");
         return SCN_ERROR;
     }
@@ -736,6 +786,13 @@ static void killNode(char *name)
 int main(int argc, char **argv) 
 {
     ENTER();
+    struct sigaction launchCheckAction;
+    launchCheckAction.sa_flags = SA_SIGINFO;
+    launchCheckAction.sa_sigaction = sigHandler;
+    sigemptyset (&launchCheckAction.sa_mask);
+    launchCheckAction.sa_flags = 0;
+    sigaction (SIGUSR1, &launchCheckAction, NULL);
+
     ros::init(argc, argv, "systemControlNode", ros::init_options::NoSigintHandler);
     //ros::init(argc, argv, "systemControlNode");
     //ros::NodeHandle n;

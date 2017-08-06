@@ -6,6 +6,7 @@ uint8 reconType
 #preserveState - set to "true" when need to load state in the new node
 bool preserveState
 string oldNode
+string oldNodePackage
 string newNode
 string newNodePackage
 
@@ -14,7 +15,7 @@ uint8   paramType
 string  paramName
 bool    boolValue
 string  stringValue
-int32  intValue
+int32   intValue
 float64  doubleValue
 
 ---
