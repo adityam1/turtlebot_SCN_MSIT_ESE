@@ -8,13 +8,13 @@ rosservice call /frameworkInfoService '{queryType: 0}'
 rosservice call /frameworkInfoService '{queryType: 1}'
 
 # roservice call command to test userInterfaceService, this can be used to invoke the noderithm switch
-rosservice call /userInterfaceService '{reconType: 15, oldNode: demoNode1, newNode: demoNode2, newNodePackage: reconfigure}'
+rosservice call /userInterfaceService '{reconType: 2, oldNodePackage: reconfigure, oldNode: demoNode1, newNode: demoNode2, newNodePackage: reconfigure}'
 
 # roservice call command to test userInterfaceService, this can be used to invoke the noderithm switch
-rosservice call /userInterfaceService '{old_node: demoNode4, new_node: demoNode8, new_node_package: reconfigure}'
+rosservice call /userInterfaceService '{reconType: 2, oldNodePackage: reconfigure, oldNode: demoNode4, newNode: demoNode8, newNodePackage: reconfigure}'
 
 # roservice call command to test userInterfaceService, this can be used to invoke the noderithm switch
-rosservice call /userInterfaceService '{old_node: demoNode10, new_node: demoNode17, new_node_package: reconfigure}'
+rosservice call /userInterfaceService '{reconType: 2, oldNodePackage: reconfigure, oldNode: demoNode10, newNode: demoNode17, newNodePackage: reconfigure}'
 
 # roservice call command to test userInterfaceService, this can be used to invoke the noderithm switch
-rosservice call /userInterfaceService '{old_node: demoNode18, new_node: demoNode19, new_node_package: reconfigure}'
+rosservice call /userInterfaceService '{reconType: 2, oldNodePackage: reconfigure, oldNode: demoNode18, newNode: demoNode19, newNodePackage: reconfigure}'
