@@ -546,6 +546,8 @@ void doNodeRecon(reconfigure::userInterfaceService::Request &req,
         } 
         else
         {
+            ros::AsyncSpinner spinner(4);
+            spinner.start();
             /* Check node existance */
             ros::Duration(1).sleep();
             ros::NodeHandle n;
@@ -556,6 +558,7 @@ void doNodeRecon(reconfigure::userInterfaceService::Request &req,
             srv.request.command = SCN_NODE_PING;
             srv.request.auth = SCN_AUTH;
             
+            ROS_ERROR("SCN: Making call");
             if (client.call(srv)) 
             {
                 if(SCN_ERROR == srv.response.status) 
@@ -573,6 +576,8 @@ void doNodeRecon(reconfigure::userInterfaceService::Request &req,
                 retry++;
                 ROS_ERROR("SCN: Failed to launch %s Retry: %d", newNode.c_str(), retry);
             }
+            spinner.stop();
+            ROS_ERROR("SCN: Done call");
         }
     }
 
@@ -712,7 +717,7 @@ static bool launchNode(char *packageName, char *nodeName, bool preserveState)
     FILE *fp_which;
     int error = 0;
     char rosrun_path[200] = {0};
-    char *argv[5] = {0};
+    char *argv[6] = {0};
     pid_t pid;
     char info[200];
     scn_library::debug_msg debug;
@@ -733,17 +738,20 @@ static bool launchNode(char *packageName, char *nodeName, bool preserveState)
         {
             pid_t parentPid = getppid();
             setpgid(0, 0);
-            char stateVariable[2];
+            char stateVariable[3];
+            char scnStart[3];
             if(preserveState) {
                 sprintf(stateVariable, "-s");
-                argv[3] = stateVariable;
-                argv[4] = NULL;
+                argv[4] = stateVariable;
+                argv[5] = NULL;
             } else {
-                argv[3] = NULL;
+                argv[4] = NULL;
             }
             argv[0] = rosrun_path;
             argv[1] = packageName;
             argv[2] = nodeName;
+            sprintf(stateVariable, "-i");
+            argv[3] = stateVariable;
 
             ROS_INFO("Attempting to start node %s", nodeName);
 
