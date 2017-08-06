@@ -539,12 +539,39 @@ void doNodeRecon(reconfigure::userInterfaceService::Request &req,
     {
         if(SCN_ERROR == launchNode((char *)newNodePackage.c_str(), (char *)newNode.c_str(), preserveState)) 
         {
-            /* Failed */
-            retry++;
+            /* Failed  rosrun does not exist */
+            ROS_ERROR("SCN: Failed to launch %s Retry: %d", newNode.c_str(), retry);
+            retry = 3;
+            break;
         } 
         else
         {
-            break;
+            /* Check node existance */
+            ros::NodeHandle n;
+            std::string serviceName = newNode + SCN_COMM;
+            ros::ServiceClient client = n.serviceClient<scn_library::scnNodeComm>(serviceName);
+            
+            scn_library::scnNodeComm srv;
+            srv.request.command = SCN_NODE_PING;
+            srv.request.auth = SCN_AUTH;
+            
+            if (client.call(srv)) 
+            {
+                if(SCN_ERROR == srv.response.status) 
+                {
+                    retry++;
+                    ROS_ERROR("SCN: Failed to launch %s Retry: %d", newNode.c_str(), retry);
+                }
+                else
+                {
+                    break;
+                }
+            } 
+            else 
+            {
+                retry++;
+                ROS_ERROR("SCN: Failed to launch %s Retry: %d", newNode.c_str(), retry);
+            }
         }
     }
 
