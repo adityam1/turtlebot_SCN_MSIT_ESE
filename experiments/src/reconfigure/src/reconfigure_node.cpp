@@ -547,6 +547,7 @@ void doNodeRecon(reconfigure::userInterfaceService::Request &req,
         else
         {
             /* Check node existance */
+            ros::Duration(1).sleep();
             ros::NodeHandle n;
             std::string serviceName = newNode + SCN_COMM;
             ros::ServiceClient client = n.serviceClient<scn_library::scnNodeComm>(serviceName);
