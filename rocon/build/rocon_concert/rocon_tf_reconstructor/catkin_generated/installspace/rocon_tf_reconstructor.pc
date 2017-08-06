@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/rocon/install
-
-Name: rocon_tf_reconstructor
-Description: Description of rocon_tf_reconstructor
-Version: 0.6.11
-Cflags: -I/home/turtlebot/ese_team_project/rocon/install/include
-Libs: -L/home/turtlebot/ese_team_project/rocon/install/lib -lrocon_tf_reconstructor_lib
-Requires: concert_msgs geometry_msgs roscpp tf

@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/rocon/install
-
-Name: concert_scheduler_requests
-Description: Description of concert_scheduler_requests
-Version: 0.7.0
-Cflags: 
-Libs: -L/home/turtlebot/ese_team_project/rocon/install/lib 
-Requires: 

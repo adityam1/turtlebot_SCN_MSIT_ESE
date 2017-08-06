@@ -1,6 +1,0 @@
-set(concert_resource_pool_SETUP_PY_VERSION "0.7.0")
-set(concert_resource_pool_SETUP_PY_SCRIPTS "")
-set(concert_resource_pool_SETUP_PY_PACKAGES "concert_resource_pool")
-set(concert_resource_pool_SETUP_PY_PACKAGE_DIRS "src/concert_resource_pool")
-set(concert_resource_pool_SETUP_PY_MODULES "")
-set(concert_resource_pool_SETUP_PY_MODULE_DIRS "")

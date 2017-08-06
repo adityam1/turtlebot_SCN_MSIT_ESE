@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/rocon/devel
-
-Name: rocon_unreliable_experiments
-Description: Description of rocon_unreliable_experiments
-Version: 0.7.10
-Cflags: 
-Libs: -L/home/turtlebot/ese_team_project/rocon/devel/lib 
-Requires: roscpp std_msgs

@@ -1,6 +1,0 @@
-set(rqt_capabilities_SETUP_PY_VERSION "0.1.2")
-set(rqt_capabilities_SETUP_PY_SCRIPTS "scripts/rqt_capabilities")
-set(rqt_capabilities_SETUP_PY_PACKAGES "rqt_capabilities")
-set(rqt_capabilities_SETUP_PY_PACKAGE_DIRS "src/rqt_capabilities")
-set(rqt_capabilities_SETUP_PY_MODULES "")
-set(rqt_capabilities_SETUP_PY_MODULE_DIRS "")

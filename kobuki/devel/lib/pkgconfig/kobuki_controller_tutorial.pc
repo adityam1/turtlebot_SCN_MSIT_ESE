@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/kobuki/devel
-
-Name: kobuki_controller_tutorial
-Description: Description of kobuki_controller_tutorial
-Version: 0.6.8
-Cflags: -I/home/turtlebot/ese_team_project/kobuki/src/kobuki/kobuki_controller_tutorial/include
-Libs: -L/home/turtlebot/ese_team_project/kobuki/devel/lib -lbump_blink_controller_nodelet
-Requires: roscpp nodelet pluginlib std_msgs kobuki_msgs yocs_controllers

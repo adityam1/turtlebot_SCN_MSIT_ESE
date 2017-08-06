@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/rocon/install
-
-Name: rocon_std_msgs
-Description: Description of rocon_std_msgs
-Version: 0.7.12
-Cflags: -I/home/turtlebot/ese_team_project/rocon/install/include
-Libs: -L/home/turtlebot/ese_team_project/rocon/install/lib 
-Requires: message_runtime std_msgs rocon_service_pair_msgs

@@ -1,6 +1,0 @@
-set(concert_qt_teleop_SETUP_PY_VERSION "0.7.12")
-set(concert_qt_teleop_SETUP_PY_SCRIPTS "scripts/concert_teleop")
-set(concert_qt_teleop_SETUP_PY_PACKAGES "concert_qt_teleop")
-set(concert_qt_teleop_SETUP_PY_PACKAGE_DIRS "src/concert_qt_teleop")
-set(concert_qt_teleop_SETUP_PY_MODULES "")
-set(concert_qt_teleop_SETUP_PY_MODULE_DIRS "")

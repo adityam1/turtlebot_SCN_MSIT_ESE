@@ -1,6 +1,0 @@
-set(rocon_apps_SETUP_PY_VERSION "0.7.13")
-set(rocon_apps_SETUP_PY_SCRIPTS "")
-set(rocon_apps_SETUP_PY_PACKAGES "rocon_apps")
-set(rocon_apps_SETUP_PY_PACKAGE_DIRS "src/rocon_apps")
-set(rocon_apps_SETUP_PY_MODULES "")
-set(rocon_apps_SETUP_PY_MODULE_DIRS "")

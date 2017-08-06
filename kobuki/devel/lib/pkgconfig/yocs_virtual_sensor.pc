@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/kobuki/devel
-
-Name: yocs_virtual_sensor
-Description: Description of yocs_virtual_sensor
-Version: 0.6.4
-Cflags: -I/home/turtlebot/ese_team_project/kobuki/src/yujin_ocs/yocs_virtual_sensor/include -I/usr/include
-Libs: -L/home/turtlebot/ese_team_project/kobuki/devel/lib -l:/usr/lib/x86_64-linux-gnu/libboost_system.so
-Requires: tf roscpp sensor_msgs geometry_msgs yocs_msgs yocs_math_toolkit

@@ -1,2 +1,0 @@
-set(scheduler_msgs_MESSAGE_FILES "/home/turtlebot/ese_team_project/rocon/src/rocon_msgs/scheduler_msgs/msg/CurrentStatus.msg;/home/turtlebot/ese_team_project/rocon/src/rocon_msgs/scheduler_msgs/msg/KnownResources.msg;/home/turtlebot/ese_team_project/rocon/src/rocon_msgs/scheduler_msgs/msg/Request.msg;/home/turtlebot/ese_team_project/rocon/src/rocon_msgs/scheduler_msgs/msg/Resource.msg;/home/turtlebot/ese_team_project/rocon/src/rocon_msgs/scheduler_msgs/msg/SchedulerRequests.msg")
-set(scheduler_msgs_SERVICE_FILES "")

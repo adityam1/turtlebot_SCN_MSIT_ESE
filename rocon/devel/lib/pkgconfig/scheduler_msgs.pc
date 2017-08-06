@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/rocon/devel
-
-Name: scheduler_msgs
-Description: Description of scheduler_msgs
-Version: 0.7.12
-Cflags: -I/home/turtlebot/ese_team_project/rocon/devel/include
-Libs: -L/home/turtlebot/ese_team_project/rocon/devel/lib 
-Requires: message_runtime rocon_std_msgs std_msgs uuid_msgs

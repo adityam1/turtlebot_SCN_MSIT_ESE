@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/rocon/devel
-
-Name: world_canvas_server
-Description: Description of world_canvas_server
-Version: 0.1.0
-Cflags: 
-Libs: -L/home/turtlebot/ese_team_project/rocon/devel/lib 
-Requires: 

@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/kobuki/devel
-
-Name: kobuki_gazebo_plugins
-Description: Description of kobuki_gazebo_plugins
-Version: 0.4.2
-Cflags: -I/home/turtlebot/ese_team_project/kobuki/src/kobuki_desktop/kobuki_gazebo_plugins/include
-Libs: -L/home/turtlebot/ese_team_project/kobuki/devel/lib -lgazebo_ros_kobuki
-Requires: gazebo_ros gazebo_plugins geometry_msgs kobuki_msgs nav_msgs roscpp sensor_msgs std_msgs tf

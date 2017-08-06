@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/rocon/install
-
-Name: concert_qt_service_info
-Description: Description of concert_qt_service_info
-Version: 0.7.12
-Cflags: 
-Libs: -L/home/turtlebot/ese_team_project/rocon/install/lib 
-Requires: 

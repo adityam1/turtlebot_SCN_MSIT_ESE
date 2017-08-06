@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/rocon/devel
-
-Name: turtle_concert
-Description: Description of turtle_concert
-Version: 0.6.7
-Cflags: 
-Libs: -L/home/turtlebot/ese_team_project/rocon/devel/lib 
-Requires: roscpp std_srvs gateway_msgs geometry_msgs turtlesim

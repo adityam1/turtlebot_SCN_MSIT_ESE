@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/rocon/install
-
-Name: gazebo_concert
-Description: Description of gazebo_concert
-Version: 0.6.7
-Cflags: 
-Libs: -L/home/turtlebot/ese_team_project/rocon/install/lib 
-Requires: 

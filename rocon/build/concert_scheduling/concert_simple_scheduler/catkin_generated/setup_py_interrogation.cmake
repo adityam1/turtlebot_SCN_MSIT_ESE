@@ -1,6 +1,0 @@
-set(concert_simple_scheduler_SETUP_PY_VERSION "0.7.0")
-set(concert_simple_scheduler_SETUP_PY_SCRIPTS "")
-set(concert_simple_scheduler_SETUP_PY_PACKAGES "concert_simple_scheduler")
-set(concert_simple_scheduler_SETUP_PY_PACKAGE_DIRS "src/concert_simple_scheduler")
-set(concert_simple_scheduler_SETUP_PY_MODULES "")
-set(concert_simple_scheduler_SETUP_PY_MODULE_DIRS "")

@@ -1,9 +1,0 @@
-\subsubsection parameters ROS parameters
-
-Reads and maintains the following parameters on the ROS server
-
-- \b "~auto_invite" : \b [bool] automatically invite clients min: False, default: False, max: True
-- \b "~local_clients_only" : \b [bool] invite clients from other pc's on the network, used for simulations. min: False, default: False, max: True
-- \b "~oblivion_timeout" : \b [int] time before a bad, gone client is removed from the index. min: 0, default: 3600, max: 2147483647
-- \b "~service_timeout" : \b [double] waiting timeout for status, start_rapp, and stop_rapp. min: 0.0, default: 5.0, max: 100.0
-

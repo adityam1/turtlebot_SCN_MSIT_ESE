@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/rocon/install
-
-Name: rocon_hub
-Description: Description of rocon_hub
-Version: 0.7.10
-Cflags: 
-Libs: -L/home/turtlebot/ese_team_project/rocon/install/lib 
-Requires: 

@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/kobuki/devel
-
-Name: kobuki_bumper2pc
-Description: Description of kobuki_bumper2pc
-Version: 0.6.8
-Cflags: -I/home/turtlebot/ese_team_project/kobuki/src/kobuki/kobuki_bumper2pc/include
-Libs: -L/home/turtlebot/ese_team_project/kobuki/devel/lib -lkobuki_bumper2pc_nodelet
-Requires: roscpp nodelet pluginlib sensor_msgs kobuki_msgs

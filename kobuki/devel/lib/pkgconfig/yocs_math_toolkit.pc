@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/kobuki/devel
-
-Name: yocs_math_toolkit
-Description: Description of yocs_math_toolkit
-Version: 0.6.4
-Cflags: -I/home/turtlebot/ese_team_project/kobuki/src/yujin_ocs/yocs_math_toolkit/include
-Libs: -L/home/turtlebot/ese_team_project/kobuki/devel/lib -lyocs_math_toolkit
-Requires: tf roscpp geometry_msgs

@@ -1,6 +1,0 @@
-set(rocon_gateway_graph_SETUP_PY_VERSION "0.7.12")
-set(rocon_gateway_graph_SETUP_PY_SCRIPTS "scripts/rocon_gateway_graph")
-set(rocon_gateway_graph_SETUP_PY_PACKAGES "rocon_gateway_graph")
-set(rocon_gateway_graph_SETUP_PY_PACKAGE_DIRS "src/rocon_gateway_graph")
-set(rocon_gateway_graph_SETUP_PY_MODULES "")
-set(rocon_gateway_graph_SETUP_PY_MODULE_DIRS "")

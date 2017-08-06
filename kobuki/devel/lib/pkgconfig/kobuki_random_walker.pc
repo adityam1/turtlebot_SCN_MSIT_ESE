@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/kobuki/devel
-
-Name: kobuki_random_walker
-Description: Description of kobuki_random_walker
-Version: 0.6.8
-Cflags: -I/home/turtlebot/ese_team_project/kobuki/src/kobuki/kobuki_random_walker/include
-Libs: -L/home/turtlebot/ese_team_project/kobuki/devel/lib -lkobuki_random_walker_nodelet
-Requires: ecl_threads geometry_msgs kobuki_msgs nodelet pluginlib roscpp std_msgs yocs_controllers

@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/kobuki/install
-
-Name: yocs_controllers
-Description: Description of yocs_controllers
-Version: 0.6.4
-Cflags: -I/home/turtlebot/ese_team_project/kobuki/install/include
-Libs: -L/home/turtlebot/ese_team_project/kobuki/install/lib 
-Requires: roscpp

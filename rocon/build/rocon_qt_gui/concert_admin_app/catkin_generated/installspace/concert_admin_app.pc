@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/rocon/install
-
-Name: concert_admin_app
-Description: Description of concert_admin_app
-Version: 0.7.12
-Cflags: 
-Libs: -L/home/turtlebot/ese_team_project/rocon/install/lib 
-Requires: 

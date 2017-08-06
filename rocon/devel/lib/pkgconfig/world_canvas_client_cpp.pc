@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/rocon/devel
-
-Name: world_canvas_client_cpp
-Description: Description of world_canvas_client_cpp
-Version: 0.1.0
-Cflags: -I/home/turtlebot/ese_team_project/rocon/src/world_canvas_libs/world_canvas_client_cpp/include
-Libs: -L/home/turtlebot/ese_team_project/rocon/devel/lib -lworld_canvas_client
-Requires: roscpp unique_id uuid_msgs visualization_msgs world_canvas_msgs

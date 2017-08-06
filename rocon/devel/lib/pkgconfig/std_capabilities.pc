@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/rocon/devel
-
-Name: std_capabilities
-Description: Description of std_capabilities
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/turtlebot/ese_team_project/rocon/devel/lib 
-Requires: 

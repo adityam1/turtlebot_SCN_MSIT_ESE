@@ -1,6 +1,0 @@
-set(concert_service_gazebo_SETUP_PY_VERSION "0.1.12")
-set(concert_service_gazebo_SETUP_PY_SCRIPTS "")
-set(concert_service_gazebo_SETUP_PY_PACKAGES "concert_service_gazebo")
-set(concert_service_gazebo_SETUP_PY_PACKAGE_DIRS "src/concert_service_gazebo")
-set(concert_service_gazebo_SETUP_PY_MODULES "")
-set(concert_service_gazebo_SETUP_PY_MODULE_DIRS "")

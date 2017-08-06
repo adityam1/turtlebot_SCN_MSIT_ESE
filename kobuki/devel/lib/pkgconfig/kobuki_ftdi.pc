@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/kobuki/devel
-
-Name: kobuki_ftdi
-Description: Description of kobuki_ftdi
-Version: 0.6.5
-Cflags: -I/home/turtlebot/ese_team_project/kobuki/src/kobuki_core/kobuki_ftdi/include
-Libs: -L/home/turtlebot/ese_team_project/kobuki/devel/lib 
-Requires: ecl_command_line

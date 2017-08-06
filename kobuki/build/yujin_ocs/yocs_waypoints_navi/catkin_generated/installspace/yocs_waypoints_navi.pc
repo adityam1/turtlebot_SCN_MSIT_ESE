@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/kobuki/install
-
-Name: yocs_waypoints_navi
-Description: Description of yocs_waypoints_navi
-Version: 0.6.4
-Cflags: 
-Libs: -L/home/turtlebot/ese_team_project/kobuki/install/lib 
-Requires: 

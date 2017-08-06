@@ -1,2 +1,0 @@
-set(concert_service_msgs_MESSAGE_FILES "msg/CaptureResourcePair.msg;msg/CaptureResourceRequest.msg;msg/CaptureResourcePairRequest.msg;msg/CaptureResourceResponse.msg;msg/CaptureResourcePairResponse.msg;msg/KillTurtlePair.msg;msg/KillTurtleRequest.msg;msg/KillTurtlePairRequest.msg;msg/KillTurtleResponse.msg;msg/KillTurtlePairResponse.msg;msg/SpawnTurtlePair.msg;msg/SpawnTurtleRequest.msg;msg/SpawnTurtlePairRequest.msg;msg/SpawnTurtleResponse.msg;msg/SpawnTurtlePairResponse.msg")
-set(concert_service_msgs_SERVICE_FILES "")

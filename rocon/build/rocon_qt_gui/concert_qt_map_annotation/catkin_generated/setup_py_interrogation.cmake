@@ -1,6 +1,0 @@
-set(concert_qt_map_annotation_SETUP_PY_VERSION "0.7.12")
-set(concert_qt_map_annotation_SETUP_PY_SCRIPTS "scripts/concert_map_annotation")
-set(concert_qt_map_annotation_SETUP_PY_PACKAGES "concert_qt_map_annotation")
-set(concert_qt_map_annotation_SETUP_PY_PACKAGE_DIRS "src/concert_qt_map_annotation")
-set(concert_qt_map_annotation_SETUP_PY_MODULES "")
-set(concert_qt_map_annotation_SETUP_PY_MODULE_DIRS "")

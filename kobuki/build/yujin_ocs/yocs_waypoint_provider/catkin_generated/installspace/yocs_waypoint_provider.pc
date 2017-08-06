@@ -1,8 +1,0 @@
-prefix=/home/turtlebot/ese_team_project/kobuki/install
-
-Name: yocs_waypoint_provider
-Description: Description of yocs_waypoint_provider
-Version: 0.6.4
-Cflags: 
-Libs: -L/home/turtlebot/ese_team_project/kobuki/install/lib -lyaml-cpp
-Requires: roscpp visualization_msgs yocs_msgs
