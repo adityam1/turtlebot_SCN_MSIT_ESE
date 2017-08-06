@@ -36,6 +36,7 @@
 #define SCN_ENTER_RECON (10)
 #define SCN_EXIT_RECON  (11)
 #define SCN_KILL        (12)
+#define SCN_NODE_PING   (13)
 
 #if 0
 //SCN reconType type

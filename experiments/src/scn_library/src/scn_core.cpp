@@ -213,6 +213,9 @@ namespace ros {
             case SCN_KILL: 
                 status = killServiceCb(vargps->req, vargps->res);
                 break;
+            case SCN_NODE_PING: 
+                status = SCN_ST_OK;
+                break;
             default: 
                 ROS_ERROR("SCN: Received invalid message. Will not \
                         process this");
@@ -263,13 +266,8 @@ namespace ros {
             ROS_ERROR("Common Service Call time out!");
             return false;
         } else {
-            if ((intptr_t)retvalp == 0) {
-                ROS_INFO("common service call succeed!");
-                return true;
-            } else {
-                ROS_INFO("common service call failed!");
-                return false;
-            } 
+            res.status = (intptr_t)retvalp;
+            return true;
         }
         LEAVE();
     }
