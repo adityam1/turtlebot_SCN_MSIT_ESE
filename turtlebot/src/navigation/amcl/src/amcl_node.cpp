@@ -366,7 +366,7 @@ main(int argc, char** argv)
 
   //signal(SIGINT, sigintHandler);
 
-  ROS_ERROR("Aditya >>>>>>>>>>>>>>>>>>>>>>>>>>>>>: This is what is running");
+  ROS_INFO("SCN: Modified AMCL");
   
   // Make our node available to sigintHandler
   amcl_node_ptr.reset(new AmclNode());
@@ -374,9 +374,7 @@ main(int argc, char** argv)
   if (argc == 1)
   {
     // run using ROS input
-      ROS_ERROR("Aditya >>>>>>>>>>>>>>>>>>>>>>>>>>>>>: Spinning");
     ros::spin();
-      ROS_ERROR("Aditya >>>>>>>>>>>>>>>>>>>>>>>>>>>>>: I SHOULD NEVER BE CALLED");
   }
   else if ((argc == 3) && (std::string(argv[1]) == "--run-from-bag"))
   {
@@ -683,7 +681,7 @@ void AmclNode::reconfigureCB(AMCLConfig &config, uint32_t level)
 
 void AmclNode::runFromBag(const std::string &in_bag_fn)
 {
-    ROS_ERROR("AMCL_NODE: Run from Bag......!!!!");
+  ROS_INFO("AMCL_NODE: Run from Bag");
   rosbag::Bag bag;
   bag.open(in_bag_fn, rosbag::bagmode::Read);
   std::vector<std::string> topics;
