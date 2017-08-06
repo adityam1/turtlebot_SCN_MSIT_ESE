@@ -300,6 +300,7 @@ namespace ros {
             ) {
 
         bool isSCN = false;
+        bool loadState = false;
         int retry = 0;
         int opt;
 
@@ -315,30 +316,53 @@ namespace ros {
         /* Create Nodehandle for SCN */
         scnNodeInfo.scnNodeHandle = new ros::NodeHandle;
 
-        /* Check if SCN is present */
-        ros::ServiceClient client = 
-            scnNodeInfo.scnNodeHandle->serviceClient<scn_library::presence>("presence");
-        scn_library::presence srv;
-
-        while((!isSCN) && (retry < 3))
+        /* Do we need to load state from disk? */
+        while((opt = getopt(argc, argv, "si")) != -1)
         {
-            if(!client.call(srv))
+              ROS_INFO("WhilE");
+            switch(opt)
             {
-                /* SCN does not exist. Need to spawn SCN */
-                launchSCN();
+                case 's': 
+                    {
+                        /* Need to load state from disk */
+                        loadState = true;
+                    }
+                    break; 
+                case 'i': isSCN = true;
+                      ROS_INFO("Started by SCN");
+                      break;
+                default:
+                    break;
             }
-            else
-            {
-                isSCN = true;
-                break;
-            }
-            retry++;
-            sleep(1);
         }
-        if(3 == retry)
+        
+        if(!isSCN)
         {
-            ROS_ERROR("SCN not present in the System. \
-                    Continuing without SCN");
+            /* Check if SCN is present */
+            ros::ServiceClient client = 
+                scnNodeInfo.scnNodeHandle->serviceClient<scn_library::presence>("presence");
+            scn_library::presence srv;
+
+            while((!isSCN) && (retry < 3))
+            {
+                if(!client.call(srv))
+                {
+                    /* SCN does not exist. Need to spawn SCN */
+                    launchSCN();
+                }
+                else
+                {
+                    isSCN = true;
+                    break;
+                }
+                retry++;
+                sleep(1);
+            }
+            if(3 == retry)
+            {
+                ROS_ERROR("SCN not present in the System. \
+                        Continuing without SCN");
+            }
         }
 
         std::string nodeServiceName = scnNodeInfo.name + SCN_COMM;
@@ -348,19 +372,12 @@ namespace ros {
         scnSetNodeState(SCN_NORMAL_MODE);
 
         /* Do we need to load state from disk? */
-        while((opt = getopt(argc, argv, "s")) != -1){
-            switch(opt)
+        if(loadState)
+        {
+            /* Need to load state from disk */
+            if(NULL != scnNodeInfo.loadStateCb) 
             {
-                case 's': 
-                    {
-                        /* Need to load state from disk */
-                        if(NULL != scnNodeInfo.loadStateCb) {
-                            scnNodeInfo.loadStateCb();
-                        }
-                    }
-                    break;
-                default:
-                    break;
+                scnNodeInfo.loadStateCb();
             }
         }
 
