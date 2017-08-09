@@ -21,9 +21,7 @@ namespace ros {
     /* SCN core function definitions */
     static bool launchSCN() {
         FILE *fp_which;
-        int error = 0;
         char rosrun_path[200] = {0};
-        char *argv[4] = {0};
         pid_t pid;
 
         if((fp_which = popen("/usr/bin/which rosrun", "r")) != NULL) {
@@ -35,6 +33,7 @@ namespace ros {
             std::string reconfigure = "reconfigure";
             std::string reconfigure_node = "reconfigure_node";
             if(0 == (pid = fork())) {
+                char *argv[4] = {0};
                 setpgid(0, 0);
                 argv[0] = rosrun_path;
                 argv[1] = const_cast<char*>(reconfigure.c_str());
@@ -43,6 +42,7 @@ namespace ros {
 
                 ROS_INFO("Attempting to start SCN");
 
+                int error = 0;
                 error = execve(argv[0], argv, environ);
                 if(error) {
                     ROS_ERROR("Unable to start node");
@@ -301,7 +301,6 @@ namespace ros {
 
         bool isSCN = false;
         bool loadState = false;
-        int retry = 0;
         int opt;
 
         /* Initialize the node with ROS */
@@ -342,6 +341,7 @@ namespace ros {
             ros::ServiceClient client = 
                 scnNodeInfo.scnNodeHandle->serviceClient<scn_library::presence>("presence");
             scn_library::presence srv;
+            int retry = 0;
 
             while((!isSCN) && (retry < 3))
             {

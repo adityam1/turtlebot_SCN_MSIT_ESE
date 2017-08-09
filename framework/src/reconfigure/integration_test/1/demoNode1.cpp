@@ -134,7 +134,7 @@ int main(int argc, char ** argv) {
  * callback function that specifies the behaviors when the test service is called
  */
 bool demoNode1CallBack(reconfigure::demoNodeService::Request &req, reconfigure::demoNodeService::Response &res) {
-    std::string service = req.callback_service;
+    //std::string service = req.callback_service;
 
     ROS_INFO("Inside demoNode 1 test service!\n");
     return true;

@@ -137,7 +137,7 @@ int main(int argc, char ** argv) {
  */
 bool demoNode9CallBack(reconfigure::demoNodeService::Request &req, reconfigure::demoNodeService::Response &res) {
     ENTER();
-    std::string service = req.callback_service;
+    //std::string service = req.callback_service;
 
     ROS_INFO("Inside demoNode 9 test service!\n");
     LEAVE();

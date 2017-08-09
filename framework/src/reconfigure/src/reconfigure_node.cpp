@@ -456,8 +456,6 @@ STATUS_T enterReconMode(vector<string> &orderedList)
 void doParamRecon(reconfigure::userInterfaceService::Request &req,
         reconfigure::userInterfaceService::Response &res)
 {
-    bool rollback = false;
-
     std::string param = req.paramName;
     uint8_t paramType = req.paramType;
     
@@ -502,7 +500,7 @@ void doParamRecon(reconfigure::userInterfaceService::Request &req,
 void doNodeRecon(reconfigure::userInterfaceService::Request &req,
         reconfigure::userInterfaceService::Response &res) 
 {
-    int j = 0, retry = 0;
+    int retry = 0;
     STATUS_T result;
 
     bool preserveState = req.preserveState;
@@ -715,9 +713,7 @@ static void sigHandler(int signum, siginfo_t *sigInfo, void *sigContext)
 static bool launchNode(char *packageName, char *nodeName, bool preserveState) 
 {
     FILE *fp_which;
-    int error = 0;
     char rosrun_path[200] = {0};
-    char *argv[6] = {0};
     pid_t pid;
     char info[200];
     scn_library::debug_msg debug;
@@ -736,10 +732,10 @@ static bool launchNode(char *packageName, char *nodeName, bool preserveState)
 
         if(0 == (pid = fork())) 
         {
+            char *argv[6] = {0};
             pid_t parentPid = getppid();
             setpgid(0, 0);
             char stateVariable[3];
-            char scnStart[3];
             if(preserveState) {
                 sprintf(stateVariable, "-s");
                 argv[4] = stateVariable;
@@ -755,6 +751,7 @@ static bool launchNode(char *packageName, char *nodeName, bool preserveState)
 
             ROS_INFO("Attempting to start node %s", nodeName);
 
+            int error;
             error = execve(argv[0], argv, environ);
             if(error) {
                 ROS_ERROR("Unable to start node");

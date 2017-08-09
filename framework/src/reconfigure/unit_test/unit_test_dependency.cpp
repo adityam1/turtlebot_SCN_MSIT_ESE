@@ -10,8 +10,6 @@ static int log_level = LOG_DBG;
 bool isEqualVector(vector<string> &list1, vector<string> &list2);
 void printList(vector<string> &list);
 
-int add( int i, int j ) { return i+j; }
-
 int main(int argc, char** argv) {
     /**
      * use case 1 - single source, single sink
@@ -214,7 +212,7 @@ int main(int argc, char** argv) {
     node = "5";
     topicSubscribing = "6_topic";
     topicDependency->addOutgoingTopics(node, topicSubscribing);
-    topicSubscribing = "5_topic";
+    topicPublishing = "5_topic";
     topicDependency->addIncomingTopics(node, topicPublishing);
 
     node = "1";
