@@ -1,0 +1,210 @@
+diff --git a/turtlebot/src/navigation/move_base/CMakeLists.txt b/turtlebot/src/navigation/move_base/CMakeLists.txt
+index c8e87b9..93977f4 100644
+--- a/turtlebot/src/navigation/move_base/CMakeLists.txt
++++ b/turtlebot/src/navigation/move_base/CMakeLists.txt
+@@ -12,6 +12,7 @@ find_package(catkin REQUIRED
+         move_base_msgs
+         nav_core
+         tf
++        scn_library
+ )
+ find_package(Eigen REQUIRED)
+ add_definitions(${EIGEN_DEFINITIONS})
+@@ -41,8 +42,8 @@ target_link_libraries(move_base
+     ${Boost_LIBRARIES}
+     ${catkin_LIBRARIES}
+     )
+-add_dependencies(move_base move_base_gencfg)
+-add_dependencies(move_base geometry_msgs_gencpp)
++add_dependencies(move_base move_base_gencfg reconfigure_generate_messages_cpp scn_library)
++add_dependencies(move_base geometry_msgs_gencpp reconfigure_generate_messages_cpp scn_library)
+ 
+ add_executable(move_base_node
+   src/move_base_node.cpp
+diff --git a/turtlebot/src/navigation/move_base/include/move_base/move_base.h b/turtlebot/src/navigation/move_base/include/move_base/move_base.h
+index b3c6070..48324c6 100644
+--- a/turtlebot/src/navigation/move_base/include/move_base/move_base.h
++++ b/turtlebot/src/navigation/move_base/include/move_base/move_base.h
+@@ -58,6 +58,14 @@
+ 
+ #include <dynamic_reconfigure/server.h>
+ #include "move_base/MoveBaseConfig.h"
++#include <scn_library/systemControlRegisterService.h>
++#include <scn_library/scn_utils.h>
++#include <scn_library/scn_core.h>
++#include <scn_library/scn_node_handle.h>
++#include <scn_library/scn_service_client.h>
++#include <scn_library/scn_service_server.h>
++#include <scn_library/scn_publisher.h>
++#include <scn_library/scn_subscriber.h>
+ 
+ namespace move_base {
+   //typedefs to help us out with the action server so that we don't hace to type so much
+@@ -230,6 +238,11 @@ namespace move_base {
+       bool setup_, p_freq_change_, c_freq_change_;
+       bool new_global_plan_;
+   };
++
++  void saveStateCb(uint8_t reconType);
++  STATUS_T reconModeCb(uint8_t reconType, uint8_t command);
++  void loadStateCb(); 
++ 
+ };
+ #endif
+ 
+diff --git a/turtlebot/src/navigation/move_base/src/move_base.cpp b/turtlebot/src/navigation/move_base/src/move_base.cpp
+index 16e6b42..c084cea 100644
+--- a/turtlebot/src/navigation/move_base/src/move_base.cpp
++++ b/turtlebot/src/navigation/move_base/src/move_base.cpp
+@@ -45,6 +45,9 @@
+ 
+ namespace move_base {
+ 
++    static bool reconModeWait = false;
++    static MoveBase *myPointer;
++
+   MoveBase::MoveBase(tf::TransformListener& tf) :
+     tf_(tf),
+     as_(NULL),
+@@ -57,8 +60,13 @@ namespace move_base {
+ 
+     as_ = new MoveBaseActionServer(ros::NodeHandle(), "move_base", boost::bind(&MoveBase::executeCb, this, _1), false);
+ 
+-    ros::NodeHandle private_nh("~");
+-    ros::NodeHandle nh;
++    myPointer = this; 
++
++    //ros::NodeHandle private_nh("~");
++    ros::SCNNodeHandle private_nh("~");
++    //ros::NodeHandle nh;
++    ros::SCNNodeHandle nh;
++    nh.registerTfSCN("move_base", SUBSCRIBE);
+ 
+     recovery_trigger_ = PLANNING_R;
+ 
+@@ -86,17 +94,19 @@ namespace move_base {
+     planner_thread_ = new boost::thread(boost::bind(&MoveBase::planThread, this));
+ 
+     //for comanding the base
+-    vel_pub_ = nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
+-    current_goal_pub_ = private_nh.advertise<geometry_msgs::PoseStamped>("current_goal", 0 );
++    vel_pub_ = nh.advertise<geometry_msgs::Twist>("move_base", "cmd_vel", 1);
++    current_goal_pub_ = private_nh.advertise<geometry_msgs::PoseStamped>("move_base", "current_goal", 0 );
+ 
+-    ros::NodeHandle action_nh("move_base");
+-    action_goal_pub_ = action_nh.advertise<move_base_msgs::MoveBaseActionGoal>("goal", 1);
++    //ros::NodeHandle action_nh("move_base");
++    ros::SCNNodeHandle action_nh("move_base");
++    action_goal_pub_ = action_nh.advertise<move_base_msgs::MoveBaseActionGoal>("move_base", "goal", 1);
+ 
+     //we'll provide a mechanism for some people to send goals as PoseStamped messages over a topic
+     //they won't get any useful information back about its status, but this is useful for tools
+     //like nav_view and rviz
+-    ros::NodeHandle simple_nh("move_base_simple");
+-    goal_sub_ = simple_nh.subscribe<geometry_msgs::PoseStamped>("goal", 1, boost::bind(&MoveBase::goalCB, this, _1));
++    //ros::NodeHandle simple_nh("move_base_simple");
++    ros::SCNNodeHandle simple_nh("move_base_simple");
++    goal_sub_ = simple_nh.subscribe<geometry_msgs::PoseStamped>("move_base", "goal", 1, boost::bind(&MoveBase::goalCB, this, _1));
+ 
+     //we'll assume the radius of the robot to be consistent with what's specified for the costmaps
+     private_nh.param("local_costmap/inscribed_radius", inscribed_radius_, 0.325);
+@@ -170,10 +180,10 @@ namespace move_base {
+     controller_costmap_ros_->start();
+ 
+     //advertise a service for getting a plan
+-    make_plan_srv_ = private_nh.advertiseService("make_plan", &MoveBase::planService, this);
++    make_plan_srv_ = private_nh.advertiseService("move_base", "make_plan", &MoveBase::planService, this);
+ 
+     //advertise a service for clearing the costmaps
+-    clear_costmaps_srv_ = private_nh.advertiseService("clear_costmaps", &MoveBase::clearCostmapsService, this);
++    clear_costmaps_srv_ = private_nh.advertiseService("move_base", "clear_costmaps", &MoveBase::clearCostmapsService, this);
+ 
+     //if we shutdown our costmaps when we're deactivated... we'll do that now
+     if(shutdown_costmaps_){
+@@ -481,6 +491,8 @@ namespace move_base {
+ 
+   MoveBase::~MoveBase(){
+     recovery_behaviors_.clear();
++    ros::SCNNodeHandle nh;
++    nh.unRegisterTfSCN("move_base", SUBSCRIBE);
+ 
+     delete dsrv_;
+ 
+@@ -718,6 +730,12 @@ namespace move_base {
+     ros::NodeHandle n;
+     while(n.ok())
+     {
++      while(reconModeWait){
++          publishZeroVelocity();                 
++          ros::Rate r(10);
++          ros::spinOnce();
++          r.sleep();
++        }
+       if(c_freq_change_)
+       {
+         ROS_INFO("Setting controller frequency to %.2f", controller_frequency_);
+@@ -726,6 +744,7 @@ namespace move_base {
+       }
+ 
+       if(as_->isPreemptRequested()){
++        
+         if(as_->isNewGoalAvailable()){
+           //if we're active and a new goal is available, we'll accept it, but we won't shut anything down
+           move_base_msgs::MoveBaseGoal new_goal = *as_->acceptNewGoal();
+@@ -1181,4 +1200,40 @@ namespace move_base {
+       controller_costmap_ros_->stop();
+     }
+   }
++
++
++  /* SCN stuff */
++  void saveStateCb(uint8_t reconType) {
++    //FIXME: Need to add code here. Will do this once basic implementation works
++  }
++
++  STATUS_T reconModeCb(uint8_t reconType, uint8_t command) {
++    STATUS_T status = SCN_ST_OK;
++      if(SCN_NODE_RECON == reconType) {
++          switch (command) {
++              case SCN_ENTER_RECON: 
++                  /* Set the action server to pause and write velocity of the bot as 0 */
++                  reconModeWait = true;
++//                  myPointer->as_->setPreempted();
++                  ROS_WARN("Received enter reconfiguration request from SCN. Pausing the system");
++                  status = SCN_ST_OK;
++                  break;
++              case SCN_EXIT_RECON:
++                  /* Let go off the pause */
++                  reconModeWait = false;
++                  ROS_WARN("Received exit reconfiguration request from SCN. Entering normal mode");
++                  status = SCN_ST_OK;
++                  break;
++              default: 
++                  ROS_WARN("Received unknown request");
++                  status = SCN_ST_ERROR;
++          }
++          return status;
++      }
++  
++  }
++  void loadStateCb() {
++    //FIXME: Need to add code here. Will do this once basic implementation works
++    
++  }
+ };
+diff --git a/turtlebot/src/navigation/move_base/src/move_base_node.cpp b/turtlebot/src/navigation/move_base/src/move_base_node.cpp
+index bf55ec6..faa6280 100644
+--- a/turtlebot/src/navigation/move_base/src/move_base_node.cpp
++++ b/turtlebot/src/navigation/move_base/src/move_base_node.cpp
+@@ -30,8 +30,9 @@
+ #include <move_base/move_base.h>
+ 
+ int main(int argc, char** argv){
+-  ros::init(argc, argv, "move_base_node");
+-  tf::TransformListener tf(ros::Duration(10));
++  //ros::init(argc, argv, "move_base_node");
++    ros::scnInit(argc, argv, "move_base", ros::init_options::NoSigintHandler, move_base::saveStateCb, move_base::reconModeCb, move_base::loadStateCb);
++    tf::TransformListener tf(ros::Duration(10));
+ 
+   move_base::MoveBase move_base( tf );
+ 
