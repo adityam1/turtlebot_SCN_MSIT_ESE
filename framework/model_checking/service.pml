@@ -37,9 +37,8 @@ bool inited = false;  // mutex for INIT to make sure SCN inited before other nod
 int gSafeMode = 0;    // safe mode flag: 0 - normal, 1 - safe 
 int PRT_FREQ = 200000;  // print frequency
 
-bool isA2SCN = false;
+//Below flags are used to verify property9
 bool isSCN2A = false;
-bool isB2SCN = false;
 bool isSCN2B = false;
 
 bool ASafeMode = false;
@@ -50,6 +49,7 @@ bool AExists = false;
 bool BExists = false;
 bool SCNExists = false;
 
+//Below variables can be used to check property7
 bool AESReqReceived = false;
 bool ALSReqReceived = false;
 bool BESReqReceived = false;
@@ -57,6 +57,7 @@ bool BLSReqReceived = false;
 bool SCNESReqReceived = false;
 bool SCNLSReqReceived = false;
 
+//Below variables can be used to check property8
 bool AServiceCallPossible = true;
 bool BServiceCallPossible = true;
 
@@ -144,7 +145,7 @@ proctype NodeB(chan _B2SCN, _B2A, _SCN2B, _A2B) {
     fi
 
     do
-      :: (nextStep == NOR) -> atomic {
+      :: atomic {
         printf("[NodeB] start of normal operation of B\n");
         BServiceCallPossible = true;
         do
@@ -155,8 +156,6 @@ proctype NodeB(chan _B2SCN, _B2A, _SCN2B, _A2B) {
             break;
         od
         printf("[NodeB] end of normal operation of B\n");
-      }
-      :: (nextStep == ES && isSCN2B == true) -> atomic {
         _SCN2B ? msgType, msgText;
         BServiceCallPossible = false;
         isSCN2B = false;
@@ -166,31 +165,12 @@ proctype NodeB(chan _B2SCN, _B2A, _SCN2B, _A2B) {
             BSafeMode = true;
             _B2SCN ! RES, OK_B;
             printf("[NodeB] Recv ES for B done\n");
-            isB2SCN = true;
-          :: (msgType != ES) -> 
-            printf("[NodeB] Recv ES for B ...\n");
-            _B2SCN ! RES, ERR_B;
-            printf("[NodeB] Recv ES for B fail\n");
-            isB2SCN = true;
+           :: (msgType == LS) ->
+            printf("[NodeB] Recv LS for B...\n");
+            _B2SCN ! RES, OK_B;
+            BSafeMode = false;
+            printf("[NodeB] Recv LS for B done\n");
         fi
-      }
-      :: (nextStep == LS && isSCN2B == true) -> atomic {
-        _SCN2B ? msgType, msgText;
-        isSCN2B = false;
-        if
-        :: (msgType == LS) ->
-          printf("[NodeB] Recv LS for B...\n");
-          _B2SCN ! RES, OK_B;
-          BSafeMode = false;
-          printf("[NodeB] Recv LS for B done\n");
-          isB2SCN = true;
-        :: (msgType != LS) ->
-          printf("[NodeB] Recv LS for B...\n");
-          _B2SCN ! RES, ERR_B;
-          printf("[NodeB] Recv LS for B fail\n");
-          isB2SCN = true;
-        fi
-        break;
       }
     od
     printf("[NodeB] Leave Node B\n");
@@ -226,7 +206,7 @@ proctype NodeA(chan _A2SCN, _A2B, _SCN2A, _B2A) {
     fi
    
     do
-    :: (nextStep == NOR) -> atomic {
+    :: atomic {
         printf("[NodeA] begin normal operation of A\n");
         int i = 0;
         AServiceCallPossible = true;
@@ -241,8 +221,6 @@ proctype NodeA(chan _A2SCN, _A2B, _SCN2A, _B2A) {
         od
         
         printf("[NodeA] end of normal operation of A\n");
-    }
-    :: (nextStep == ES && isSCN2A == true) -> atomic {
         AServiceCallPossible = false;
         _SCN2A ? msgType, msgText;
         if
@@ -252,32 +230,15 @@ proctype NodeA(chan _A2SCN, _A2B, _SCN2A, _B2A) {
             ASafeMode = true;
             _A2SCN ! RES, OK_A;
             printf("[NodeA] Recv ES for A done\n");
-        :: (msgType != ES) -> 
-            printf("[NodeA] Recv ES for A ...\n");
-            _A2SCN ! RES, ERR_A;
-            printf("[NodeA] Recv ES for A fail\n");
-        fi
-        isA2SCN = true;
-        isSCN2A = false;
-    }
-    :: (nextStep == LS && isSCN2A == true) -> atomic {
-        _SCN2A ? msgType, msgText;
-        AESReqReceived = false;
-        if 
         :: (msgType == LS) ->
           printf("[NodeA] Recv LS for A ...\n");
           _A2SCN ! RES, OK_A;
           ASafeMode = false;
+          AESReqReceived = false;
           printf("[NodeA] Recv LS for A done\n");
-        :: (msgType != LS) ->
-          printf("[NodeA] Recv LS for A ...\n");
-          _A2SCN ! RES, ERR_A;
-          printf("[NodeA] Recv LS for A fail\n");
         fi
-        isA2SCN = true;
         isSCN2A = false;
-        break;
-      }
+    }
     od
     
     printf("[NodeA] Leave Node A\n");
@@ -356,7 +317,6 @@ proctype SystemControlNode(chan _SCN2A, _SCN2B, _A2SCN, _B2SCN) {
             printf("[SCN] send ES message to B\n"); 
             isSCN2B = true;
 
-            (isB2SCN == true) -> 
               _B2SCN ? RES, msg_B;
               if 
                 :: (msg_B == OK_B) -> 
@@ -365,13 +325,11 @@ proctype SystemControlNode(chan _SCN2A, _SCN2B, _A2SCN, _B2SCN) {
                 :: (msg_B == ERR_B) -> goto error;
                   printf("[SCN] recv ERR message from B for ES\n");
               fi
-            isB2SCN = false;
 
             _SCN2A ! ES, 0;
             printf("[SCN] send ES message to A\n");
             isSCN2A = true;
             
-            (isA2SCN == true) ->  
               _A2SCN ? RES, msg_A;
               if 
                 :: (msg_A == OK_A) -> 
@@ -380,7 +338,6 @@ proctype SystemControlNode(chan _SCN2A, _SCN2B, _A2SCN, _B2SCN) {
                 :: (msg_A == ERR_A) -> goto error;
                   printf("[SCN] recv ERR message from A for ES\n");
               fi
-            isA2SCN = false;
        
             nextStep = LS;
             printf("[SCN] enter safe mode done\n");
@@ -393,7 +350,7 @@ proctype SystemControlNode(chan _SCN2A, _SCN2B, _A2SCN, _B2SCN) {
           printf("[SCN] send LS message to A\n");
           isSCN2A = true;
 
-          (isA2SCN == true) ->  
+
             _A2SCN ? RES, msg;
             if 
               :: (msg == OK_A) -> 
@@ -402,13 +359,11 @@ proctype SystemControlNode(chan _SCN2A, _SCN2B, _A2SCN, _B2SCN) {
               :: (msg == ERR_A) -> goto error;
                 printf("[SCN] recv ERR message from A for LS\n");
             fi
-          isA2SCN = false;
 
           _SCN2B ! LS, 0;
           printf("[SCN] send LS message to B\n");
           isSCN2B = true;
 
-          (isB2SCN == true) -> 
             _B2SCN ? RES, msg;
             if 
               :: (msg == OK_B) -> 
@@ -417,7 +372,6 @@ proctype SystemControlNode(chan _SCN2A, _SCN2B, _A2SCN, _B2SCN) {
               :: (msg == ERR_B) -> goto error;
                 printf("[SCN] recv ERR message from B for LS\n");
             fi
-          isB2SCN = false;
 
           gSafeMode = 0;
           SCNSafeMode = false;
