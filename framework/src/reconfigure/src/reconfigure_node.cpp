@@ -530,7 +530,7 @@ void doNodeRecon(reconfigure::userInterfaceService::Request &req,
     // for the killed node, explicitly remove dependency from the framework
     gDependency->removeNode(oldNode);
 
-    ros::Duration(1).sleep();
+    ros::Duration(3).sleep();
     
     //Start the new node
     while (retry < 3)
@@ -544,8 +544,13 @@ void doNodeRecon(reconfigure::userInterfaceService::Request &req,
         } 
         else
         {
-            ros::AsyncSpinner spinner(4);
-            spinner.start();
+            // NOT needed: using a multithreaded spinner for SCN
+            //ros::AsyncSpinner spinner(2);
+            //bool spinnerStarted = false; 
+            //if(spinnerStarted = spinner.canStart()) // cannot use more than one spinner
+                //spinner.start();
+
+            //break;
             /* Check node existance */
             ros::Duration(1).sleep();
             ros::NodeHandle n;
@@ -556,7 +561,7 @@ void doNodeRecon(reconfigure::userInterfaceService::Request &req,
             srv.request.command = SCN_NODE_PING;
             srv.request.auth = SCN_AUTH;
             
-            ROS_ERROR("SCN: Making call");
+            ROS_INFO("SCN: Making ping call to new node");
             if (client.call(srv)) 
             {
                 if(SCN_ERROR == srv.response.status) 
@@ -568,14 +573,15 @@ void doNodeRecon(reconfigure::userInterfaceService::Request &req,
                 {
                     break;
                 }
-            } 
-            else 
-            {
+            } else {
                 retry++;
                 ROS_ERROR("SCN: Failed to launch %s Retry: %d", newNode.c_str(), retry);
             }
-            spinner.stop();
-            ROS_ERROR("SCN: Done call");
+
+            //if(spinnerStarted) 
+                //spinner.stop();
+
+            ROS_INFO("SCN: Done ping call");
         }
     }
 
@@ -723,15 +729,19 @@ static bool launchNode(char *packageName, char *nodeName, bool preserveState)
     debug.info = info;
     debug_pub.publish(debug);
 
+    // get a full path to rosrun
     if((fp_which = popen("/usr/bin/which rosrun", "r")) != NULL) 
     {
+        //FIXME: paths over 200 not supported
         fgets(rosrun_path, 200, fp_which);
         pclose(fp_which);
 
         rosrun_path[strlen(rosrun_path) -1] = '\0';
 
+        // make a new process to run rosrun
         if(0 == (pid = fork())) 
-        {
+        { 
+            // Child Process
             char *argv[6] = {0};
             pid_t parentPid = getppid();
             setpgid(0, 0);
@@ -845,7 +855,11 @@ int main(int argc, char **argv)
     // override the default ros sigint handler
     signal(SIGINT, systemControlSigintHandler);
 
-    ros::spin();
+    // in Kinetic an AsyncSpinner cannot be used to enable spawning and pinging a new node
+    // so now using a multi-threaded spinner globally to not get stuck on pinging calls in doNodeRecon
+    ros::MultiThreadedSpinner spinner(2); 
+    spinner.spin();
+    //ros::spin();
     LEAVE();
     return 0;
 }

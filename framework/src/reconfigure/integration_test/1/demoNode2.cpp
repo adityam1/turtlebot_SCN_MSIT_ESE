@@ -117,6 +117,7 @@ int main(int argc, char ** argv) {
     // service provided for demo node 3
     std::string testService2 = "demoNode1TestService";
     ros::SCNServiceServer testService = n.advertiseService(gNodeName, testService2, demoNode2CallBack);
+    ROS_INFO("Node 2: advertised service");
 
     //ros::spin();
     while (!g_request_shutdown) {

@@ -318,7 +318,7 @@ namespace ros {
         /* Do we need to load state from disk? */
         while((opt = getopt(argc, argv, "si")) != -1)
         {
-              ROS_INFO("WhilE");
+            ROS_INFO("WhilE");
             switch(opt)
             {
                 case 's': 
@@ -383,5 +383,6 @@ namespace ros {
 
         /* Mark node initialization done */
         scnNodeInfo.initStatus = true;
+        ROS_INFO("SCN init complete");
     }
 }
