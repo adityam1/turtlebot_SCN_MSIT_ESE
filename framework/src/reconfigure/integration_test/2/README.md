@@ -27,4 +27,4 @@
   4 (old)                    8 (new)
 
 #### roservice call command to test userInterfaceService, this can be used to invoke the node switch
-`rosservice call /userInterfaceService '{old_node: demoNode4, new_node: demoNode8, new_node_package: reconfigure}`
+`rosservice call /userInterfaceService '{reconType: 2, oldNode: demoNode4, oldNodePackage: reconfigure, newNode: demoNode8, newNodePackage: reconfigure}'`

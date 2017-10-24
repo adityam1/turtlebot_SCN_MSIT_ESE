@@ -2,8 +2,8 @@
 - demoNode18: 
     publishes demoNode18TestPublisher
 
-- demoNode19: (will be used to replace demoNode1)
-    publisher demoNode18TestPublisher
+- demoNode19: (will be used to replace demoNode18)
+    publishes demoNode18TestPublisher
 
 - demoNode20:
     subscribes demoNode18TestPublisher
@@ -14,4 +14,4 @@
   18 (old)     19 (new)
 
 #### roservice call command to test userInterfaceService, this can be used to invoke the node switch
-`rosservice call /userInterfaceService '{old_node: demoNode18, new_node: demoNode19, new_node_package: reconfigure}`
+`rosservice call /userInterfaceService '{reconType: 2, oldNode: demoNode18, oldNodePackage: reconfigure, newNode: demoNode19, newNodePackage: reconfigure}'`

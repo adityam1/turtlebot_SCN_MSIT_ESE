@@ -29,7 +29,7 @@
     provides demoNode16TestService
     uses demoNode9TestService
 
-- demoNode17: (will be used to replace demoNode4)
+- demoNode17: (will be used to replace demoNode10)
     provides demoNode10TestService
     uses demoNode9TestService
 
@@ -39,10 +39,12 @@
         \    \ / \                    \    \ / \ 
         11   12   16                  11   12   16
          \  /    /       -->           \  /    / 
-    (old) 10    /                 (new) 17    /  
+    (old) 10    /                 (new) 17    /
            \  /                          \  /     
             9                             9      
 
+#### nodes 9 and 16 should not experience any disruption due to reconfiguration 
+
 #### roservice call command to test userInterfaceService, this can be used to invoke the node switch
-`rosservice call /userInterfaceService '{old_node: demoNode10, new_node: demoNode17, new_node_package: reconfigure}`
+`rosservice call /userInterfaceService '{reconType: 2, oldNode: demoNode10, oldNodePackage: reconfigure, newNode: demoNode17, newNodePackage: reconfigure}'`
 
