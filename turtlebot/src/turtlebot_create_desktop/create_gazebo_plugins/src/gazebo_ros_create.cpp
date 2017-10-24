@@ -87,30 +87,7 @@ void GazeboRosCreate::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   if (_sdf->HasElement("torque"))
     torque_ = _sdf->GetElement("torque")->Get<double>();
 
-  base_geom_name_ = "base_footprint_collision_base_link";
-  if (_sdf->HasElement("base_geom"))
-    base_geom_name_ = _sdf->GetElement("base_geom")->Get<std::string>();
-  base_geom_ = my_parent_->GetChildCollision(base_geom_name_);
-  if (!base_geom_)
-  {
-    // This is a hack for ROS Diamond back. E-turtle and future releases
-    // will not need this, because it will contain the fixed-joint reduction
-    // in urdf2gazebo
-    base_geom_ = my_parent_->GetChildCollision("base_footprint_geom");
-    if (!base_geom_)
-    {
-      ROS_ERROR("Unable to find geom[%s]",base_geom_name_.c_str());
-      return;
-    }
-  }
-
-  //base_geom_->SetContactsEnabled(true);
-  //contact_event_ = base_geom_->ConnectContact(boost::bind(&GazeboRosCreate::OnContact, this, _1, _2));
-  physics::ContactManager *mgr = my_world_->GetPhysicsEngine()->GetContactManager();
-  std::string topic = mgr->CreateFilter(base_geom_name_, base_geom_name_);
-  contact_sub_ = gazebo_node_->Subscribe(topic, &GazeboRosCreate::OnContact, this);
-
-  wall_sensor_ = boost::dynamic_pointer_cast<sensors::RaySensor>(
+  wall_sensor_ = std::dynamic_pointer_cast<sensors::RaySensor>(
     sensors::SensorManager::Instance()->GetSensor("wall_sensor"));
   if (!wall_sensor_)
   {
@@ -118,13 +95,13 @@ void GazeboRosCreate::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
     return;
   }
 
-  left_cliff_sensor_ = boost::dynamic_pointer_cast<sensors::RaySensor>(
+  left_cliff_sensor_ = std::dynamic_pointer_cast<sensors::RaySensor>(
     sensors::SensorManager::Instance()->GetSensor("left_cliff_sensor"));
-  right_cliff_sensor_ = boost::dynamic_pointer_cast<sensors::RaySensor>(
+  right_cliff_sensor_ = std::dynamic_pointer_cast<sensors::RaySensor>(
     sensors::SensorManager::Instance()->GetSensor("right_cliff_sensor"));
-  leftfront_cliff_sensor_ = boost::dynamic_pointer_cast<sensors::RaySensor>(
+  leftfront_cliff_sensor_ = std::dynamic_pointer_cast<sensors::RaySensor>(
     sensors::SensorManager::Instance()->GetSensor("leftfront_cliff_sensor"));
-  rightfront_cliff_sensor_ = boost::dynamic_pointer_cast<sensors::RaySensor>(
+  rightfront_cliff_sensor_ = std::dynamic_pointer_cast<sensors::RaySensor>(
     sensors::SensorManager::Instance()->GetSensor("rightfront_cliff_sensor"));
 
   wall_sensor_->SetActive(true);
@@ -252,12 +229,12 @@ void GazeboRosCreate::UpdateChild()
     d2 = step_time.Double() * (wd / 2) * joints_[RIGHT]->GetVelocity(0);
 
   // Can see NaN values here, just zero them out if needed
-  if (isnan(d1)) {
+  if (std::isnan(d1)) {
     ROS_WARN_THROTTLE(0.1, "Gazebo ROS Create plugin. NaN in d1. Step time: %.2f. WD: %.2f. Velocity: %.2f", step_time.Double(), wd, joints_[LEFT]->GetVelocity(0));
     d1 = 0;
   }
 
-  if (isnan(d2)) {
+  if (std::isnan(d2)) {
     ROS_WARN_THROTTLE(0.1, "Gazebo ROS Create plugin. NaN in d2. Step time: %.2f. WD: %.2f. Velocity: %.2f", step_time.Double(), wd, joints_[RIGHT]->GetVelocity(0));
     d2 = 0;
   }
@@ -279,12 +256,10 @@ void GazeboRosCreate::UpdateChild()
   if (set_joints_[LEFT])
   {
     joints_[LEFT]->SetVelocity( 0, wheel_speed_[LEFT] / (wd/2.0) );
-    joints_[LEFT]->SetMaxForce( 0, torque_ );
   }
   if (set_joints_[RIGHT])
   {
     joints_[RIGHT]->SetVelocity( 0, wheel_speed_[RIGHT] / (wd / 2.0) );
-    joints_[RIGHT]->SetMaxForce( 0, torque_ );
   }
 
   nav_msgs::Odometry odom;
@@ -366,27 +341,27 @@ void GazeboRosCreate::UpdateChild()
 
 void GazeboRosCreate::UpdateSensors()
 {
-  if (wall_sensor_->GetRange(0) < 0.04)
+  if (wall_sensor_->Range(0) < 0.04)
     sensor_state_.wall = true;
   else
     sensor_state_.wall = false;
 
-  if (left_cliff_sensor_->GetRange(0) > 0.02)
+  if (left_cliff_sensor_->Range(0) > 0.02)
     sensor_state_.cliff_left = true;
   else
     sensor_state_.cliff_left = false;
 
-  if (right_cliff_sensor_->GetRange(0) > 0.02)
+  if (right_cliff_sensor_->Range(0) > 0.02)
     sensor_state_.cliff_right = true;
   else
     sensor_state_.cliff_right = false;
 
-  if (rightfront_cliff_sensor_->GetRange(0) > 0.02)
+  if (rightfront_cliff_sensor_->Range(0) > 0.02)
     sensor_state_.cliff_front_right = true;
   else
     sensor_state_.cliff_front_right = false;
 
-  if (leftfront_cliff_sensor_->GetRange(0) > 0.02)
+  if (leftfront_cliff_sensor_->Range(0) > 0.02)
     sensor_state_.cliff_front_left = true;
   else
     sensor_state_.cliff_front_left = false;
